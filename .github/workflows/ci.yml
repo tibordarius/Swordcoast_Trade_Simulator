@@ -7,6 +7,23 @@ on:
 jobs:
   rust:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:18-3.6
+        env:
+          POSTGRES_USER: wdex
+          POSTGRES_PASSWORD: wdex_ci
+          POSTGRES_DB: wdex
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U wdex -d wdex"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      PGPASSWORD: wdex_ci
+      WDEX_TEST_DATABASE_URL: "host=localhost user=wdex password=wdex_ci dbname=wdex"
     defaults:
       run:
         working-directory: code
@@ -15,6 +32,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+      - name: Apply migrations for Rust integration tests
+        run: |
+          for migration in migrations/0*.sql; do
+            echo "Applying $migration"
+            psql -h localhost -U wdex -d wdex -v ON_ERROR_STOP=1 -f "$migration"
+          done
       - name: Normalize imported Rust formatting
         run: cargo fmt --all
       - name: Clippy
