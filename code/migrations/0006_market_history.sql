@@ -1,8 +1,8 @@
 -- Hot/recent market history. Keep database-neutral PostgreSQL in the core migration set.
 -- Timescale acceleration is optional and lives under code/sql/timescale.
 CREATE TABLE IF NOT EXISTS market_tick (
-    world_id UUID NOT NULL REFERENCES world(id),
-    branch_id UUID NOT NULL REFERENCES branch(id),
+    world_id BIGINT NOT NULL REFERENCES world(id),
+    branch_id BIGINT NOT NULL REFERENCES branch(id),
     tick BIGINT NOT NULL,
     market_id TEXT NOT NULL,
     commodity_id TEXT NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS market_tick (
 CREATE INDEX IF NOT EXISTS market_tick_lookup_idx ON market_tick (branch_id, market_id, commodity_id, tick DESC);
 
 CREATE TABLE IF NOT EXISTS market_candle (
-    branch_id UUID NOT NULL REFERENCES branch(id),
+    branch_id BIGINT NOT NULL REFERENCES branch(id),
     market_id TEXT NOT NULL,
     commodity_id TEXT NOT NULL,
     interval_ticks INTEGER NOT NULL CHECK (interval_ticks > 0),

@@ -25,7 +25,7 @@ impl SimulationClock {
 
     pub fn is_hour_boundary(&self) -> bool {
         let ticks_per_hour = 60_u64 / u64::from(self.tick_minutes);
-        ticks_per_hour > 0 && self.tick % ticks_per_hour == 0
+        ticks_per_hour > 0 && self.tick.is_multiple_of(ticks_per_hour)
     }
 }
 
