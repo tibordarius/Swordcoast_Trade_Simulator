@@ -1,8 +1,9 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    derive_stream_seed, fnv1a64, stable_sort_deltas, Delta, ScheduledEvent, Scheduler,
-    SimulationClock, SplitMix64, StableStateHash,
+    derive_stream_seed, fnv1a64, stable_sort_deltas, Delta, MarketCommodityKey,
+    MarketCommodityState, ScheduledEvent, Scheduler, SimulationClock, SplitMix64,
+    StableStateHash,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -12,6 +13,7 @@ pub struct WorldState {
     streams: BTreeMap<String, SplitMix64>,
     scheduler: Scheduler,
     deltas: Vec<Delta>,
+    markets: BTreeMap<MarketCommodityKey, MarketCommodityState>,
     next_sequence: u64,
     production_signal: i64,
 }
@@ -37,6 +39,7 @@ impl WorldState {
             streams,
             scheduler: Scheduler::default(),
             deltas: Vec::new(),
+            markets: BTreeMap::new(),
             next_sequence: 1,
             production_signal: 0,
         };
@@ -44,10 +47,38 @@ impl WorldState {
         world
     }
 
-    pub fn seed(&self) -> u64 { self.seed }
-    pub fn tick(&self) -> u64 { self.clock.tick() }
-    pub fn production_signal(&self) -> i64 { self.production_signal }
-    pub fn next_sequence(&self) -> u64 { self.next_sequence }
+    pub fn seed(&self) -> u64 {
+        self.seed
+    }
+
+    pub fn tick(&self) -> u64 {
+        self.clock.tick()
+    }
+
+    pub fn production_signal(&self) -> i64 {
+        self.production_signal
+    }
+
+    pub fn next_sequence(&self) -> u64 {
+        self.next_sequence
+    }
+
+    pub fn insert_market(
+        &mut self,
+        key: MarketCommodityKey,
+        state: MarketCommodityState,
+    ) -> Option<MarketCommodityState> {
+        self.markets.insert(key, state)
+    }
+
+    pub fn market(
+        &self,
+        market_id: &str,
+        commodity_id: &str,
+    ) -> Option<&MarketCommodityState> {
+        self.markets
+            .get(&MarketCommodityKey::new(market_id, commodity_id))
+    }
 
     pub fn draw_from_stream(&mut self, namespace: &str) -> u64 {
         self.streams
@@ -56,7 +87,7 @@ impl WorldState {
             .next_u64()
     }
 
-    fn next_sequence(&mut self) -> u64 {
+    fn allocate_sequence(&mut self) -> u64 {
         let sequence = self.next_sequence;
         self.next_sequence = self
             .next_sequence
@@ -68,7 +99,7 @@ impl WorldState {
     fn schedule(&mut self, due_tick: u64, kind: u32) {
         let event = ScheduledEvent {
             due_tick,
-            sequence: self.next_sequence(),
+            sequence: self.allocate_sequence(),
             kind,
         };
         self.scheduler.push(event);
@@ -79,7 +110,7 @@ impl WorldState {
             priority,
             entity_id,
             kind,
-            sequence: self.next_sequence(),
+            sequence: self.allocate_sequence(),
             amount,
         };
         self.deltas.push(delta);
@@ -94,6 +125,21 @@ impl WorldState {
                 self.schedule(event.due_tick + 12, Self::PRODUCTION_EVENT);
             }
             other => panic!("unknown event kind: {other}"),
+        }
+    }
+
+    fn advance_markets_if_due(&mut self) {
+        if !self.clock.is_hour_boundary() {
+            return;
+        }
+        let elapsed_minutes = self
+            .clock
+            .tick()
+            .checked_mul(u64::from(self.clock.tick_minutes()))
+            .expect("elapsed simulation minutes overflow");
+        let hour_index = elapsed_minutes / 60;
+        for market in self.markets.values_mut() {
+            market.advance_hour(hour_index);
         }
     }
 
@@ -112,6 +158,7 @@ impl WorldState {
         while let Some(event) = self.scheduler.pop_due(self.clock.tick()) {
             self.handle_event(event);
         }
+        self.advance_markets_if_due();
         self.commit_deltas();
     }
 
@@ -142,6 +189,11 @@ impl StableStateHash for WorldState {
             bytes.extend_from_slice(&event.due_tick.to_le_bytes());
             bytes.extend_from_slice(&event.sequence.to_le_bytes());
             bytes.extend_from_slice(&event.kind.to_le_bytes());
+        }
+
+        for (key, market) in &self.markets {
+            key.append_stable_bytes(&mut bytes);
+            market.append_stable_bytes(&mut bytes);
         }
 
         fnv1a64(&bytes)
