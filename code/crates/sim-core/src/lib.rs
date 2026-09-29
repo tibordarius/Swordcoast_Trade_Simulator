@@ -11,6 +11,7 @@ pub mod rate;
 pub mod rng;
 pub mod scheduler;
 pub mod state;
+pub mod snapshot;
 
 pub use clock::SimulationClock;
 pub use delta::{stable_sort_deltas, Delta};
@@ -27,3 +28,4 @@ pub use rate::ExactDailyRate;
 pub use rng::{derive_stream_seed, SplitMix64};
 pub use scheduler::{ScheduledEvent, Scheduler};
 pub use state::{TradeDispatchError, WorldState};
+pub use snapshot::{decode_world_snapshot, encode_world_snapshot, SNAPSHOT_STATE_FORMAT};
