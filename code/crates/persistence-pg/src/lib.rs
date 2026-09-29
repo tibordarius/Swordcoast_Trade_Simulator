@@ -182,12 +182,6 @@ impl PgPersistence {
         })
     }
 
-    pub fn delete_world(&mut self, world_id: i64) -> Result<(), PersistenceError> {
-        self.client
-            .execute("DELETE FROM world WHERE id = $1", &[&world_id])?;
-        Ok(())
-    }
-
     pub fn execute_command(
         &mut self,
         ids: WorldBranch,
