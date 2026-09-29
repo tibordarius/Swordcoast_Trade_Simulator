@@ -1,19 +1,148 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "calibration_note": "Sea-lane timing, capacity, risk and freight parameters recovered from the richer Google Drive simulator and normalized to integer fixed-point units. They are simulation calibration, not Forgotten Realms canon.",
   "routes": [
-    {"id":"SEA-CAL-ATH","from":"MKT-CAL","to":"MKT-ATH","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
-    {"id":"SEA-ATH-BG","from":"MKT-ATH","to":"MKT-BG","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
-    {"id":"SEA-BG-WD","from":"MKT-BG","to":"MKT-WD","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
-    {"id":"SEA-WD-NW","from":"MKT-WD","to":"MKT-NW","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
-    {"id":"SEA-NW-LUS","from":"MKT-NW","to":"MKT-LUS","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
-    {"id":"SEA-ATH-WD","from":"MKT-ATH","to":"MKT-WD","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"inference"},
-    {"id":"SEA-BG-NW","from":"MKT-BG","to":"MKT-NW","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"inference"},
-    {"id":"SEA-WD-LUS","from":"MKT-WD","to":"MKT-LUS","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"inference"}
+    {
+      "id": "SEA-ATH-BG",
+      "from": "MKT-ATH",
+      "to": "MKT-BG",
+      "mode": "sea",
+      "bidirectional": true,
+      "distance_miles": 550,
+      "travel_ticks": 2304,
+      "risk_bps": 150,
+      "freight_mcp_per_kg": 140,
+      "capacity_kg": 25000000,
+      "capacity_m3": 50000,
+      "provenance": "inference"
+    },
+    {
+      "id": "SEA-ATH-WD",
+      "from": "MKT-ATH",
+      "to": "MKT-WD",
+      "mode": "sea",
+      "bidirectional": true,
+      "distance_miles": 1200,
+      "travel_ticks": 5184,
+      "risk_bps": 160,
+      "freight_mcp_per_kg": 315,
+      "capacity_kg": 20000000,
+      "capacity_m3": 40000,
+      "provenance": "inference"
+    },
+    {
+      "id": "SEA-BG-NW",
+      "from": "MKT-BG",
+      "to": "MKT-NW",
+      "mode": "sea",
+      "bidirectional": true,
+      "distance_miles": 1150,
+      "travel_ticks": 4896,
+      "risk_bps": 180,
+      "freight_mcp_per_kg": 300,
+      "capacity_kg": 12000000,
+      "capacity_m3": 24000,
+      "provenance": "inference"
+    },
+    {
+      "id": "SEA-BG-WD",
+      "from": "MKT-BG",
+      "to": "MKT-WD",
+      "mode": "sea",
+      "bidirectional": true,
+      "distance_miles": 750,
+      "travel_ticks": 3168,
+      "risk_bps": 100,
+      "freight_mcp_per_kg": 180,
+      "capacity_kg": 35000000,
+      "capacity_m3": 70000,
+      "provenance": "inference"
+    },
+    {
+      "id": "SEA-CAL-ATH",
+      "from": "MKT-CAL",
+      "to": "MKT-ATH",
+      "mode": "sea",
+      "bidirectional": true,
+      "distance_miles": 750,
+      "travel_ticks": 3168,
+      "risk_bps": 120,
+      "freight_mcp_per_kg": 180,
+      "capacity_kg": 20000000,
+      "capacity_m3": 40000,
+      "provenance": "inference"
+    },
+    {
+      "id": "SEA-NW-LUS",
+      "from": "MKT-NW",
+      "to": "MKT-LUS",
+      "mode": "sea",
+      "bidirectional": true,
+      "distance_miles": 200,
+      "travel_ticks": 864,
+      "risk_bps": 220,
+      "freight_mcp_per_kg": 80,
+      "capacity_kg": 8000000,
+      "capacity_m3": 16000,
+      "provenance": "inference"
+    },
+    {
+      "id": "SEA-WD-LUS",
+      "from": "MKT-WD",
+      "to": "MKT-LUS",
+      "mode": "sea",
+      "bidirectional": true,
+      "distance_miles": 620,
+      "travel_ticks": 2592,
+      "risk_bps": 200,
+      "freight_mcp_per_kg": 160,
+      "capacity_kg": 10000000,
+      "capacity_m3": 20000,
+      "provenance": "inference"
+    },
+    {
+      "id": "SEA-WD-NW",
+      "from": "MKT-WD",
+      "to": "MKT-NW",
+      "mode": "sea",
+      "bidirectional": true,
+      "distance_miles": 450,
+      "travel_ticks": 1872,
+      "risk_bps": 110,
+      "freight_mcp_per_kg": 120,
+      "capacity_kg": 15000000,
+      "capacity_m3": 30000,
+      "provenance": "inference"
+    }
   ],
   "production_nodes": [
-    {"id":"NODE-AMN-AGRI","name":"Amnian Agricultural Hinterland","feeds":"MKT-ATH","mode":"regional_abstraction","provenance":"inference"},
-    {"id":"NODE-CHIONTHAR","name":"Chionthar Hinterland","feeds":"MKT-BG","mode":"river_overland_abstraction","provenance":"inference"},
-    {"id":"NODE-NW-TIMBER","name":"Neverwinter Timber Hinterland","feeds":"MKT-NW","mode":"regional_abstraction","provenance":"inference"},
-    {"id":"NODE-NORTH-MINERAL","name":"Northern Mineral Hinterland","feeds":"MKT-LUS","mode":"regional_abstraction","provenance":"inference"}
+    {
+      "id": "NODE-AMN-AGRI",
+      "name": "Amnian Agricultural Hinterland",
+      "feeds": "MKT-ATH",
+      "mode": "regional_abstraction",
+      "provenance": "inference"
+    },
+    {
+      "id": "NODE-CHIONTHAR",
+      "name": "Chionthar Hinterland",
+      "feeds": "MKT-BG",
+      "mode": "river_overland_abstraction",
+      "provenance": "inference"
+    },
+    {
+      "id": "NODE-NW-TIMBER",
+      "name": "Neverwinter Timber Hinterland",
+      "feeds": "MKT-NW",
+      "mode": "regional_abstraction",
+      "provenance": "inference"
+    },
+    {
+      "id": "NODE-NORTH-MINERAL",
+      "name": "Northern Mineral Hinterland",
+      "feeds": "MKT-LUS",
+      "mode": "regional_abstraction",
+      "provenance": "inference"
+    }
   ]
 }

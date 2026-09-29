@@ -109,6 +109,52 @@ impl MarketCommodityState {
         self.inventory.on_hand
     }
 
+    pub fn available_milli(&self) -> i64 {
+        self.inventory.available()
+    }
+
+    pub fn reference_price_mcp(&self) -> i64 {
+        self.reference_price_mcp
+    }
+
+    pub fn reserve_for_shipment(&mut self, quantity_milli: i64) -> bool {
+        self.inventory.reserve(quantity_milli)
+    }
+
+    pub fn depart_reserved_shipment(&mut self, quantity_milli: i64) -> bool {
+        if !self.inventory.depart_reserved(quantity_milli) {
+            return false;
+        }
+        self.volume_milli = self
+            .volume_milli
+            .checked_add(quantity_milli)
+            .expect("market volume overflow");
+        true
+    }
+
+    pub fn commit_incoming(&mut self, quantity_milli: i64) {
+        assert!(quantity_milli > 0);
+        self.incoming_committed_milli = self
+            .incoming_committed_milli
+            .checked_add(quantity_milli)
+            .expect("incoming commitment overflow");
+    }
+
+    pub fn receive_incoming(&mut self, quantity_milli: i64) -> bool {
+        if quantity_milli <= 0 || quantity_milli > self.incoming_committed_milli {
+            return false;
+        }
+        if !self.inventory.receive(quantity_milli) {
+            return false;
+        }
+        self.incoming_committed_milli -= quantity_milli;
+        self.volume_milli = self
+            .volume_milli
+            .checked_add(quantity_milli)
+            .expect("market volume overflow");
+        true
+    }
+
     pub fn target_reserve_milli(&self) -> i64 {
         self.inventory.target_reserve
     }

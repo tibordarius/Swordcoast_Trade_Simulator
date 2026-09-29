@@ -53,12 +53,32 @@ def main():
             not isinstance(c["reference_price_cp"], int) or c["reference_price_cp"] < 0
         ):
             raise SystemExit(f"reference price must be integer cp: {c['id']}")
+        for field in ("mass_grams_per_base_unit", "volume_cm3_per_base_unit"):
+            if not isinstance(c[field], int) or c[field] <= 0:
+                raise SystemExit(f"{field} must be a positive integer: {c['id']}")
+
+    if len(routes) != 8:
+        raise SystemExit(f"expected 8 calibrated sea routes, got {len(routes)}")
 
     for r in routes:
         if r["from"] not in market_ids or r["to"] not in market_ids:
             raise SystemExit(f"route endpoint missing: {r['id']}")
         if r["from"] == r["to"]:
             raise SystemExit(f"self route: {r['id']}")
+        if r["mode"] != "sea":
+            raise SystemExit(f"MVP calibrated route must be sea: {r['id']}")
+        for field in (
+            "distance_miles", "travel_ticks", "risk_bps", "freight_mcp_per_kg",
+            "capacity_kg", "capacity_m3",
+        ):
+            if not isinstance(r[field], int):
+                raise SystemExit(f"{field} must be integer fixed-point: {r['id']}")
+        if r["distance_miles"] <= 0 or r["travel_ticks"] <= 0:
+            raise SystemExit(f"invalid route timing/distance: {r['id']}")
+        if not 0 <= r["risk_bps"] <= 10000:
+            raise SystemExit(f"invalid route risk: {r['id']}")
+        if r["freight_mcp_per_kg"] < 0 or r["capacity_kg"] <= 0 or r["capacity_m3"] <= 0:
+            raise SystemExit(f"invalid route freight/capacity: {r['id']}")
 
     state_keys = set()
     for state in market_states:

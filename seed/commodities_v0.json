@@ -11,7 +11,9 @@
       "fungibility": "full",
       "reference_price_cp": 2,
       "reference_price_status": "calibration_example",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1300
     },
     {
       "id": "CMD-FISH",
@@ -23,7 +25,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1100
     },
     {
       "id": "CMD-SALTFISH",
@@ -35,7 +39,9 @@
       "fungibility": "full",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "inference"
+      "provenance": "inference",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1100
     },
     {
       "id": "CMD-LIVESTOCK",
@@ -47,7 +53,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 350000,
+      "volume_cm3_per_base_unit": 1500000
     },
     {
       "id": "CMD-SALT",
@@ -59,7 +67,9 @@
       "fungibility": "full",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 800
     },
     {
       "id": "CMD-TIMBER",
@@ -71,7 +81,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 650000,
+      "volume_cm3_per_base_unit": 1000000
     },
     {
       "id": "CMD-SHIPTIMBER",
@@ -83,7 +95,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "inference"
+      "provenance": "inference",
+      "mass_grams_per_base_unit": 800000,
+      "volume_cm3_per_base_unit": 1000000
     },
     {
       "id": "CMD-IRONORE",
@@ -95,7 +109,9 @@
       "fungibility": "full",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 250
     },
     {
       "id": "CMD-IRON",
@@ -107,7 +123,9 @@
       "fungibility": "full",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 130
     },
     {
       "id": "CMD-HIDES",
@@ -119,7 +137,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1200
     },
     {
       "id": "CMD-WOOL",
@@ -131,7 +151,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "inference"
+      "provenance": "inference",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 2500
     },
     {
       "id": "CMD-CLOTH",
@@ -143,7 +165,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 5000,
+      "volume_cm3_per_base_unit": 15000
     },
     {
       "id": "CMD-ROPE",
@@ -155,7 +179,9 @@
       "fungibility": "full",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 15000,
+      "volume_cm3_per_base_unit": 25000
     },
     {
       "id": "CMD-POTTERY",
@@ -167,7 +193,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 25000,
+      "volume_cm3_per_base_unit": 50000
     },
     {
       "id": "CMD-TOOLS",
@@ -179,7 +207,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 20000,
+      "volume_cm3_per_base_unit": 30000
     },
     {
       "id": "CMD-WEAPONS",
@@ -191,7 +221,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": 5000,
       "reference_price_status": "campaign_seed",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 2500,
+      "volume_cm3_per_base_unit": 5000
     },
     {
       "id": "CMD-ARMOR",
@@ -203,7 +235,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 25000,
+      "volume_cm3_per_base_unit": 60000
     },
     {
       "id": "CMD-ALE",
@@ -215,7 +249,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1000
     },
     {
       "id": "CMD-WINE",
@@ -227,7 +263,9 @@
       "fungibility": "provenance_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "source_requires_unit_conversion",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1000
     },
     {
       "id": "CMD-SPICES",
@@ -239,7 +277,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "source_requires_lb_to_kg_conversion",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1200
     },
     {
       "id": "CMD-SILK",
@@ -251,7 +291,9 @@
       "fungibility": "quality_sensitive",
       "reference_price_cp": 2000,
       "reference_price_status": "campaign_seed",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 2000,
+      "volume_cm3_per_base_unit": 6000
     },
     {
       "id": "CMD-GEMS",
@@ -263,7 +305,9 @@
       "fungibility": "provenance_sensitive",
       "reference_price_cp": 50000,
       "reference_price_status": "campaign_seed_average",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 100,
+      "volume_cm3_per_base_unit": 50
     },
     {
       "id": "CMD-WHALEOIL",
@@ -275,7 +319,9 @@
       "fungibility": "provenance_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "campaign_canon"
+      "provenance": "campaign_canon",
+      "mass_grams_per_base_unit": 920,
+      "volume_cm3_per_base_unit": 1000
     },
     {
       "id": "CMD-ALCHEMY",
@@ -287,7 +333,9 @@
       "fungibility": "provenance_sensitive",
       "reference_price_cp": null,
       "reference_price_status": "unset",
-      "provenance": "fr_canon"
+      "provenance": "fr_canon",
+      "mass_grams_per_base_unit": 10000,
+      "volume_cm3_per_base_unit": 20000
     }
   ]
 }
