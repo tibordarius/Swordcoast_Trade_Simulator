@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "id": "PROFILE-INDEPENDENT",
+      "name": "Independent Merchant",
+      "parameters": {
+        "min_roi_bps": 600,
+        "max_information_age_ticks": 576,
+        "max_route_distance_km": 1800,
+        "bulk_weight": 300,
+        "value_density_weight": 300,
+        "distance_weight": -150,
+        "controlled_route_bonus": 0,
+        "remote_market_bonus": -200,
+        "warehouse_patience_bps": 2000,
+        "information_quality_bps": 5500,
+        "risk_tolerance_bps": 5000
+      }
+    },
+    {
+      "id": "PROFILE-OTC-BULK",
+      "name": "Vertically Integrated Bulk Trader",
+      "campaign_faction_example": "OTC",
+      "parameters": {
+        "min_roi_bps": 400,
+        "max_information_age_ticks": 864,
+        "max_route_distance_km": 2200,
+        "bulk_weight": 1800,
+        "value_density_weight": 100,
+        "distance_weight": -100,
+        "controlled_route_bonus": 900,
+        "remote_market_bonus": -250,
+        "warehouse_patience_bps": 8000,
+        "information_quality_bps": 7500,
+        "risk_tolerance_bps": 6200
+      }
+    },
+    {
+      "id": "PROFILE-DTC-LONGRANGE",
+      "name": "Long-Range Sparse Network Trader",
+      "campaign_faction_example": "DTC/DWTC (Deepwater Trading Company)",
+      "parameters": {
+        "min_roi_bps": 700,
+        "max_information_age_ticks": 2880,
+        "max_route_distance_km": 6500,
+        "bulk_weight": -200,
+        "value_density_weight": 1900,
+        "distance_weight": 350,
+        "controlled_route_bonus": 100,
+        "remote_market_bonus": 1200,
+        "warehouse_patience_bps": 4500,
+        "information_quality_bps": 9000,
+        "risk_tolerance_bps": 7800
+      }
+    }
+  ],
+  "note": "Numbers are simulation calibration values. Faction examples bind campaign factions to generic profiles; the scoring engine does not branch on faction names."
+}

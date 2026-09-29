@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "commodity": "CMD-GRAIN",
+  "market": "MKT-ATH",
+  "scenario_name": "Athkatla Grain Ledger Benchmark",
+  "quantity_unit": "milli_kg",
+  "starting_on_hand": 700000000,
+  "starting_reserved": 0,
+  "target_reserve": 700000000,
+  "daily_production": 30000000,
+  "daily_consumption": 25000000,
+  "daily_spoilage_ppm": 500,
+  "calibration_status": "engineering_benchmark_not_lore"
+}
