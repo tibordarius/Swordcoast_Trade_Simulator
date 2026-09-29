@@ -6,13 +6,22 @@ fn embedded_seed_loads_complete_six_market_matrix() {
     assert_eq!(bundle.markets_len(), 6);
     assert_eq!(bundle.commodities_len(), 24);
     assert_eq!(bundle.market_states().len(), 144);
+    assert_eq!(bundle.routes_len(), 8);
 
     for market in ["MKT-WD", "MKT-BG", "MKT-ATH", "MKT-CAL", "MKT-NW", "MKT-LUS"] {
         assert_eq!(bundle.states_for_market(market).count(), 24);
     }
 
     assert_eq!(bundle.market("MKT-WD").unwrap().exchange, "WDEX");
-    assert_eq!(bundle.commodity("CMD-GRAIN").unwrap().provenance, "fr_canon");
+    let grain = bundle.commodity("CMD-GRAIN").unwrap();
+    assert_eq!(grain.provenance, "fr_canon");
+    assert_eq!(grain.mass_grams_per_base_unit, 1_000);
+    assert_eq!(grain.volume_cm3_per_base_unit, 1_300);
+
+    let route = bundle.route("SEA-ATH-WD").unwrap();
+    assert_eq!(route.travel_ticks, 5_184);
+    assert_eq!(route.freight_mcp_per_kg, 315);
+    assert_eq!(route.capacity_kg, 20_000_000);
 }
 
 #[test]
