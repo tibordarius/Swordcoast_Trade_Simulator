@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"WDEX scenario branch request",
+  "type":"object",
+  "required":["name","parent_snapshot_id","horizon_ticks","events"],
+  "properties":{
+    "name":{"type":"string","minLength":1},
+    "parent_snapshot_id":{"type":"string","minLength":1},
+    "horizon_ticks":{"type":"string","pattern":"^[1-9][0-9]*$"},
+    "events":{"type":"array"},
+    "run_count":{"type":"integer","minimum":1,"maximum":10000},
+    "seed_namespace":{"type":"string"}
+  }
+}

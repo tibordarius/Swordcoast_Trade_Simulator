@@ -1,0 +1,18 @@
+{
+  "protocol_version": 1,
+  "world_id": "1",
+  "branch_id": "1",
+  "simulation_version": "0.1.0",
+  "sequence": "8422",
+  "tick": "550230",
+  "exchange": {"market_id":"4","code":"WDEX","name":"Waterdeep Exchange"},
+  "markets": [
+    {"market_id":"4","commodity_id":"1","symbol":"WD-GRAIN","name":"Grain","family":"Food","bid_mcp":"2110","ask_mcp":"2136","previous_close_mcp":"1982","on_hand_milli":"2520000000","target_reserve_milli":"4000000000","daily_demand_milli":"420000000","volume_milli":"12840000000","depth_milli":"1600000000"},
+    {"market_id":"4","commodity_id":"2","symbol":"WD-TIMBER","name":"Timber","family":"Industrial","bid_mcp":"126200","ask_mcp":"127300","previous_close_mcp":"124900","on_hand_milli":"932000000","target_reserve_milli":"1100000000","daily_demand_milli":"72000000","volume_milli":"4920000000","depth_milli":"950000000"},
+    {"market_id":"4","commodity_id":"3","symbol":"WD-IRON","name":"Iron Ingots","family":"Industrial","bid_mcp":"239800","ask_mcp":"242400","previous_close_mcp":"247100","on_hand_milli":"1400000000","target_reserve_milli":"1200000000","daily_demand_milli":"55000000","volume_milli":"2180000000","depth_milli":"650000000"},
+    {"market_id":"4","commodity_id":"4","symbol":"WD-WINE","name":"Wine","family":"Luxury","bid_mcp":"185900","ask_mcp":"187100","previous_close_mcp":"186300","on_hand_milli":"445000000","target_reserve_milli":"500000000","daily_demand_milli":"18000000","volume_milli":"860000000","depth_milli":"320000000"},
+    {"market_id":"4","commodity_id":"5","symbol":"WD-SPICE","name":"Spices","family":"Luxury","bid_mcp":"808000","ask_mcp":"815500","previous_close_mcp":"750000","on_hand_milli":"82000000","target_reserve_milli":"150000000","daily_demand_milli":"5500000","volume_milli":"124000000","depth_milli":"60000000"},
+    {"market_id":"4","commodity_id":"6","symbol":"WD-WHALE","name":"Whale Oil","family":"Maritime","bid_mcp":"351000","ask_mcp":"355000","previous_close_mcp":"346000","on_hand_milli":"121000000","target_reserve_milli":"200000000","daily_demand_milli":"7000000","volume_milli":"290000000","depth_milli":"125000000"}
+  ],
+  "shipments": []
+}

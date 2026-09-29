@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "simulation_calibration_not_forgotten_realms_canon",
+  "recipes": [
+    {
+      "id": "REC-SMELT-IRON",
+      "name": "Smelt iron ore into ingots",
+      "site_type": "smelter",
+      "cycle_ticks": 144,
+      "inputs": [{"commodity_id": "CMD-IRONORE", "quantity_milli": 100000000}],
+      "outputs": [{"commodity_id": "CMD-IRON", "quantity_milli": 60000000, "role": "primary"}]
+    },
+    {
+      "id": "REC-FORGE-TOOLS",
+      "name": "Forge iron tools",
+      "site_type": "forge",
+      "cycle_ticks": 96,
+      "inputs": [{"commodity_id": "CMD-IRON", "quantity_milli": 100000000}],
+      "outputs": [{"commodity_id": "CMD-TOOLS", "quantity_milli": 1000, "role": "primary"}]
+    },
+    {
+      "id": "REC-FORGE-WEAPONS",
+      "name": "Forge weapons",
+      "site_type": "forge",
+      "cycle_ticks": 96,
+      "inputs": [{"commodity_id": "CMD-IRON", "quantity_milli": 20000000}],
+      "outputs": [{"commodity_id": "CMD-WEAPONS", "quantity_milli": 1000, "role": "primary"}]
+    },
+    {
+      "id": "REC-SALT-FISH",
+      "name": "Preserve fish with salt",
+      "site_type": "fishery_processor",
+      "cycle_ticks": 48,
+      "inputs": [
+        {"commodity_id": "CMD-FISH", "quantity_milli": 100000000},
+        {"commodity_id": "CMD-SALT", "quantity_milli": 20000000}
+      ],
+      "outputs": [{"commodity_id": "CMD-SALTFISH", "quantity_milli": 100000000, "role": "primary"}]
+    },
+    {
+      "id": "REC-WEAVE-CLOTH",
+      "name": "Weave wool into cloth",
+      "site_type": "textile_workshop",
+      "cycle_ticks": 96,
+      "inputs": [{"commodity_id": "CMD-WOOL", "quantity_milli": 50000000}],
+      "outputs": [{"commodity_id": "CMD-CLOTH", "quantity_milli": 10000, "role": "primary"}]
+    }
+  ],
+  "notes": [
+    "Ratios are calibration values for engine validation, not claims about Forgotten Realms industrial yields.",
+    "Recipes explicitly authorize commodity destruction/creation; conservation tests compare inventory deltas against recorded recipe inputs/outputs rather than assuming mass-equivalent base units."
+  ]
+}

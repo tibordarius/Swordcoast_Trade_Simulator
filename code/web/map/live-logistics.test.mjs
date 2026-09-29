@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {shipmentProgress,shipmentPosition,routeFlowWidth,makeMarketsGeoJSON,makeRoutesGeoJSON,makeShipmentsGeoJSON} from './live-logistics.mjs';
+
+const root=new URL('../../../',import.meta.url).pathname;
+const exchanges=JSON.parse(fs.readFileSync(root+'seed/toril_exchange_coordinates_v1.json','utf8')).exchanges;
+const routes=JSON.parse(fs.readFileSync(root+'seed/toril_route_geometries_v1.json','utf8')).routes;
+const r=routes.find(x=>x.id==='SEA-WD-NW');
+const shipment={id:'S1',route_id:r.id,departure_tick:'100',eta_tick:'200',commodity:'grain',quantity_milli:'100000000'};
+assert.equal(shipmentProgress(shipment,'50'),0);
+assert.equal(shipmentProgress(shipment,'100'),0);
+assert.equal(shipmentProgress(shipment,'150'),0.5);
+assert.equal(shipmentProgress(shipment,'200'),1);
+assert.equal(shipmentProgress(shipment,'250'),1);
+const p0=shipmentPosition(shipment,r,'100');
+const p1=shipmentPosition(shipment,r,'200');
+assert.deepEqual([p0.lon_fria,p0.lat],r.coordinates_fria[0]);
+assert.deepEqual([p1.lon_fria,p1.lat],r.coordinates_fria.at(-1));
+assert.ok(routeFlowWidth('500000000')>=13.9);
+assert.equal(routeFlowWidth('0'),0);
+const markets=makeMarketsGeoJSON(exchanges);
+assert.equal(markets.features.length,6);
+const routeGeo=makeRoutesGeoJSON(routes,{[r.id]:'250000000'});
+assert.equal(routeGeo.features.length,routes.length);
+const shipGeo=makeShipmentsGeoJSON([shipment],new Map(routes.map(x=>[x.id,x])),'150');
+assert.equal(shipGeo.features.length,1);
+assert.equal(shipGeo.features[0].properties.progress,0.5);
+// performance sanity: derived positions are cheap enough to animate large fleets client-side.
+const many=Array.from({length:10_000},(_,i)=>({...shipment,id:`S${i}`,departure_tick:String(100+i%20),eta_tick:String(300+i%20)}));
+const t0=performance.now();
+makeShipmentsGeoJSON(many,new Map(routes.map(x=>[x.id,x])),'180');
+const elapsed=performance.now()-t0;
+assert.ok(elapsed<1500,`10k interpolation too slow: ${elapsed}ms`);
+console.log(JSON.stringify({status:'PASS',route:r.id,distance_km:Number((r.distance_m/1000).toFixed(3)),ten_thousand_positions_ms:Number(elapsed.toFixed(2))}));
