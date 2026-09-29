@@ -4,6 +4,7 @@ import {
   pctChangeBps,
   formatBpsPct,
   daysCover,
+  marketKey,
   createClientState,
   previewMarketOrder,
 } from './market.mjs';
@@ -12,6 +13,7 @@ const params = new URLSearchParams(location.search);
 const apiBase = (params.get('api') ?? 'http://127.0.0.1:3000').replace(/\/$/, '');
 const snapshot = await fetch('./mock-snapshot.json').then((response) => response.json());
 const worldId = snapshot.world_id;
+const exchangeMarketId = snapshot.exchange.market_id;
 const state = createClientState(snapshot);
 let selected = snapshot.markets[0];
 let side = 'buy';
@@ -30,6 +32,11 @@ function currentRows() {
   return [...state.markets.values()];
 }
 
+function refreshSelected() {
+  const current = state.markets.get(marketKey(selected.market_id, selected.commodity_id));
+  if (current) selected = current;
+}
+
 function renderRows(filter = '') {
   const query = filter.trim().toLowerCase();
   rowsEl.innerHTML = '';
@@ -43,7 +50,11 @@ function renderRows(filter = '') {
     if (row.commodity_id === selected.commodity_id) tr.classList.add('selected');
     const change = pctChangeBps(row.ask_mcp, row.previous_close_mcp);
     const cover = daysCover(row.on_hand_milli, row.daily_demand_milli);
-    tr.innerHTML = `<td><span class="symbol">${row.symbol}</span><span class="commodity">${row.name}</span></td>
+    const sourceBadge =
+      row.source === 'engine'
+        ? '<span class="source-badge live">LIVE</span>'
+        : '<span class="source-badge">REF</span>';
+    tr.innerHTML = `<td><span class="symbol">${row.symbol}</span>${sourceBadge}<span class="commodity">${row.name}</span></td>
       <td>${mcpToCpString(row.bid_mcp)}</td><td>${mcpToCpString(row.ask_mcp)}</td>
       <td class="${change > 0 ? 'up' : change < 0 ? 'down' : 'neutral'}">${formatBpsPct(change)}</td>
       <td>${milliToUnitString(row.on_hand_milli, 0)}</td><td>${cover?.toFixed(1) ?? '—'}</td>`;
@@ -57,15 +68,22 @@ function renderRows(filter = '') {
 }
 
 function renderDetail() {
+  const source = selected.source === 'engine' ? ' · LIVE ENGINE' : ' · REFERENCE';
   document.querySelector('#detailSymbol').textContent = selected.symbol;
-  document.querySelector('#detailName').textContent = selected.name;
+  document.querySelector('#detailName').textContent = selected.name + source;
   document.querySelector('#detailBid').textContent = `${mcpToCpString(selected.bid_mcp)} cp`;
   document.querySelector('#detailAsk').textContent = `${mcpToCpString(selected.ask_mcp)} cp`;
   document.querySelector('#detailStock').textContent = milliToUnitString(selected.on_hand_milli, 0);
-  document.querySelector('#detailReserve').textContent = milliToUnitString(selected.target_reserve_milli, 0);
+  document.querySelector('#detailReserve').textContent = milliToUnitString(
+    selected.target_reserve_milli,
+    0,
+  );
   document.querySelector('#detailCover').textContent =
     `${daysCover(selected.on_hand_milli, selected.daily_demand_milli).toFixed(1)} days`;
-  document.querySelector('#detailVolume').textContent = milliToUnitString(selected.volume_milli, 0);
+  document.querySelector('#detailVolume').textContent = milliToUnitString(
+    selected.volume_milli,
+    0,
+  );
   renderPreview();
 }
 
@@ -103,6 +121,31 @@ async function fetchStatus() {
   applyEngineStatus(await response.json());
 }
 
+async function syncMarketSnapshot() {
+  const response = await fetch(
+    `${apiBase}/v1/markets/${encodeURIComponent(exchangeMarketId)}/snapshot`,
+  );
+  if (!response.ok) throw new Error(`market snapshot HTTP ${response.status}`);
+  const live = await response.json();
+
+  for (const commodity of live.commodities) {
+    const key = marketKey(live.market_id, commodity.commodity_id);
+    const existing = state.markets.get(key);
+    if (!existing) continue;
+    state.markets.set(key, {
+      ...existing,
+      ...commodity,
+      source: 'engine',
+    });
+  }
+
+  state.tick = BigInt(live.tick);
+  tickEl.textContent = live.tick;
+  refreshSelected();
+  renderRows(searchEl.value);
+  renderDetail();
+}
+
 async function advance(ticks) {
   const response = await fetch(
     `${apiBase}/v1/worlds/${encodeURIComponent(worldId)}/advance`,
@@ -114,12 +157,20 @@ async function advance(ticks) {
   );
   if (!response.ok) throw new Error(`advance HTTP ${response.status}`);
   applyEngineStatus(await response.json());
+  await syncMarketSnapshot();
 }
 
 function connectLive() {
   const wsBase = apiBase.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
   const socket = new WebSocket(`${wsBase}/v1/live/${encodeURIComponent(worldId)}`);
-  socket.onmessage = (event) => applyEngineStatus(JSON.parse(event.data));
+  socket.onmessage = async (event) => {
+    applyEngineStatus(JSON.parse(event.data));
+    try {
+      await syncMarketSnapshot();
+    } catch (error) {
+      console.warn('market snapshot refresh failed', error);
+    }
+  };
   socket.onopen = () => {
     connectionEl.textContent = 'ENGINE LIVE';
     liveDot.classList.remove('offline');
@@ -136,8 +187,8 @@ document.querySelector('#quantity').oninput = renderPreview;
 document.querySelectorAll('[data-side]').forEach((button) => {
   button.onclick = () => {
     side = button.dataset.side;
-    document.querySelectorAll('[data-side]').forEach(
-      (candidate) => candidate.classList.toggle('active', candidate === button),
+    document.querySelectorAll('[data-side]').forEach((candidate) =>
+      candidate.classList.toggle('active', candidate === button),
     );
     renderPreview();
   };
@@ -161,6 +212,7 @@ renderDetail();
 
 try {
   await fetchStatus();
+  await syncMarketSnapshot();
   connectLive();
 } catch (error) {
   console.warn('WDEX engine unavailable, using reference snapshot only', error);
