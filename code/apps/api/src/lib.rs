@@ -16,116 +16,44 @@ use sim_core::{
 };
 use tokio::sync::{broadcast, Mutex};
 use tower_http::cors::CorsLayer;
-
-const WDEX_MARKET: &str = "MKT-WD";
-
-#[derive(Clone, Copy)]
-struct InstrumentSeed {
-    commodity_id: &'static str,
-    on_hand_milli: i64,
-    target_reserve_milli: i64,
-    reference_price_mcp: i64,
-    daily_supply_milli: i64,
-    daily_demand_milli: i64,
-    liquidity_tier: u8,
-    depth_milli: i64,
-}
-
-const WDEX_INSTRUMENTS: [InstrumentSeed; 6] = [
-    InstrumentSeed {
-        commodity_id: "CMD-GRAIN",
-        on_hand_milli: 3_800_000_000,
-        target_reserve_milli: 4_000_000_000,
-        reference_price_mcp: 2_000,
-        daily_supply_milli: 400_000_000,
-        daily_demand_milli: 420_000_000,
-        liquidity_tier: 5,
-        depth_milli: 1_600_000_000,
-    },
-    InstrumentSeed {
-        commodity_id: "CMD-TIMBER",
-        on_hand_milli: 932_000_000,
-        target_reserve_milli: 1_100_000_000,
-        reference_price_mcp: 118_000,
-        daily_supply_milli: 76_000_000,
-        daily_demand_milli: 72_000_000,
-        liquidity_tier: 4,
-        depth_milli: 950_000_000,
-    },
-    InstrumentSeed {
-        commodity_id: "CMD-IRON",
-        on_hand_milli: 1_400_000_000,
-        target_reserve_milli: 1_200_000_000,
-        reference_price_mcp: 250_000,
-        daily_supply_milli: 50_000_000,
-        daily_demand_milli: 55_000_000,
-        liquidity_tier: 4,
-        depth_milli: 650_000_000,
-    },
-    InstrumentSeed {
-        commodity_id: "CMD-WINE",
-        on_hand_milli: 445_000_000,
-        target_reserve_milli: 500_000_000,
-        reference_price_mcp: 175_000,
-        daily_supply_milli: 17_000_000,
-        daily_demand_milli: 18_000_000,
-        liquidity_tier: 4,
-        depth_milli: 320_000_000,
-    },
-    InstrumentSeed {
-        commodity_id: "CMD-SPICES",
-        on_hand_milli: 82_000_000,
-        target_reserve_milli: 150_000_000,
-        reference_price_mcp: 500_000,
-        daily_supply_milli: 5_000_000,
-        daily_demand_milli: 5_500_000,
-        liquidity_tier: 3,
-        depth_milli: 60_000_000,
-    },
-    InstrumentSeed {
-        commodity_id: "CMD-WHALEOIL",
-        on_hand_milli: 121_000_000,
-        target_reserve_milli: 200_000_000,
-        reference_price_mcp: 250_000,
-        daily_supply_milli: 6_000_000,
-        daily_demand_milli: 7_000_000,
-        liquidity_tier: 3,
-        depth_milli: 125_000_000,
-    },
-];
+use world_data::SeedBundle;
 
 #[derive(Clone)]
 pub struct AppState {
     world_id: Arc<str>,
     world: Arc<Mutex<WorldState>>,
+    seed_data: Arc<SeedBundle>,
     updates: broadcast::Sender<WorldStatus>,
 }
 
 impl AppState {
     pub fn new(world_id: impl Into<Arc<str>>, seed: u64) -> Self {
-        let (updates, _) = broadcast::channel(64);
+        let seed_data =
+            SeedBundle::embedded_mvp().expect("embedded MVP seed must be valid");
         let mut world = WorldState::new(seed);
 
-        for instrument in WDEX_INSTRUMENTS {
+        for state in seed_data.market_states() {
             world.insert_market(
-                MarketCommodityKey::new(WDEX_MARKET, instrument.commodity_id),
+                MarketCommodityKey::new(&state.market_id, &state.commodity_id),
                 MarketCommodityState::new(
-                    instrument.on_hand_milli,
-                    instrument.target_reserve_milli,
-                    instrument.reference_price_mcp,
-                    instrument.daily_supply_milli,
-                    instrument.daily_demand_milli,
-                    instrument.liquidity_tier,
-                    instrument.depth_milli,
-                    0,
-                    0,
+                    state.on_hand_milli,
+                    state.target_reserve_milli,
+                    state.reference_price_mcp,
+                    state.daily_supply_milli,
+                    state.daily_demand_milli,
+                    state.liquidity_tier,
+                    state.depth_milli,
+                    state.incoming_committed_milli,
+                    state.risk_bps,
                 ),
             );
         }
 
+        let (updates, _) = broadcast::channel(64);
         Self {
             world_id: world_id.into(),
             world: Arc::new(Mutex::new(world)),
+            seed_data: Arc::new(seed_data),
             updates,
         }
     }
@@ -152,6 +80,8 @@ pub struct WorldStatus {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MarketCommoditySnapshot {
     pub commodity_id: String,
+    pub name: String,
+    pub base_unit: String,
     pub bid_mcp: String,
     pub ask_mcp: String,
     pub fundamental_mcp: String,
@@ -170,6 +100,7 @@ pub struct MarketSnapshot {
     pub world_id: String,
     pub tick: String,
     pub market_id: String,
+    pub exchange_code: String,
     pub commodities: Vec<MarketCommoditySnapshot>,
 }
 
@@ -239,49 +170,55 @@ async fn market_snapshot(
     State(state): State<AppState>,
     Path(market_id): Path<String>,
 ) -> ApiResult<MarketSnapshot> {
-    if market_id != WDEX_MARKET {
-        return Err((
+    let market_definition = state.seed_data.market(&market_id).ok_or_else(|| {
+        (
             StatusCode::NOT_FOUND,
             Json(ApiError {
                 code: "market_not_found",
                 message: format!("unknown market: {market_id}"),
             }),
-        ));
-    }
+        )
+    })?;
 
     let world = state.world.lock().await;
-    let mut commodities = Vec::with_capacity(WDEX_INSTRUMENTS.len());
+    let mut commodities = Vec::new();
 
-    for instrument in WDEX_INSTRUMENTS {
-        let market = world
-            .market(WDEX_MARKET, instrument.commodity_id)
+    for seed in state.seed_data.states_for_market(&market_id) {
+        let market_state = world
+            .market(&market_id, &seed.commodity_id)
             .ok_or_else(|| {
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(ApiError {
                         code: "market_state_missing",
                         message: format!(
-                            "WDEX state missing for {}",
-                            instrument.commodity_id
+                            "market state missing for {} / {}",
+                            market_id, seed.commodity_id
                         ),
                     }),
                 )
             })?;
-        let quote = market.quote();
+        let commodity = state
+            .seed_data
+            .commodity(&seed.commodity_id)
+            .expect("validated seed guarantees commodity reference");
+        let quote = market_state.quote();
 
         commodities.push(MarketCommoditySnapshot {
-            commodity_id: instrument.commodity_id.to_string(),
+            commodity_id: seed.commodity_id.clone(),
+            name: commodity.name.clone(),
+            base_unit: commodity.base_unit.clone(),
             bid_mcp: quote.bid_mcp.to_string(),
             ask_mcp: quote.ask_mcp.to_string(),
             fundamental_mcp: quote.fundamental_mcp.to_string(),
-            on_hand_milli: market.on_hand_milli().to_string(),
-            target_reserve_milli: market.target_reserve_milli().to_string(),
-            daily_supply_milli: market.daily_supply_milli().to_string(),
-            daily_demand_milli: market.daily_demand_milli().to_string(),
-            depth_milli: market.depth_milli().to_string(),
-            volume_milli: market.volume_milli().to_string(),
-            recent_unmet_milli: market.recent_unmet_milli().to_string(),
-            liquidity_tier: market.liquidity_tier(),
+            on_hand_milli: market_state.on_hand_milli().to_string(),
+            target_reserve_milli: market_state.target_reserve_milli().to_string(),
+            daily_supply_milli: market_state.daily_supply_milli().to_string(),
+            daily_demand_milli: market_state.daily_demand_milli().to_string(),
+            depth_milli: market_state.depth_milli().to_string(),
+            volume_milli: market_state.volume_milli().to_string(),
+            recent_unmet_milli: market_state.recent_unmet_milli().to_string(),
+            liquidity_tier: market_state.liquidity_tier(),
         });
     }
 
@@ -289,6 +226,7 @@ async fn market_snapshot(
         world_id: state.world_id.to_string(),
         tick: world.tick().to_string(),
         market_id,
+        exchange_code: market_definition.exchange.clone(),
         commodities,
     }))
 }
