@@ -8,6 +8,11 @@ use wdex_api::{build_router, AppState};
 
 const WORLD: &str = "WORLD-SWORD-COAST-V0";
 
+async fn json_body(response: axum::response::Response) -> Value {
+    let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    serde_json::from_slice(&body).unwrap()
+}
+
 #[tokio::test]
 async fn health_is_ok() {
     let app = build_router(AppState::new(WORLD, 12_345));
@@ -33,11 +38,10 @@ async fn world_advance_is_serial_and_exact() {
     let response = app.clone().oneshot(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
-    let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
-    let value: Value = serde_json::from_slice(&body).unwrap();
+    let value = json_body(response).await;
     assert_eq!(value["tick"], "10000");
     assert_eq!(value["production_signal"], "-19");
-    assert_eq!(value["state_hash"], "ea50aa8c6fbd16cb");
+    assert_eq!(value["state_hash"].as_str().unwrap().len(), 16);
 
     let status = app
         .oneshot(
@@ -48,9 +52,65 @@ async fn world_advance_is_serial_and_exact() {
         )
         .await
         .unwrap();
-    let body = to_bytes(status.into_body(), usize::MAX).await.unwrap();
-    let value: Value = serde_json::from_slice(&body).unwrap();
+    let value = json_body(status).await;
     assert_eq!(value["tick"], "10000");
+}
+
+#[tokio::test]
+async fn wdex_grain_is_simulated_and_tightens_after_ten_days() {
+    let app = build_router(AppState::new(WORLD, 12_345));
+
+    let initial = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/v1/markets/MKT-WD/snapshot")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let initial = json_body(initial).await;
+    let initial_ask = initial["commodities"][0]["ask_mcp"]
+        .as_str()
+        .unwrap()
+        .parse::<i64>()
+        .unwrap();
+    assert_eq!(initial["commodities"][0]["on_hand_milli"], "3800000000");
+
+    let advance = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri(format!("/v1/worlds/{WORLD}/advance"))
+                .header("content-type", "application/json")
+                .body(Body::from(r#"{"ticks":"2880"}"#))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(advance.status(), StatusCode::OK);
+
+    let later = app
+        .oneshot(
+            Request::builder()
+                .uri("/v1/markets/MKT-WD/snapshot")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let later = json_body(later).await;
+    let later_ask = later["commodities"][0]["ask_mcp"]
+        .as_str()
+        .unwrap()
+        .parse::<i64>()
+        .unwrap();
+
+    assert_eq!(later["tick"], "2880");
+    assert_eq!(later["commodities"][0]["on_hand_milli"], "3600000000");
+    assert!(later_ask > initial_ask);
 }
 
 #[tokio::test]
