@@ -22,6 +22,18 @@ jobs:
       - name: Tests
         run: cargo test --workspace --all-targets
 
+  web-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: WDEX fixed-point and slippage tests
+        run: node --test code/web/wdex/market.test.mjs
+      - name: Validate WDEX fixture JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('code/web/wdex/mock-snapshot.json','utf8')); console.log('WDEX fixture: PASS')"
+
   seed-validation:
     runs-on: ubuntu-latest
     steps:
