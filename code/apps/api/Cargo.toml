@@ -11,6 +11,7 @@ serde_json = "1"
 sim-core = { path = "../../crates/sim-core" }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "sync"] }
 tower-http = { version = "0.6", features = ["cors"] }
+world-data = { path = "../../crates/world-data" }
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
