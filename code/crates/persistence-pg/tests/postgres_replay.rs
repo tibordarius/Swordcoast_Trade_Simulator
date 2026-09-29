@@ -21,7 +21,7 @@ fn unique_name(prefix: &str) -> String {
 }
 
 #[test]
-fn snapshot_restart_replays_later_events_and_detects_tampering() {
+fn postgres_snapshot_replay_and_integrity_guards() {
     let Some(url) = database_url() else {
         eprintln!("WDEX_TEST_DATABASE_URL not set; skipping PostgreSQL integration test");
         return;
@@ -81,6 +81,9 @@ fn snapshot_restart_replays_later_events_and_detects_tampering() {
     assert_eq!(head_sequence, 3);
     assert_ne!(head_hash, "GENESIS");
 
+    // The production schema already rejects UPDATE/DELETE on the event log.
+    // Disable that user trigger only inside this corruption test so the replay
+    // verifier itself is forced to detect a forged row.
     let mut raw = Client::connect(&url, NoTls).unwrap();
     raw.batch_execute("ALTER TABLE input_event_log DISABLE TRIGGER USER;")
         .unwrap();
@@ -96,47 +99,38 @@ fn snapshot_restart_replays_later_events_and_detects_tampering() {
     assert!(matches!(error, PersistenceError::Integrity(_)));
     assert!(error.to_string().contains("hash mismatch"));
 
-    store.delete_world(ids.world_id).unwrap();
-}
-
-#[test]
-fn deleting_tail_event_is_detected_by_branch_head() {
-    let Some(url) = database_url() else {
-        eprintln!("WDEX_TEST_DATABASE_URL not set; skipping PostgreSQL integration test");
-        return;
-    };
-
-    let seed = 54_321_u64;
-    let genesis = SeedBundle::embedded_mvp().unwrap().instantiate_world(seed);
-    let mut world = genesis.clone();
-    let mut store = PgPersistence::connect(&url, VERSION).unwrap();
-    let ids = store
-        .create_world_branch(&unique_name("wdex-tail"), seed, "main")
+    // A second branch proves tail truncation is detected by the persisted
+    // branch head even if the append-only trigger were bypassed.
+    let second_seed = 54_321_u64;
+    let second_genesis = SeedBundle::embedded_mvp()
+        .unwrap()
+        .instantiate_world(second_seed);
+    let mut second_world = second_genesis.clone();
+    let second_ids = store
+        .create_world_branch(&unique_name("wdex-tail"), second_seed, "main")
         .unwrap();
-
     store
         .execute_command(
-            ids,
-            &mut world,
+            second_ids,
+            &mut second_world,
             "integration-test",
             &WorldCommand::AdvanceTicks { ticks: 1 },
         )
         .unwrap();
 
-    let mut raw = Client::connect(&url, NoTls).unwrap();
     raw.batch_execute("ALTER TABLE input_event_log DISABLE TRIGGER USER;")
         .unwrap();
     raw.execute(
         "DELETE FROM input_event_log WHERE branch_id = $1 AND sequence = 1",
-        &[&ids.branch_id],
+        &[&second_ids.branch_id],
     )
     .unwrap();
     raw.batch_execute("ALTER TABLE input_event_log ENABLE TRIGGER USER;")
         .unwrap();
 
-    let error = store.restore_latest(ids, &genesis).unwrap_err();
+    let error = store
+        .restore_latest(second_ids, &second_genesis)
+        .unwrap_err();
     assert!(matches!(error, PersistenceError::Integrity(_)));
     assert!(error.to_string().contains("branch head sequence"));
-
-    store.delete_world(ids.world_id).unwrap();
 }
