@@ -4,4 +4,5 @@ members = [
     "crates/sim-core",
     "crates/world-data",
     "apps/sim-cli",
+    "apps/api",
 ]
