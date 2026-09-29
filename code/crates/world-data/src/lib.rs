@@ -1,7 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use serde::Deserialize;
-use sim_core::{MarketCommodityKey, MarketCommodityState, WorldState};
+use sim_core::{
+    CalibratedRoute, CargoProfile, MarketCommodityKey, MarketCommodityState, WorldState,
+};
 
 const ALLOWED_PROVENANCE: [&str; 4] = [
     "fr_canon",
@@ -23,6 +25,11 @@ struct CommodityFile {
 #[derive(Debug, Clone, Deserialize)]
 struct MarketStateFile {
     states: Vec<MarketStateSeed>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct RouteFile {
+    routes: Vec<RouteDefinition>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
@@ -47,6 +54,26 @@ pub struct CommodityDefinition {
     pub reference_price_cp: Option<i64>,
     pub reference_price_status: String,
     pub provenance: String,
+    #[serde(default)]
+    pub mass_grams_per_base_unit: i64,
+    #[serde(default)]
+    pub volume_cm3_per_base_unit: i64,
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+pub struct RouteDefinition {
+    pub id: String,
+    pub from: String,
+    pub to: String,
+    pub mode: String,
+    pub bidirectional: bool,
+    pub distance_miles: i64,
+    pub travel_ticks: u64,
+    pub risk_bps: i64,
+    pub freight_mcp_per_kg: i64,
+    pub capacity_kg: i64,
+    pub capacity_m3: i64,
+    pub provenance: String,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
@@ -69,15 +96,17 @@ pub struct MarketStateSeed {
 pub struct SeedBundle {
     markets: BTreeMap<String, MarketDefinition>,
     commodities: BTreeMap<String, CommodityDefinition>,
+    routes: BTreeMap<String, RouteDefinition>,
     market_states: Vec<MarketStateSeed>,
 }
 
 impl SeedBundle {
     pub fn embedded_mvp() -> Result<Self, String> {
-        Self::from_json(
+        Self::from_json_with_routes(
             include_str!("../../../../seed/markets_v0.json"),
             include_str!("../../../../seed/commodities_v0.json"),
             include_str!("../../../../seed/market_states_v0.json"),
+            include_str!("../../../../seed/routes_v0.json"),
         )
     }
 
@@ -86,15 +115,32 @@ impl SeedBundle {
         commodities_json: &str,
         market_states_json: &str,
     ) -> Result<Self, String> {
+        Self::from_json_with_routes(
+            markets_json,
+            commodities_json,
+            market_states_json,
+            r#"{"routes":[]}"#,
+        )
+    }
+
+    pub fn from_json_with_routes(
+        markets_json: &str,
+        commodities_json: &str,
+        market_states_json: &str,
+        routes_json: &str,
+    ) -> Result<Self, String> {
         let markets_file: MarketFile =
             serde_json::from_str(markets_json).map_err(|error| format!("markets seed: {error}"))?;
         let commodities_file: CommodityFile = serde_json::from_str(commodities_json)
             .map_err(|error| format!("commodities seed: {error}"))?;
         let states_file: MarketStateFile = serde_json::from_str(market_states_json)
             .map_err(|error| format!("market states seed: {error}"))?;
+        let routes_file: RouteFile =
+            serde_json::from_str(routes_json).map_err(|error| format!("routes seed: {error}"))?;
 
         let markets = collect_markets(markets_file.markets)?;
         let commodities = collect_commodities(commodities_file.commodities)?;
+        let routes = collect_routes(routes_file.routes, &markets)?;
         let mut market_states = states_file.states;
 
         let mut state_keys = BTreeSet::new();
@@ -141,12 +187,37 @@ impl SeedBundle {
         Ok(Self {
             markets,
             commodities,
+            routes,
             market_states,
         })
     }
 
     pub fn instantiate_world(&self, seed: u64) -> WorldState {
         let mut world = WorldState::new(seed);
+        for commodity in self.commodities.values() {
+            if commodity.mass_grams_per_base_unit > 0 && commodity.volume_cm3_per_base_unit > 0 {
+                world.insert_cargo_profile(
+                    &commodity.id,
+                    CargoProfile::new(
+                        commodity.mass_grams_per_base_unit,
+                        commodity.volume_cm3_per_base_unit,
+                    ),
+                );
+            }
+        }
+        for route in self.routes.values() {
+            world.insert_route(CalibratedRoute::new(
+                &route.id,
+                &route.from,
+                &route.to,
+                route.bidirectional,
+                route.travel_ticks,
+                route.risk_bps,
+                route.freight_mcp_per_kg,
+                route.capacity_kg,
+                route.capacity_m3,
+            ));
+        }
         for state in &self.market_states {
             world.insert_market(
                 MarketCommodityKey::new(&state.market_id, &state.commodity_id),
@@ -174,12 +245,20 @@ impl SeedBundle {
         self.commodities.get(commodity_id)
     }
 
+    pub fn route(&self, route_id: &str) -> Option<&RouteDefinition> {
+        self.routes.get(route_id)
+    }
+
     pub fn markets_len(&self) -> usize {
         self.markets.len()
     }
 
     pub fn commodities_len(&self) -> usize {
         self.commodities.len()
+    }
+
+    pub fn routes_len(&self) -> usize {
+        self.routes.len()
     }
 
     pub fn market_states(&self) -> &[MarketStateSeed] {
@@ -222,9 +301,50 @@ fn collect_commodities(
         if definition.quantity_scale <= 0 {
             return Err(format!("invalid quantity scale for {}", definition.id));
         }
+        let dimensions_present =
+            definition.mass_grams_per_base_unit > 0 && definition.volume_cm3_per_base_unit > 0;
+        let dimensions_absent =
+            definition.mass_grams_per_base_unit == 0 && definition.volume_cm3_per_base_unit == 0;
+        if !dimensions_present && !dimensions_absent {
+            return Err(format!(
+                "commodity logistics dimensions must both be positive or both omitted: {}",
+                definition.id
+            ));
+        }
         let id = definition.id.clone();
         if out.insert(id.clone(), definition).is_some() {
             return Err(format!("duplicate commodity id {id}"));
+        }
+    }
+    Ok(out)
+}
+
+fn collect_routes(
+    definitions: Vec<RouteDefinition>,
+    markets: &BTreeMap<String, MarketDefinition>,
+) -> Result<BTreeMap<String, RouteDefinition>, String> {
+    let mut out = BTreeMap::new();
+    for definition in definitions {
+        validate_provenance(&definition.provenance, &definition.id)?;
+        if definition.from == definition.to
+            || !markets.contains_key(&definition.from)
+            || !markets.contains_key(&definition.to)
+        {
+            return Err(format!("invalid route endpoints for {}", definition.id));
+        }
+        if definition.mode != "sea"
+            || definition.distance_miles <= 0
+            || definition.travel_ticks == 0
+            || !(0..=10_000).contains(&definition.risk_bps)
+            || definition.freight_mcp_per_kg < 0
+            || definition.capacity_kg <= 0
+            || definition.capacity_m3 <= 0
+        {
+            return Err(format!("invalid calibrated route {}", definition.id));
+        }
+        let id = definition.id.clone();
+        if out.insert(id.clone(), definition).is_some() {
+            return Err(format!("duplicate route id {id}"));
         }
     }
     Ok(out)
