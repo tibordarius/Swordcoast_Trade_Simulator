@@ -84,7 +84,7 @@ fn dispatch_removes_origin_stock_and_arrival_changes_destination_later() {
     );
 
     world.run_ticks(1);
-    assert_eq!(world.shipment(shipment.id).unwrap().progress_bps(), 5_000);
+    assert_eq!(world.shipment(shipment.id).unwrap().progress_bps(world.tick()), 5_000);
     assert_eq!(
         world.market("MKT-WD", "CMD-GRAIN").unwrap().on_hand_milli(),
         destination_before
