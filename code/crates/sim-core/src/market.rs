@@ -1,6 +1,7 @@
 use crate::{compute_price, InventoryLedger, PriceState};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct MarketCommodityKey {
     market_id: String,
     commodity_id: String,
@@ -28,7 +29,7 @@ impl MarketCommodityKey {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MarketCommodityState {
     inventory: InventoryLedger,
     reference_price_mcp: i64,

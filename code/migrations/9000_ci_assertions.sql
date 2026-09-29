@@ -27,6 +27,23 @@ BEGIN
   END IF;
 
   IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'snapshot' AND column_name = 'event_sequence'
+  ) THEN
+    RAISE EXCEPTION 'snapshot replay watermark missing';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'branch' AND column_name = 'last_event_sequence'
+  ) OR NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'branch' AND column_name = 'last_event_hash'
+  ) THEN
+    RAISE EXCEPTION 'branch event-log head missing';
+  END IF;
+
+  IF NOT EXISTS (
     SELECT 1 FROM pg_extension WHERE extname = 'postgis'
   ) THEN
     RAISE EXCEPTION 'PostGIS extension not installed';

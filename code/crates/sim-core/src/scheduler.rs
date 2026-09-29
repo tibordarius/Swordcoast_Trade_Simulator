@@ -1,14 +1,15 @@
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct ScheduledEvent {
     pub due_tick: u64,
     pub sequence: u64,
     pub kind: u32,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Scheduler {
     queue: BinaryHeap<Reverse<ScheduledEvent>>,
 }

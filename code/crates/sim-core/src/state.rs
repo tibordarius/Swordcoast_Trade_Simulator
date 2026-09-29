@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     derive_stream_seed, evaluate_executable_opportunity, fnv1a64, stable_sort_deltas,
     CalibratedRoute, CargoProfile, CargoUsage, Delta, ExecutableOpportunity, MarketCommodityKey,
@@ -9,7 +11,7 @@ use crate::{
 
 const TICKS_PER_DAY: u64 = 288;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 struct RouteDayKey {
     route_id: String,
     day_index: u64,
@@ -39,7 +41,7 @@ pub enum TradeDispatchError {
     OpportunityRejected(ExecutableOpportunity),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct WorldState {
     seed: u64,
     clock: SimulationClock,
