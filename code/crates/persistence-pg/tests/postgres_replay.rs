@@ -82,11 +82,15 @@ fn snapshot_restart_replays_later_events_and_detects_tampering() {
     assert_ne!(head_hash, "GENESIS");
 
     let mut raw = Client::connect(&url, NoTls).unwrap();
+    raw.batch_execute("ALTER TABLE input_event_log DISABLE TRIGGER USER;")
+        .unwrap();
     raw.execute(
         "UPDATE input_event_log SET event_hash = 'tampered' WHERE branch_id = $1 AND sequence = 2",
         &[&ids.branch_id],
     )
     .unwrap();
+    raw.batch_execute("ALTER TABLE input_event_log ENABLE TRIGGER USER;")
+        .unwrap();
 
     let error = store.restore_latest(ids, &genesis).unwrap_err();
     assert!(matches!(error, PersistenceError::Integrity(_)));
@@ -120,11 +124,15 @@ fn deleting_tail_event_is_detected_by_branch_head() {
         .unwrap();
 
     let mut raw = Client::connect(&url, NoTls).unwrap();
+    raw.batch_execute("ALTER TABLE input_event_log DISABLE TRIGGER USER;")
+        .unwrap();
     raw.execute(
         "DELETE FROM input_event_log WHERE branch_id = $1 AND sequence = 1",
         &[&ids.branch_id],
     )
     .unwrap();
+    raw.batch_execute("ALTER TABLE input_event_log ENABLE TRIGGER USER;")
+        .unwrap();
 
     let error = store.restore_latest(ids, &genesis).unwrap_err();
     assert!(matches!(error, PersistenceError::Integrity(_)));
