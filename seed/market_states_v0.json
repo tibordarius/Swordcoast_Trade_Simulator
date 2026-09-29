@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "states": [
+    {
+      "market_id": "MKT-WD",
+      "commodity_id": "CMD-GRAIN",
+      "on_hand_milli": 3800000000,
+      "target_reserve_milli": 4000000000,
+      "reference_price_mcp": 2000,
+      "daily_supply_milli": 400000000,
+      "daily_demand_milli": 420000000,
+      "liquidity_tier": 5,
+      "depth_milli": 1600000000,
+      "incoming_committed_milli": 0,
+      "risk_bps": 0
+    },
+    {
+      "market_id": "MKT-WD",
+      "commodity_id": "CMD-TIMBER",
+      "on_hand_milli": 932000000,
+      "target_reserve_milli": 1100000000,
+      "reference_price_mcp": 118000,
+      "daily_supply_milli": 76000000,
+      "daily_demand_milli": 72000000,
+      "liquidity_tier": 4,
+      "depth_milli": 950000000,
+      "incoming_committed_milli": 0,
+      "risk_bps": 0
+    },
+    {
+      "market_id": "MKT-WD",
+      "commodity_id": "CMD-IRON",
+      "on_hand_milli": 1400000000,
+      "target_reserve_milli": 1200000000,
+      "reference_price_mcp": 250000,
+      "daily_supply_milli": 50000000,
+      "daily_demand_milli": 55000000,
+      "liquidity_tier": 4,
+      "depth_milli": 650000000,
+      "incoming_committed_milli": 0,
+      "risk_bps": 0
+    },
+    {
+      "market_id": "MKT-WD",
+      "commodity_id": "CMD-WINE",
+      "on_hand_milli": 445000000,
+      "target_reserve_milli": 500000000,
+      "reference_price_mcp": 175000,
+      "daily_supply_milli": 17000000,
+      "daily_demand_milli": 18000000,
+      "liquidity_tier": 4,
+      "depth_milli": 320000000,
+      "incoming_committed_milli": 0,
+      "risk_bps": 0
+    },
+    {
+      "market_id": "MKT-WD",
+      "commodity_id": "CMD-SPICES",
+      "on_hand_milli": 82000000,
+      "target_reserve_milli": 150000000,
+      "reference_price_mcp": 500000,
+      "daily_supply_milli": 5000000,
+      "daily_demand_milli": 5500000,
+      "liquidity_tier": 3,
+      "depth_milli": 60000000,
+      "incoming_committed_milli": 0,
+      "risk_bps": 0
+    },
+    {
+      "market_id": "MKT-WD",
+      "commodity_id": "CMD-WHALEOIL",
+      "on_hand_milli": 121000000,
+      "target_reserve_milli": 200000000,
+      "reference_price_mcp": 250000,
+      "daily_supply_milli": 6000000,
+      "daily_demand_milli": 7000000,
+      "liquidity_tier": 3,
+      "depth_milli": 125000000,
+      "incoming_committed_milli": 0,
+      "risk_bps": 0
+    }
+  ]
+}

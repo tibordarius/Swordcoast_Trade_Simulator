@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WDEX — Waterdeep Exchange</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">SWORD COAST MARKETS</div>
+      <h1>WDEX <span>Waterdeep Exchange</span></h1>
+    </div>
+    <div class="status">
+      <span class="live-dot" id="liveDot"></span>
+      <span id="connection">CONNECTING</span>
+      <span class="divider"></span>
+      <span>REF SEQ <b id="sequence">—</b></span>
+      <span>ENGINE TICK <b id="tick">—</b></span>
+      <span>HASH <b id="stateHash">—</b></span>
+      <span class="divider"></span>
+      <button data-advance="12">+1h</button>
+      <button data-advance="288">+1d</button>
+      <button data-advance="2880">+10d</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="panel market-panel">
+      <div class="panel-head">
+        <div>
+          <div class="eyebrow">SPOT MARKET · REFERENCE QUOTES</div>
+          <h2>WDEX Commodities</h2>
+        </div>
+        <div class="search"><input id="search" placeholder="Filter symbols or commodities" /></div>
+      </div>
+      <table>
+        <thead><tr><th>Instrument</th><th>Bid</th><th>Ask</th><th>Change</th><th>Stock</th><th>Days cover</th></tr></thead>
+        <tbody id="marketRows"></tbody>
+      </table>
+    </section>
+
+    <aside class="panel detail-panel">
+      <div class="eyebrow">INSTRUMENT</div>
+      <h2 id="detailSymbol">WD-GRAIN</h2>
+      <div id="detailName" class="muted">Grain</div>
+      <div class="quote-grid">
+        <div><span>Bid</span><strong id="detailBid">—</strong></div>
+        <div><span>Ask</span><strong id="detailAsk">—</strong></div>
+      </div>
+      <div class="metric"><span>Available stock</span><b id="detailStock">—</b></div>
+      <div class="metric"><span>Target reserve</span><b id="detailReserve">—</b></div>
+      <div class="metric"><span>Days of cover</span><b id="detailCover">—</b></div>
+      <div class="metric"><span>Daily market volume</span><b id="detailVolume">—</b></div>
+
+      <div class="ticket">
+        <div class="ticket-tabs">
+          <button data-side="buy" class="active">BUY</button>
+          <button data-side="sell">SELL</button>
+        </div>
+        <label>Quantity <span id="unitLabel">units</span></label>
+        <input id="quantity" type="number" min="0.001" step="0.001" value="100000" />
+        <div class="preview"><span>Est. average</span><b id="previewPrice">—</b></div>
+        <div class="preview"><span>Market impact</span><b id="previewImpact">—</b></div>
+        <div class="preview total"><span>Notional</span><b id="previewNotional">—</b></div>
+        <button id="submitOrder" class="primary">Preview order only</button>
+        <p class="fine">Quotes are reference fixtures. Engine clock and world hash are live.</p>
+      </div>
+    </aside>
+
+    <section class="panel lower-panel">
+      <div><div class="eyebrow">MARKET INTELLIGENCE</div><h2>Why is this moving?</h2></div>
+      <div class="drivers">
+        <div><span>Inventory below reserve</span><b>+8.1%</b></div>
+        <div><span>Southern imports delayed</span><b>+4.2%</b></div>
+        <div><span>Naval procurement</span><b>+1.8%</b></div>
+        <div><span>Known incoming cargo</span><b class="negative">−0.6%</b></div>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: code
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Format bootstrap checkout
+        run: cargo fmt --all
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --workspace --all-targets
+
+  web-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: WDEX fixed-point and slippage tests
+        run: node --test code/web/wdex/market.test.mjs
+      - name: Validate WDEX fixture JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('code/web/wdex/mock-snapshot.json','utf8')); console.log('WDEX fixture: PASS')"
+
+  seed-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate seed data
+        run: python tools/validate_seed.py
+
+  duckdb-analytics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install DuckDB
+        run: python -m pip install --disable-pip-version-check 'duckdb>=1.4,<2'
+      - name: Parquet and analytical gate
+        run: python tools/sprint15_duckdb_gate.py
+
+  postgres-schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:18-3.6
+        env:
+          POSTGRES_USER: wdex
+          POSTGRES_PASSWORD: wdex_ci
+          POSTGRES_DB: wdex
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U wdex -d wdex"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      PGPASSWORD: wdex_ci
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure migrations are present
+        run: test -e code/migrations/0001_core.sql
+      - name: Apply migrations
+        run: |
+          for migration in code/migrations/0*.sql; do
+            echo "Applying $migration"
+            psql -h localhost -U wdex -d wdex -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Schema assertions
+        run: psql -h localhost -U wdex -d wdex -v ON_ERROR_STOP=1 -f code/migrations/9000_ci_assertions.sql
