@@ -1,4 +1,4 @@
-use crate::{compute_price, market_buy, market_sell, BPS};
+use crate::{compute_price, market_buy, market_sell, CalibratedRoute, CargoProfile, PriceState, BPS};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MarketView {
@@ -89,6 +89,79 @@ pub fn evaluate_opportunity(
         purchase_mcp: buy.total_mcp,
         expected_revenue_mcp: sell.total_mcp,
         transport_mcp: transport,
+        expected_loss_mcp: expected_loss,
+        expected_profit_mcp: profit,
+        roi_bps,
+        accepted,
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ExecutableOpportunity {
+    pub quantity_milli: i64,
+    pub purchase_mcp: i64,
+    pub expected_revenue_mcp: i64,
+    pub freight_mcp: i64,
+    pub expected_loss_mcp: i64,
+    pub expected_profit_mcp: i64,
+    pub roi_bps: i64,
+    pub accepted: bool,
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn evaluate_executable_opportunity(
+    origin_quote: PriceState,
+    origin_depth_milli: i64,
+    destination_quote: PriceState,
+    destination_depth_milli: i64,
+    route: &CalibratedRoute,
+    cargo: CargoProfile,
+    quantity_milli: i64,
+    capital_mcp: i64,
+    min_roi_bps: i64,
+) -> ExecutableOpportunity {
+    if quantity_milli <= 0 || origin_depth_milli <= 0 || destination_depth_milli <= 0 {
+        return ExecutableOpportunity {
+            quantity_milli,
+            purchase_mcp: 0,
+            expected_revenue_mcp: 0,
+            freight_mcp: 0,
+            expected_loss_mcp: 0,
+            expected_profit_mcp: i64::MIN / 4,
+            roi_bps: i64::MIN / 4,
+            accepted: false,
+        };
+    }
+
+    let buy = market_buy(quantity_milli, origin_quote.ask_mcp, origin_depth_milli);
+    let sell = market_sell(
+        quantity_milli,
+        destination_quote.bid_mcp,
+        destination_depth_milli,
+    );
+    let freight = route.freight_cost_mcp(quantity_milli, cargo);
+    let expected_loss = (buy.total_mcp * route.risk_bps) / BPS;
+    let deployed = buy
+        .total_mcp
+        .checked_add(freight)
+        .expect("merchant deployed capital overflow");
+    let profit = sell.total_mcp - buy.total_mcp - freight - expected_loss;
+    let roi_bps = if deployed > 0 {
+        (profit * BPS) / deployed
+    } else {
+        i64::MIN / 2
+    };
+    let accepted = route.accepts_quantity(quantity_milli, cargo)
+        && deployed <= capital_mcp
+        && profit > 0
+        && roi_bps >= min_roi_bps;
+
+    ExecutableOpportunity {
+        quantity_milli,
+        purchase_mcp: buy.total_mcp,
+        expected_revenue_mcp: sell.total_mcp,
+        freight_mcp: freight,
         expected_loss_mcp: expected_loss,
         expected_profit_mcp: profit,
         roi_bps,
