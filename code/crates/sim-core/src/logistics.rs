@@ -1,9 +1,10 @@
 use crate::InventoryLedger;
+use serde::{Deserialize, Serialize};
 
 pub const MILLI_BASE_UNIT: i64 = 1_000;
 pub const PROGRESS_BPS_MAX: i64 = 10_000;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Route {
     pub travel_ticks: u64,
     pub capacity_per_day: i64,
@@ -23,7 +24,7 @@ impl Route {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ShipmentStatus {
     Reserved,
     InTransit,
@@ -31,7 +32,7 @@ pub enum ShipmentStatus {
     Lost,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Shipment {
     pub id: u64,
     pub quantity: i64,
@@ -98,7 +99,7 @@ impl Shipment {
 }
 
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CargoProfile {
     pub mass_grams_per_base_unit: i64,
     pub volume_cm3_per_base_unit: i64,
@@ -131,7 +132,7 @@ impl CargoProfile {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CargoUsage {
     pub mass_grams: i64,
     pub volume_cm3: i64,
@@ -152,7 +153,7 @@ impl CargoUsage {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CalibratedRoute {
     pub id: String,
     pub from_market: String,
@@ -225,7 +226,7 @@ impl CalibratedRoute {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TradeShipment {
     pub id: u64,
     pub route_id: String,
