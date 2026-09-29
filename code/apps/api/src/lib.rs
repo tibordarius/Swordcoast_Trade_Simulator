@@ -11,9 +11,14 @@ use axum::{
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
-use sim_core::{StableStateHash, WorldState};
+use sim_core::{
+    MarketCommodityKey, MarketCommodityState, StableStateHash, WorldState,
+};
 use tokio::sync::{broadcast, Mutex};
 use tower_http::cors::CorsLayer;
+
+const WDEX_MARKET: &str = "MKT-WD";
+const GRAIN: &str = "CMD-GRAIN";
 
 #[derive(Clone)]
 pub struct AppState {
@@ -25,9 +30,25 @@ pub struct AppState {
 impl AppState {
     pub fn new(world_id: impl Into<Arc<str>>, seed: u64) -> Self {
         let (updates, _) = broadcast::channel(64);
+        let mut world = WorldState::new(seed);
+        world.insert_market(
+            MarketCommodityKey::new(WDEX_MARKET, GRAIN),
+            MarketCommodityState::new(
+                3_800_000_000,
+                4_000_000_000,
+                2_000,
+                400_000_000,
+                420_000_000,
+                5,
+                1_600_000_000,
+                0,
+                0,
+            ),
+        );
+
         Self {
             world_id: world_id.into(),
-            world: Arc::new(Mutex::new(WorldState::new(seed))),
+            world: Arc::new(Mutex::new(world)),
             updates,
         }
     }
@@ -51,6 +72,30 @@ pub struct WorldStatus {
     pub state_hash: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarketCommoditySnapshot {
+    pub commodity_id: String,
+    pub bid_mcp: String,
+    pub ask_mcp: String,
+    pub fundamental_mcp: String,
+    pub on_hand_milli: String,
+    pub target_reserve_milli: String,
+    pub daily_supply_milli: String,
+    pub daily_demand_milli: String,
+    pub depth_milli: String,
+    pub volume_milli: String,
+    pub recent_unmet_milli: String,
+    pub liquidity_tier: u8,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MarketSnapshot {
+    pub world_id: String,
+    pub tick: String,
+    pub market_id: String,
+    pub commodities: Vec<MarketCommoditySnapshot>,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct AdvanceRequest {
     pub ticks: String,
@@ -69,6 +114,7 @@ pub fn build_router(state: AppState) -> Router {
         .route("/health", get(health))
         .route("/v1/worlds/{world_id}/status", get(status))
         .route("/v1/worlds/{world_id}/advance", post(advance))
+        .route("/v1/markets/{market_id}/snapshot", get(market_snapshot))
         .route("/v1/live/{world_id}", get(live))
         .layer(CorsLayer::permissive())
         .with_state(state)
@@ -110,6 +156,53 @@ async fn advance(
 
     let _ = state.updates.send(status.clone());
     Ok(Json(status))
+}
+
+async fn market_snapshot(
+    State(state): State<AppState>,
+    Path(market_id): Path<String>,
+) -> ApiResult<MarketSnapshot> {
+    if market_id != WDEX_MARKET {
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiError {
+                code: "market_not_found",
+                message: format!("unknown market: {market_id}"),
+            }),
+        ));
+    }
+
+    let world = state.world.lock().await;
+    let grain = world.market(WDEX_MARKET, GRAIN).ok_or_else(|| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiError {
+                code: "market_state_missing",
+                message: "WDEX grain state is not initialized".to_string(),
+            }),
+        )
+    })?;
+    let quote = grain.quote();
+
+    Ok(Json(MarketSnapshot {
+        world_id: state.world_id.to_string(),
+        tick: world.tick().to_string(),
+        market_id,
+        commodities: vec![MarketCommoditySnapshot {
+            commodity_id: GRAIN.to_string(),
+            bid_mcp: quote.bid_mcp.to_string(),
+            ask_mcp: quote.ask_mcp.to_string(),
+            fundamental_mcp: quote.fundamental_mcp.to_string(),
+            on_hand_milli: grain.on_hand_milli().to_string(),
+            target_reserve_milli: grain.target_reserve_milli().to_string(),
+            daily_supply_milli: grain.daily_supply_milli().to_string(),
+            daily_demand_milli: grain.daily_demand_milli().to_string(),
+            depth_milli: grain.depth_milli().to_string(),
+            volume_milli: grain.volume_milli().to_string(),
+            recent_unmet_milli: grain.recent_unmet_milli().to_string(),
+            liquidity_tier: grain.liquidity_tier(),
+        }],
+    }))
 }
 
 async fn live(
