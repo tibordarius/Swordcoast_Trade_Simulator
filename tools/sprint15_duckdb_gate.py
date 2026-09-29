@@ -24,7 +24,9 @@ def main():
               ('WORLD','MAIN',t,'WDEX','GRAIN',wd-4,wd+4,wd,1000+t*10,1_000_000,0,0),
               ('WORLD','MAIN',t,'BGEX','GRAIN',bg-4,bg+4,bg,800+t*7,1_000_000,0,0)]
         con.executemany('INSERT INTO market_tick_source VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',rows)
-        target=(root/'history'/'market_ticks').as_posix()
+        target_dir=root/'history'/'market_ticks'
+        target_dir.parent.mkdir(parents=True, exist_ok=True)
+        target=target_dir.as_posix()
         con.execute(f'''COPY (
           SELECT *, floor(tick/105120)::BIGINT AS sim_year
           FROM market_tick_source ORDER BY market_id, commodity_id, tick
