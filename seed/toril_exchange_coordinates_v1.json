@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "coordinate_system": {
+    "name": "Toril GCS",
+    "storage_prime_meridian": "FRIA",
+    "display_prime_meridian": "Myth Drannor",
+    "ellipsoid_a_m": 6410000,
+    "ellipsoid_b_m": 6370000,
+    "inverse_flattening": 160.25,
+    "myth_drannor_prime_meridian_fria_deg": -53.48150148799
+  },
+  "upstream": {
+    "repository": "geospatial-grimoire/toril-gis",
+    "commit": "8f9bffae356ec32ec6f76ce788abf700d6e56c3b",
+    "export_batch": "2026-07-30_1",
+    "surface_places_layer": "srf_civ_populated_places_pt",
+    "svg_world_bounds": [-180, -90, 180, 90]
+  },
+  "exchanges": [
+    {"market_id":"MKT-WD","code":"WDEX","name":"Waterdeep","lat":45.200070,"lon_fria":-73.632600,"lon_md":-20.151099,"status":"toril_gis_exact","toril_gis_uuid":"e37dd71f-f84a-4ba1-a21c-2c98f6ad3cc2","svg_xy":[1181.860,497.777],"uncertainty_km":1},
+    {"market_id":"MKT-BG","code":"BGEX","name":"Baldur's Gate","lat":37.675530,"lon_fria":-70.285140,"lon_md":-16.803639,"status":"toril_gis_exact","toril_gis_uuid":"0543bb91-3dd2-43f0-aea9-889787538ad4","svg_xy":[1219.054,581.383],"uncertainty_km":1},
+    {"market_id":"MKT-CAL","code":"CALEX","name":"Calimport","lat":24.160140,"lon_fria":-68.695200,"lon_md":-15.213699,"status":"toril_gis_exact","toril_gis_uuid":"4e293219-962f-40d9-b0ba-b11fe3bf9923","svg_xy":[1236.720,731.554],"uncertainty_km":1},
+    {"market_id":"MKT-NW","code":"NWEX","name":"Neverwinter","lat":49.305960,"lon_fria":-75.914910,"lon_md":-22.433409,"status":"toril_gis_exact","toril_gis_uuid":"7e243b80-8918-42fa-b60e-03cec8bdb184","svg_xy":[1156.501,452.156],"uncertainty_km":1},
+    {"market_id":"MKT-LUS","code":"LUSEX","name":"Luskan","lat":51.344190,"lon_fria":-76.366620,"lon_md":-22.885119,"status":"toril_gis_exact","toril_gis_uuid":"cbe600f2-1f0f-4599-8c6f-436645c9bcac","svg_xy":[1151.482,429.509],"uncertainty_km":1},
+    {"market_id":"MKT-ATH","code":"ATHEX","name":"Athkatla","lat":33.443577,"lon_fria":-70.749394,"lon_md":-17.267892,"status":"provisional_secondary_affine","toril_gis_uuid":null,"svg_xy":null,"uncertainty_km":30,"derivation":{"secondary_source":"BeauNouvelle/toril-geojson cities.geojson","secondary_coordinate":[-70.50259876224578,23.98776578069659],"fit_anchors":["Waterdeep","Neverwinter","Luskan","Baldur's Gate","Murann"],"max_anchor_residual_deg":0.203,"note":"Temporary mapping coordinate only. Replace when Toril GIS publishes or identifies Athkatla."}}
+  ]
+}

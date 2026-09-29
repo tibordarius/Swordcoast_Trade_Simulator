@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "coordinate_system": "Toril GCS / FRIA",
+  "upstream": {
+    "repository": "geospatial-grimoire/toril-gis",
+    "commit": "8f9bffae356ec32ec6f76ce788abf700d6e56c3b",
+    "export_batch": "2026-07-30_1",
+    "surface_places_layer": "srf_civ_populated_places_pt",
+    "svg_world_bounds": [
+      -180,
+      -90,
+      180,
+      90
+    ]
+  },
+  "routes": [
+    {
+      "id": "SEA-CAL-ATH",
+      "from": "MKT-CAL",
+      "to": "MKT-ATH",
+      "mode": "sea",
+      "bidirectional": true,
+      "geometry_status": "direct_geodesic_with_provisional_endpoint",
+      "coordinate_uncertainty_km": 30,
+      "distance_m": 1049625,
+      "coordinates_fria": [
+        [
+          -68.6952,
+          24.16014
+        ],
+        [
+          -70.749394,
+          33.443577
+        ]
+      ],
+      "note": "Straight geodesic placeholder. Replace with navigable sea-lane polyline before route distance becomes authoritative for freight/travel."
+    },
+    {
+      "id": "SEA-ATH-BG",
+      "from": "MKT-ATH",
+      "to": "MKT-BG",
+      "mode": "sea",
+      "bidirectional": true,
+      "geometry_status": "direct_geodesic_with_provisional_endpoint",
+      "coordinate_uncertainty_km": 30,
+      "distance_m": 472429,
+      "coordinates_fria": [
+        [
+          -70.749394,
+          33.443577
+        ],
+        [
+          -70.28514,
+          37.67553
+        ]
+      ],
+      "note": "Straight geodesic placeholder. Replace with navigable sea-lane polyline before route distance becomes authoritative for freight/travel."
+    },
+    {
+      "id": "SEA-BG-WD",
+      "from": "MKT-BG",
+      "to": "MKT-WD",
+      "mode": "sea",
+      "bidirectional": true,
+      "geometry_status": "direct_geodesic_exact_endpoints",
+      "coordinate_uncertainty_km": 1,
+      "distance_m": 883977,
+      "coordinates_fria": [
+        [
+          -70.28514,
+          37.67553
+        ],
+        [
+          -73.6326,
+          45.20007
+        ]
+      ],
+      "note": "Straight geodesic placeholder. Replace with navigable sea-lane polyline before route distance becomes authoritative for freight/travel."
+    },
+    {
+      "id": "SEA-WD-NW",
+      "from": "MKT-WD",
+      "to": "MKT-NW",
+      "mode": "sea",
+      "bidirectional": true,
+      "geometry_status": "direct_geodesic_exact_endpoints",
+      "coordinate_uncertainty_km": 1,
+      "distance_m": 490062,
+      "coordinates_fria": [
+        [
+          -73.6326,
+          45.20007
+        ],
+        [
+          -75.91491,
+          49.30596
+        ]
+      ],
+      "note": "Straight geodesic placeholder. Replace with navigable sea-lane polyline before route distance becomes authoritative for freight/travel."
+    },
+    {
+      "id": "SEA-NW-LUS",
+      "from": "MKT-NW",
+      "to": "MKT-LUS",
+      "mode": "sea",
+      "bidirectional": true,
+      "geometry_status": "direct_geodesic_exact_endpoints",
+      "coordinate_uncertainty_km": 1,
+      "distance_m": 229994,
+      "coordinates_fria": [
+        [
+          -75.91491,
+          49.30596
+        ],
+        [
+          -76.36662,
+          51.34419
+        ]
+      ],
+      "note": "Straight geodesic placeholder. Replace with navigable sea-lane polyline before route distance becomes authoritative for freight/travel."
+    },
+    {
+      "id": "SEA-ATH-WD",
+      "from": "MKT-ATH",
+      "to": "MKT-WD",
+      "mode": "sea",
+      "bidirectional": true,
+      "geometry_status": "direct_geodesic_with_provisional_endpoint",
+      "coordinate_uncertainty_km": 30,
+      "distance_m": 1332156,
+      "coordinates_fria": [
+        [
+          -70.749394,
+          33.443577
+        ],
+        [
+          -73.6326,
+          45.20007
+        ]
+      ],
+      "note": "Straight geodesic placeholder. Replace with navigable sea-lane polyline before route distance becomes authoritative for freight/travel."
+    },
+    {
+      "id": "SEA-BG-NW",
+      "from": "MKT-BG",
+      "to": "MKT-NW",
+      "mode": "sea",
+      "bidirectional": true,
+      "geometry_status": "direct_geodesic_exact_endpoints",
+      "coordinate_uncertainty_km": 1,
+      "distance_m": 1374036,
+      "coordinates_fria": [
+        [
+          -70.28514,
+          37.67553
+        ],
+        [
+          -75.91491,
+          49.30596
+        ]
+      ],
+      "note": "Straight geodesic placeholder. Replace with navigable sea-lane polyline before route distance becomes authoritative for freight/travel."
+    },
+    {
+      "id": "SEA-WD-LUS",
+      "from": "MKT-WD",
+      "to": "MKT-LUS",
+      "mode": "sea",
+      "bidirectional": true,
+      "geometry_status": "direct_geodesic_exact_endpoints",
+      "coordinate_uncertainty_km": 1,
+      "distance_m": 715581,
+      "coordinates_fria": [
+        [
+          -73.6326,
+          45.20007
+        ],
+        [
+          -76.36662,
+          51.34419
+        ]
+      ],
+      "note": "Straight geodesic placeholder. Replace with navigable sea-lane polyline before route distance becomes authoritative for freight/travel."
+    }
+  ]
+}

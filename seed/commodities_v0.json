@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "commodities": [
+    {"id":"CMD-GRAIN","name":"Grain","base_unit":"kg","quantity_scale":1000,"family":"food","perishability":"medium","fungibility":"full","reference_price_cp":2,"reference_price_status":"calibration_example"},
+    {"id":"CMD-FISH","name":"Fresh Fish","base_unit":"kg","quantity_scale":1000,"family":"food","perishability":"high","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-SALTFISH","name":"Salted Fish","base_unit":"kg","quantity_scale":1000,"family":"food","perishability":"low","fungibility":"full","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-LIVESTOCK","name":"Livestock","base_unit":"head_equivalent","quantity_scale":1000,"family":"food","perishability":"special","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-SALT","name":"Salt","base_unit":"kg","quantity_scale":1000,"family":"food_input","perishability":"none","fungibility":"full","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-TIMBER","name":"Timber","base_unit":"m3","quantity_scale":1000,"family":"raw","perishability":"none","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-SHIPTIMBER","name":"Ship Timber","base_unit":"m3","quantity_scale":1000,"family":"strategic","perishability":"none","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-IRONORE","name":"Iron Ore","base_unit":"kg","quantity_scale":1000,"family":"raw","perishability":"none","fungibility":"full","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-IRON","name":"Iron Ingots","base_unit":"kg","quantity_scale":1000,"family":"industrial","perishability":"none","fungibility":"full","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-HIDES","name":"Raw Hides","base_unit":"kg","quantity_scale":1000,"family":"raw","perishability":"medium","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-WOOL","name":"Wool","base_unit":"kg","quantity_scale":1000,"family":"raw","perishability":"low","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-CLOTH","name":"Cloth","base_unit":"bolt","quantity_scale":1000,"family":"manufactured","perishability":"none","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-ROPE","name":"Rope","base_unit":"coil_equivalent","quantity_scale":1000,"family":"manufactured","perishability":"none","fungibility":"full","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-POTTERY","name":"Pottery","base_unit":"crate","quantity_scale":1000,"family":"manufactured","perishability":"none","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-TOOLS","name":"Tools","base_unit":"crate","quantity_scale":1000,"family":"manufactured","perishability":"none","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-WEAPONS","name":"Weapons","base_unit":"item_equivalent","quantity_scale":1000,"family":"strategic","perishability":"none","fungibility":"quality_sensitive","reference_price_cp":5000,"reference_price_status":"campaign_seed"},
+    {"id":"CMD-ARMOR","name":"Armor","base_unit":"item_equivalent","quantity_scale":1000,"family":"strategic","perishability":"none","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-ALE","name":"Ale","base_unit":"litre","quantity_scale":1000,"family":"consumable","perishability":"low","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-WINE","name":"Wine","base_unit":"litre","quantity_scale":1000,"family":"luxury","perishability":"quality_ageing","fungibility":"provenance_sensitive","reference_price_cp":null,"reference_price_status":"source_requires_unit_conversion"},
+    {"id":"CMD-SPICES","name":"Spices","base_unit":"kg","quantity_scale":1000,"family":"luxury","perishability":"low","fungibility":"quality_sensitive","reference_price_cp":null,"reference_price_status":"source_requires_lb_to_kg_conversion"},
+    {"id":"CMD-SILK","name":"Silk","base_unit":"bolt","quantity_scale":1000,"family":"luxury","perishability":"none","fungibility":"quality_sensitive","reference_price_cp":2000,"reference_price_status":"campaign_seed"},
+    {"id":"CMD-GEMS","name":"Gems","base_unit":"parcel","quantity_scale":1000,"family":"luxury","perishability":"none","fungibility":"provenance_sensitive","reference_price_cp":50000,"reference_price_status":"campaign_seed_average"},
+    {"id":"CMD-WHALEOIL","name":"Whale Oil","base_unit":"litre","quantity_scale":1000,"family":"maritime_luxury","perishability":"low","fungibility":"provenance_sensitive","reference_price_cp":null,"reference_price_status":"unset"},
+    {"id":"CMD-ALCHEMY","name":"Alchemical Reagents","base_unit":"crate","quantity_scale":1000,"family":"specialist","perishability":"variable","fungibility":"provenance_sensitive","reference_price_cp":null,"reference_price_status":"unset"}
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"WDEX world event proposal",
+  "type":"object",
+  "required":["event_id","event_type","start_tick","scope","modifiers","visibility"],
+  "properties":{
+    "event_id":{"type":"string","minLength":1},
+    "event_type":{"enum":["route_disruption","production_shock","demand_shock","tax_change","weather","military_requisition","port_disruption","custom_modifier"]},
+    "start_tick":{"type":"string","pattern":"^[0-9]+$"},
+    "duration_ticks":{"type":["string","null"],"pattern":"^[0-9]+$"},
+    "scope":{"type":"object"},
+    "modifiers":{"type":"array","minItems":1},
+    "visibility":{"enum":["public","rumor","dm_only"]},
+    "source_note":{"type":["string","null"]}
+  }
+}
