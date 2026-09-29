@@ -54,6 +54,29 @@ async fn world_advance_is_serial_and_exact() {
 }
 
 #[tokio::test]
+async fn advance_publishes_a_live_update() {
+    let state = AppState::new(WORLD, 12_345);
+    let mut updates = state.subscribe();
+    let app = build_router(state);
+
+    let response = app
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri(format!("/v1/worlds/{WORLD}/advance"))
+                .header("content-type", "application/json")
+                .body(Body::from(r#"{"ticks":"12"}"#))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let update = updates.recv().await.unwrap();
+    assert_eq!(update.tick, "12");
+}
+
+#[tokio::test]
 async fn invalid_tick_string_is_rejected() {
     let app = build_router(AppState::new(WORLD, 12_345));
     let response = app
