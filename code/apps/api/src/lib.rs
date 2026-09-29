@@ -1,27 +1,39 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::{Path, State},
+    extract::{
+        ws::{Message, WebSocket, WebSocketUpgrade},
+        Path, State,
+    },
     http::StatusCode,
+    response::Response,
     routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use sim_core::{StableStateHash, WorldState};
-use tokio::sync::Mutex;
+use tokio::sync::{broadcast, Mutex};
+use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
 pub struct AppState {
     world_id: Arc<str>,
     world: Arc<Mutex<WorldState>>,
+    updates: broadcast::Sender<WorldStatus>,
 }
 
 impl AppState {
     pub fn new(world_id: impl Into<Arc<str>>, seed: u64) -> Self {
+        let (updates, _) = broadcast::channel(64);
         Self {
             world_id: world_id.into(),
             world: Arc::new(Mutex::new(WorldState::new(seed))),
+            updates,
         }
+    }
+
+    pub fn subscribe(&self) -> broadcast::Receiver<WorldStatus> {
+        self.updates.subscribe()
     }
 }
 
@@ -30,7 +42,7 @@ pub struct HealthResponse {
     status: &'static str,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WorldStatus {
     pub world_id: String,
     pub seed: String,
@@ -57,6 +69,8 @@ pub fn build_router(state: AppState) -> Router {
         .route("/health", get(health))
         .route("/v1/worlds/{world_id}/status", get(status))
         .route("/v1/worlds/{world_id}/advance", post(advance))
+        .route("/v1/live/{world_id}", get(live))
+        .layer(CorsLayer::permissive())
         .with_state(state)
 }
 
@@ -91,7 +105,52 @@ async fn advance(
 
     let mut world = state.world.lock().await;
     world.run_ticks(ticks);
-    Ok(Json(status_from_world(&state, &world)))
+    let status = status_from_world(&state, &world);
+    drop(world);
+
+    let _ = state.updates.send(status.clone());
+    Ok(Json(status))
+}
+
+async fn live(
+    ws: WebSocketUpgrade,
+    State(state): State<AppState>,
+    Path(world_id): Path<String>,
+) -> Result<Response, (StatusCode, Json<ApiError>)> {
+    ensure_world(&state, &world_id)?;
+    Ok(ws.on_upgrade(move |socket| live_socket(socket, state)))
+}
+
+async fn live_socket(mut socket: WebSocket, state: AppState) {
+    let initial = {
+        let world = state.world.lock().await;
+        status_from_world(&state, &world)
+    };
+
+    if send_status(&mut socket, &initial).await.is_err() {
+        return;
+    }
+
+    let mut updates = state.subscribe();
+    loop {
+        match updates.recv().await {
+            Ok(status) => {
+                if send_status(&mut socket, &status).await.is_err() {
+                    break;
+                }
+            }
+            Err(broadcast::error::RecvError::Lagged(_)) => continue,
+            Err(broadcast::error::RecvError::Closed) => break,
+        }
+    }
+}
+
+async fn send_status(
+    socket: &mut WebSocket,
+    status: &WorldStatus,
+) -> Result<(), axum::Error> {
+    let payload = serde_json::to_string(status).expect("world status serializes");
+    socket.send(Message::Text(payload.into())).await
 }
 
 fn ensure_world(state: &AppState, requested: &str) -> Result<(), (StatusCode, Json<ApiError>)> {
