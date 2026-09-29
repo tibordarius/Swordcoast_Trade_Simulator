@@ -186,10 +186,10 @@ impl SeedBundle {
         &self.market_states
     }
 
-    pub fn states_for_market(
-        &self,
-        market_id: &str,
-    ) -> impl Iterator<Item = &MarketStateSeed> {
+    pub fn states_for_market<'a>(
+        &'a self,
+        market_id: &'a str,
+    ) -> impl Iterator<Item = &'a MarketStateSeed> + 'a {
         self.market_states
             .iter()
             .filter(move |state| state.market_id == market_id)
