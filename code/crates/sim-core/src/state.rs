@@ -44,10 +44,21 @@ impl WorldState {
         world
     }
 
-    pub fn seed(&self) -> u64 { self.seed }
-    pub fn tick(&self) -> u64 { self.clock.tick() }
-    pub fn production_signal(&self) -> i64 { self.production_signal }
-    pub fn next_sequence(&self) -> u64 { self.next_sequence }
+    pub fn seed(&self) -> u64 {
+        self.seed
+    }
+
+    pub fn tick(&self) -> u64 {
+        self.clock.tick()
+    }
+
+    pub fn production_signal(&self) -> i64 {
+        self.production_signal
+    }
+
+    pub fn next_sequence(&self) -> u64 {
+        self.next_sequence
+    }
 
     pub fn draw_from_stream(&mut self, namespace: &str) -> u64 {
         self.streams
@@ -56,7 +67,7 @@ impl WorldState {
             .next_u64()
     }
 
-    fn next_sequence(&mut self) -> u64 {
+    fn allocate_sequence(&mut self) -> u64 {
         let sequence = self.next_sequence;
         self.next_sequence = self
             .next_sequence
@@ -68,7 +79,7 @@ impl WorldState {
     fn schedule(&mut self, due_tick: u64, kind: u32) {
         let event = ScheduledEvent {
             due_tick,
-            sequence: self.next_sequence(),
+            sequence: self.allocate_sequence(),
             kind,
         };
         self.scheduler.push(event);
@@ -79,7 +90,7 @@ impl WorldState {
             priority,
             entity_id,
             kind,
-            sequence: self.next_sequence(),
+            sequence: self.allocate_sequence(),
             amount,
         };
         self.deltas.push(delta);
