@@ -8,10 +8,18 @@ pub struct ScheduledEvent {
     pub kind: u32,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default)]
 pub struct Scheduler {
     queue: BinaryHeap<Reverse<ScheduledEvent>>,
 }
+
+impl PartialEq for Scheduler {
+    fn eq(&self, other: &Self) -> bool {
+        self.sorted_events() == other.sorted_events()
+    }
+}
+
+impl Eq for Scheduler {}
 
 impl Scheduler {
     pub fn push(&mut self, event: ScheduledEvent) {
