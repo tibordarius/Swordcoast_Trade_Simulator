@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use sim_core::{
-    decode_world_snapshot, encode_world_snapshot, StableStateHash, WorldState,
+    decode_world_snapshot, encode_world_snapshot, WorldState,
     SNAPSHOT_STATE_FORMAT,
 };
 use thiserror::Error;
