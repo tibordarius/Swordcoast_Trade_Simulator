@@ -417,7 +417,6 @@ impl StableStateHash for WorldState {
         bytes.extend_from_slice(&self.seed.to_le_bytes());
         bytes.extend_from_slice(&self.production_signal.to_le_bytes());
         bytes.extend_from_slice(&self.next_sequence.to_le_bytes());
-        bytes.extend_from_slice(&self.next_shipment_id.to_le_bytes());
 
         for (namespace, stream) in &self.streams {
             append_string(&mut bytes, namespace);
@@ -433,6 +432,15 @@ impl StableStateHash for WorldState {
         for (key, market) in &self.markets {
             key.append_stable_bytes(&mut bytes);
             market.append_stable_bytes(&mut bytes);
+        }
+
+        let has_trade_state = !self.cargo_profiles.is_empty()
+            || !self.routes.is_empty()
+            || !self.route_day_usage.is_empty()
+            || !self.shipments.is_empty()
+            || self.next_shipment_id != 1;
+        if has_trade_state {
+            bytes.extend_from_slice(&self.next_shipment_id.to_le_bytes());
         }
 
         for (commodity_id, profile) in &self.cargo_profiles {
