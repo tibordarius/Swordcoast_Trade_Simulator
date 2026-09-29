@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "routes": [
+    {"id":"SEA-CAL-ATH","from":"MKT-CAL","to":"MKT-ATH","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
+    {"id":"SEA-ATH-BG","from":"MKT-ATH","to":"MKT-BG","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
+    {"id":"SEA-BG-WD","from":"MKT-BG","to":"MKT-WD","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
+    {"id":"SEA-WD-NW","from":"MKT-WD","to":"MKT-NW","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
+    {"id":"SEA-NW-LUS","from":"MKT-NW","to":"MKT-LUS","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"campaign_canon"},
+    {"id":"SEA-ATH-WD","from":"MKT-ATH","to":"MKT-WD","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"inference"},
+    {"id":"SEA-BG-NW","from":"MKT-BG","to":"MKT-NW","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"inference"},
+    {"id":"SEA-WD-LUS","from":"MKT-WD","to":"MKT-LUS","mode":"sea","bidirectional":true,"distance_status":"uncalibrated","base_days":null,"risk_status":"uncalibrated","provenance":"inference"}
+  ],
+  "production_nodes": [
+    {"id":"NODE-AMN-AGRI","name":"Amnian Agricultural Hinterland","feeds":"MKT-ATH","mode":"regional_abstraction","provenance":"inference"},
+    {"id":"NODE-CHIONTHAR","name":"Chionthar Hinterland","feeds":"MKT-BG","mode":"river_overland_abstraction","provenance":"inference"},
+    {"id":"NODE-NW-TIMBER","name":"Neverwinter Timber Hinterland","feeds":"MKT-NW","mode":"regional_abstraction","provenance":"inference"},
+    {"id":"NODE-NORTH-MINERAL","name":"Northern Mineral Hinterland","feeds":"MKT-LUS","mode":"regional_abstraction","provenance":"inference"}
+  ]
+}

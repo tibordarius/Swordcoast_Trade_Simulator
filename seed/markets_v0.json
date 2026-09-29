@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "markets": [
+    {"id":"MKT-WD","name":"Waterdeep","exchange":"WDEX","liquidity_tier":5,"role":"central consumption, processing, finance and redistribution hub","provenance":"inference"},
+    {"id":"MKT-BG","name":"Baldur's Gate","exchange":"BGEX","liquidity_tier":4,"role":"river/sea transshipment and warehousing hub","provenance":"campaign_canon"},
+    {"id":"MKT-ATH","name":"Athkatla","exchange":"ATHEX","liquidity_tier":4,"role":"Amnian capital market and agricultural/manufacturing export hub","provenance":"inference"},
+    {"id":"MKT-CAL","name":"Calimport","exchange":"CALEX","liquidity_tier":4,"role":"southern manufacturing, shipbuilding and luxury export hub","provenance":"inference"},
+    {"id":"MKT-NW","name":"Neverwinter","exchange":"NWEX","liquidity_tier":3,"role":"northern crafts, timber access and rebuilding demand hub","provenance":"campaign_canon"},
+    {"id":"MKT-LUS","name":"Luskan","exchange":"LUSEX","liquidity_tier":2,"role":"northern frontier, contraband and resource-route market","provenance":"campaign_canon"}
+  ]
+}
