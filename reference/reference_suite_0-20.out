@@ -1,0 +1,468 @@
+seed validation: PASS
+markets=6 commodities=24 routes=8
+tick_minutes=5 world_seed=12345
+seed=12345 ticks=10000 hash=ea50aa8c6fbd16cb production_signal=-19 next_sequence=1668
+repeat same seed hash=ea50aa8c6fbd16cb
+seed=54321 ticks=10000 hash=5edace93f102180b production_signal=95
+named-stream isolation: PASS
+scheduled-event ordering: PASS
+deterministic delta commit: PASS
+determinism reference: PASS
+normal case:
+  on_hand_mkg=838418883
+  produced_mkg=900000000
+  consumed_mkg=750000000
+  spoiled_mkg=11581117
+  unmet_mkg=0
+shortage case:
+  on_hand_mkg=0
+  produced_mkg=50000000
+  consumed_mkg=99980008
+  spoiled_mkg=19992
+  unmet_mkg=150019992
+conservation-of-goods: PASS
+exact hourly rate distribution: PASS
+unmet demand accounting: PASS
+spoilage hook: PASS
+surplus {'fundamental_mcp': 1000, 'bid_mcp': 996, 'ask_mcp': 1004, 'components': PriceExplanation(reserve_bps=-5000, unmet_bps=0, incoming_bps=0, risk_bps=0, total_multiplier_bps=5000)}
+normal {'fundamental_mcp': 2000, 'bid_mcp': 1992, 'ask_mcp': 2008, 'components': PriceExplanation(reserve_bps=0, unmet_bps=0, incoming_bps=0, risk_bps=0, total_multiplier_bps=10000)}
+shortage {'fundamental_mcp': 3500, 'bid_mcp': 3486, 'ask_mcp': 3514, 'components': PriceExplanation(reserve_bps=7500, unmet_bps=0, incoming_bps=0, risk_bps=0, total_multiplier_bps=17500)}
+severe {'fundamental_mcp': 5260, 'bid_mcp': 5239, 'ask_mcp': 5281, 'components': PriceExplanation(reserve_bps=13927, unmet_bps=2500, incoming_bps=-428, risk_bps=300, total_multiplier_bps=26299)}
+small buy {'average_price_mcp': 2013, 'terminal_impact_bps': 50, 'total_mcp': 20130000}
+large buy {'average_price_mcp': 2058, 'terminal_impact_bps': 500, 'total_mcp': 205800000}
+price monotonicity: PASS
+incoming supply expectation: PASS
+market slippage: PASS
+integer pricing: PASS
+route=SEA-ATH-WD travel_ticks=5184 cost_mcp=31500000
+shipment_eta=105184 progress_final_bps=10000
+reservation/departure accounting: PASS
+derived position: PASS
+arrival idempotency: PASS
+route capacity hook: PASS
+loss state hook: PASS
+forward Opportunity(origin='ATHEX', destination='WDEX', quantity_milli=100000000, purchase_mcp=165500000, expected_revenue_mcp=337800000, transport_mcp=31500000, expected_loss_mcp=1655000, expected_profit_mcp=139145000, roi_bps=7063, accepted=True)
+reverse Opportunity(origin='WDEX', destination='ATHEX', quantity_milli=100000000, purchase_mcp=342300000, expected_revenue_mcp=163100000, transport_mcp=31500000, expected_loss_mcp=3423000, expected_profit_mcp=-214123000, roi_bps=-5729, accepted=False)
+convergence accepted_trades=3 final_attempt_roi_bps=254
+stocks origin=650000000 destination=940000000 capital=799304000
+positive opportunity selection: PASS
+negative reverse trade rejection: PASS
+capital/capacity constraint hooks: PASS
+arbitrage convergence: PASS
+without merchant  Result(wd_stock=0, wd_unmet=3560000000, wd_avg_price=4911.85, wd_max_price=5032, ath_stock=7550000000, shipments=0, realized_profit=0, capital=500000000)
+2-slot logistics  Result(wd_stock=0, wd_unmet=2360000000, wd_avg_price=4765.773972602739, wd_max_price=5032, ath_stock=6150000000, shipments=14, realized_profit=4317000000, capital=4592800000)
+8-slot logistics  Result(wd_stock=1068750000, wd_unmet=428750000, wd_avg_price=3538.3581560283687, wd_max_price=5032, ath_stock=2550000000, shipments=50, realized_profit=9223500000, capital=8826700000)
+merchant reduces unmet demand: PASS
+merchant reduces average scarcity price: PASS
+higher logistics throughput reduces shortage further: PASS
+route/merchant throughput bottleneck is economically visible: PASS
+no negative stock/capital: PASS
+integrated 120-day vertical slice: PASS
+SPRINT7_PERSISTENCE: PASS
+final_tick 288
+final_grain_milli 2175000000
+final_cash_mcp 955000000
+route_risk_bps 900
+state_sha256 e82a087d45c791526365988cf66d748c142e334bb0e0aae5407638d53473914a
+MIGRATION_LINT: PASS (7 schema migrations)
+SPRINT8_LIVE_PROTOCOL: PASS
+last_sequence 8424
+tick 550235
+ask_mcp 2147
+TAP version 13
+# Subtest: formats exact milli-copper without float loss
+ok 1 - formats exact milli-copper without float loss
+  ---
+  duration_ms: 13.08755
+  type: 'test'
+  ...
+# Subtest: price change is integer-based
+ok 2 - price change is integer-based
+  ---
+  duration_ms: 0.127478
+  type: 'test'
+  ...
+# Subtest: days cover uses fixed point quantities
+ok 3 - days cover uses fixed point quantities
+  ---
+  duration_ms: 0.161258
+  type: 'test'
+  ...
+# Subtest: delta gap is rejected
+ok 4 - delta gap is rejected
+  ---
+  duration_ms: 0.236729
+  type: 'test'
+  ...
+# Subtest: market order preview respects slippage
+ok 5 - market order preview respects slippage
+  ---
+  duration_ms: 0.163681
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 73.987635
+TAP version 13
+# Subtest: market buy moves cash, market inventory and warehouse title atomically
+ok 1 - market buy moves cash, market inventory and warehouse title atomically
+  ---
+  duration_ms: 0.951773
+  type: 'test'
+  ...
+# Subtest: stale order preview cannot mutate state
+ok 2 - stale order preview cannot mutate state
+  ---
+  duration_ms: 0.377056
+  type: 'test'
+  ...
+# Subtest: limit buy reserves funds and fills only when executable average clears limit
+ok 3 - limit buy reserves funds and fills only when executable average clears limit
+  ---
+  duration_ms: 0.330457
+  type: 'test'
+  ...
+# Subtest: owned warehouse goods can become physical vessel cargo
+ok 4 - owned warehouse goods can become physical vessel cargo
+  ---
+  duration_ms: 0.172304
+  type: 'test'
+  ...
+# Subtest: market sell returns warehouse stock to market and credits account
+ok 5 - market sell returns warehouse stock to market and credits account
+  ---
+  duration_ms: 0.172164
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 64.233394
+TAP version 13
+# Subtest: all six exchanges participate in network model
+ok 1 - all six exchanges participate in network model
+  ---
+  duration_ms: 1.304522
+  type: 'test'
+  ...
+# Subtest: route selection can choose multi-hop path
+ok 2 - route selection can choose multi-hop path
+  ---
+  duration_ms: 0.56968
+  type: 'test'
+  ...
+# Subtest: executable arbitrage includes slippage freight and expected loss
+ok 3 - executable arbitrage includes slippage freight and expected loss
+  ---
+  duration_ms: 1.595913
+  type: 'test'
+  ...
+# Subtest: route capacity can make a theoretical spread untradeable
+ok 4 - route capacity can make a theoretical spread untradeable
+  ---
+  duration_ms: 0.347172
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 55.054995
+TAP version 13
+# Subtest: display center maps to configured image center
+ok 1 - display center maps to configured image center
+  ---
+  duration_ms: 0.661105
+  type: 'test'
+  ...
+# Subtest: normalization is resolution independent
+ok 2 - normalization is resolution independent
+  ---
+  duration_ms: 0.590461
+  type: 'test'
+  ...
+# Subtest: vault nominal scale is preserved
+ok 3 - vault nominal scale is preserved
+  ---
+  duration_ms: 0.113638
+  type: 'test'
+  ...
+# Subtest: control point export is bounded and normalized
+ok 4 - control point export is bounded and normalized
+  ---
+  duration_ms: 1.118699
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 58.415247
+{"status":"PASS","waterdeep":{"lon_fria":-73.63260000000001,"lat":45.200070000000004},"waterdeep_md":-20.15109851201001,"waterdeep_neverwinter_km":490.062}
+{
+  "status": "PASS",
+  "routes": [
+    {
+      "id": "SEA-CAL-ATH",
+      "distance_km": 1049.6,
+      "status": "direct_geodesic_with_provisional_endpoint"
+    },
+    {
+      "id": "SEA-ATH-BG",
+      "distance_km": 472.4,
+      "status": "direct_geodesic_with_provisional_endpoint"
+    },
+    {
+      "id": "SEA-BG-WD",
+      "distance_km": 884,
+      "status": "direct_geodesic_exact_endpoints"
+    },
+    {
+      "id": "SEA-WD-NW",
+      "distance_km": 490.1,
+      "status": "direct_geodesic_exact_endpoints"
+    },
+    {
+      "id": "SEA-NW-LUS",
+      "distance_km": 230,
+      "status": "direct_geodesic_exact_endpoints"
+    },
+    {
+      "id": "SEA-ATH-WD",
+      "distance_km": 1332.2,
+      "status": "direct_geodesic_with_provisional_endpoint"
+    },
+    {
+      "id": "SEA-BG-NW",
+      "distance_km": 1374,
+      "status": "direct_geodesic_exact_endpoints"
+    },
+    {
+      "id": "SEA-WD-LUS",
+      "distance_km": 715.6,
+      "status": "direct_geodesic_exact_endpoints"
+    }
+  ]
+}
+{"status":"PASS","route":"SEA-WD-NW","distance_km":490.062,"ten_thousand_positions_ms":25.99}
+{
+  "nodes": 53,
+  "edges": 52,
+  "luskan_neverwinter_km": "233.0",
+  "neverwinter_waterdeep_km": "528.5"
+}
+SPRINT13B_PATHWAYS: PASS
+TAP version 13
+# Subtest: one-hour candles use 12 five-minute ticks
+ok 1 - one-hour candles use 12 five-minute ticks
+  ---
+  duration_ms: 0.56969
+  type: 'test'
+  ...
+# Subtest: OHLC follows tick order even when input is unsorted
+ok 2 - OHLC follows tick order even when input is unsorted
+  ---
+  duration_ms: 0.723857
+  type: 'test'
+  ...
+# Subtest: large fixed-point history remains exact beyond Number safe integer
+ok 3 - large fixed-point history remains exact beyond Number safe integer
+  ---
+  duration_ms: 0.158563
+  type: 'test'
+  ...
+# Subtest: buckets aggregate imports and exports
+ok 4 - buckets aggregate imports and exports
+  ---
+  duration_ms: 0.17597
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 50.922569
+{"status":"PASS","rows":100000,"hourly":8334,"daily":348,"aggregate_ms":111.67}
+SPRINT15_ANALYTICS_REFERENCE: PASS
+spread_first_mcp 210
+spread_last_mcp 223
+wd_volume_milli 26760
+wd_mean_abs_move_bps 48.652174
+arrival_mtm_roi_bps 7147
+TAP version 13
+# Subtest: large ticks remain decimal strings
+ok 1 - large ticks remain decimal strings
+  ---
+  duration_ms: 0.592073
+  type: 'test'
+  ...
+# Subtest: arbitrary query types are rejected
+ok 2 - arbitrary query types are rejected
+  ---
+  duration_ms: 0.505496
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 55.683686
+SPRINT16_PRODUCTION_CHAIN: PASS
+baseline_tools_milli 60000
+shock_tools_milli 50000
+shock_first_forge_short_day 19
+shock_zero_output_days 10
+baseline_ore_mined_milli 12000000000
+shock_ore_mined_milli 9000000000
+SPRINT17_FACTION_STRATEGIES: PASS
+independent_choice LOCAL-GRAIN-BG-WD
+otc_profile_choice BULK-TIMBER-WD
+dtc_profile_choice REMOTE-SILK-EVERMEET
+PROFILE-INDEPENDENT [('BULK-TIMBER-WD', 1039), ('REMOTE-SILK-EVERMEET', None), ('SPICE-CAL-WD', 922), ('LOCAL-GRAIN-BG-WD', 1145)]
+PROFILE-OTC-BULK [('BULK-TIMBER-WD', 3395), ('REMOTE-SILK-EVERMEET', None), ('SPICE-CAL-WD', 1144), ('LOCAL-GRAIN-BG-WD', 2414)]
+PROFILE-DTC-LONGRANGE [('BULK-TIMBER-WD', 1398), ('REMOTE-SILK-EVERMEET', 5593), ('SPICE-CAL-WD', 3874), ('LOCAL-GRAIN-BG-WD', 1417)]
+TAP version 13
+# Subtest: blockade previews concrete route without price mutation
+ok 1 - blockade previews concrete route without price mutation
+  ---
+  duration_ms: 1.144848
+  type: 'test'
+  ...
+# Subtest: direct price overrides are rejected
+ok 2 - direct price overrides are rejected
+  ---
+  duration_ms: 0.39332
+  type: 'test'
+  ...
+# Subtest: advance cannot move campaign time backwards
+ok 3 - advance cannot move campaign time backwards
+  ---
+  duration_ms: 0.957251
+  type: 'test'
+  ...
+# Subtest: causal explanation ranks deterministic contributions and preserves evidence
+ok 4 - causal explanation ranks deterministic contributions and preserves evidence
+  ---
+  duration_ms: 0.320372
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 52.914505
+SPRINT19_SCENARIOS: PASS
+main_hash b46864a09bcf61b0ec3ae1148a350507f5a96c7e9c7f2fbd0b72b3a547762765
+blockade_final_price_mcp 4217
+baseline_final_price_mcp 2300
+monte_carlo {'runs': 100, 'min': 4118, 'p50': 4192, 'max': 4276, 'mean': 4188.45}
+TAP version 13
+# Subtest: 2000 deterministic random trades preserve non-negative ledgers
+ok 1 - 2000 deterministic random trades preserve non-negative ledgers
+  ---
+  duration_ms: 7.909759
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 57.861493
+SPRINT20_RECOVERY: PASS
+final_state_hash 1aa234e8d5385bd1127caf928ac10e102a7f7305069cb6d09b206318069f0808
+event_chain_head f8deba02e21a08ca408d0962aa7d153ff2cbbbfa773b32b08bc0a581dc014e56
+tamper_detected True
+
+=== seed validation ===
+
+=== sprint1_reference.py ===
+
+=== sprint2_grain.py ===
+
+=== sprint3_pricing.py ===
+
+=== sprint4_logistics.py ===
+
+=== sprint5_merchant.py ===
+
+=== sprint6_validation.py ===
+
+=== sprint7_persistence.py ===
+
+=== migration lint ===
+
+=== Sprint 8 live protocol ===
+
+=== Sprint 9 WDEX shell ===
+
+=== Sprint 10 trading ===
+
+=== Sprint 11 multi-market ===
+
+=== Sprint 12 map calibration ===
+
+=== Sprint 12b Toril GCS ===
+
+=== Sprint 13 route geometry build ===
+
+=== Sprint 13 live logistics ===
+
+=== Sprint 13b pathways ===
+
+=== Sprint 14 history unit tests ===
+
+=== Sprint 14 history benchmark ===
+
+=== Sprint 15 analytics semantics ===
+
+=== Sprint 15 analytics query contract ===
+
+=== Sprint 16 production chain ===
+
+=== Sprint 17 faction strategies ===
+
+=== Sprint 18 DM control ===
+
+=== Sprint 19 scenarios ===
+
+=== Sprint 20 trading fuzz ===
+
+=== Sprint 20 recovery ===
+
+REFERENCE SUITE 0–20: PASS
+MIGRATION_LINT: PASS (7 schema migrations)

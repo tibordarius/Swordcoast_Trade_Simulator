@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "canonical_coordinate_system": {
+    "name": "Toril GCS",
+    "storage_prime_meridian": "FRIA",
+    "display_prime_meridian": "Myth Drannor",
+    "ellipsoid": {"a_m":6410000,"b_m":6370000,"inverse_flattening":160.25},
+    "postgis_srid": 910001,
+    "maplibre_policy": "Use Toril lon/lat numerically in MapLibre; never use Earth geodesic math for distances."
+  },
+  "upstream": {
+    "project": "Toril GIS by Geospatial Grimoire",
+    "repository": "https://github.com/geospatial-grimoire/toril-gis",
+    "pinned_commit": "8f9bffae356ec32ec6f76ce788abf700d6e56c3b",
+    "geojson_batch": "2026-07-30_1",
+    "license_note": "Unofficial fan content. Use remains subject to upstream/WotC Fan Content terms."
+  },
+  "planned_layers": [
+    "srf_civ_populated_places_pt",
+    "srf_civ_pathways_ln",
+    "srf_nat_rivers_ln",
+    "srf_nat_land_pg",
+    "srf_nat_ocean_pg",
+    "srf_con_named_regions_pg",
+    "srf_nat_land_cover_pg"
+  ],
+  "legacy_campaign_overlay": {
+    "stable_key": "sword_coast_campaign_map_v1",
+    "canvas_px": [6600,10200],
+    "scale_km_per_px": 0.275,
+    "role": "optional campaign presentation layer; not canonical coordinate storage"
+  }
+}

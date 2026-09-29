@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgis/postgis:18-3.6
+    environment:
+      POSTGRES_USER: wdex
+      POSTGRES_PASSWORD: wdex_dev_only
+      POSTGRES_DB: wdex
+    ports:
+      - "5432:5432"
+    volumes:
+      - wdex_pg:/var/lib/postgresql
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wdex -d wdex"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  wdex_pg:

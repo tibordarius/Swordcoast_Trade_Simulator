@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: large ticks remain decimal strings
+ok 1 - large ticks remain decimal strings
+  ---
+  duration_ms: 0.594426
+  type: 'test'
+  ...
+# Subtest: arbitrary query types are rejected
+ok 2 - arbitrary query types are rejected
+  ---
+  duration_ms: 0.321303
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 54.218685

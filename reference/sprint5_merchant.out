@@ -1,0 +1,8 @@
+forward Opportunity(origin='ATHEX', destination='WDEX', quantity_milli=100000000, purchase_mcp=165500000, expected_revenue_mcp=337800000, transport_mcp=31500000, expected_loss_mcp=1655000, expected_profit_mcp=139145000, roi_bps=7063, accepted=True)
+reverse Opportunity(origin='WDEX', destination='ATHEX', quantity_milli=100000000, purchase_mcp=342300000, expected_revenue_mcp=163100000, transport_mcp=31500000, expected_loss_mcp=3423000, expected_profit_mcp=-214123000, roi_bps=-5729, accepted=False)
+convergence accepted_trades=3 final_attempt_roi_bps=254
+stocks origin=650000000 destination=940000000 capital=799304000
+positive opportunity selection: PASS
+negative reverse trade rejection: PASS
+capital/capacity constraint hooks: PASS
+arbitrage convergence: PASS

@@ -1,0 +1,10 @@
+{
+  "schema_version":1,
+  "reference_runtime_note":"Budgets are guardrails, not hardware-independent guarantees. CI records actual timings and alerts on regressions.",
+  "budgets":[
+    {"id":"MAP-10K-POSITIONS","operation":"derive 10,000 live shipment positions","budget_ms":100,"last_local_ms":25},
+    {"id":"HIST-100K-AGG","operation":"aggregate 100,000 ticks into OHLCV candles","budget_ms":500,"last_local_ms":107},
+    {"id":"SCN-100-RUNS","operation":"run 100 simplified 30-day scenario futures","budget_ms":1000},
+    {"id":"WDEX-2K-TRADES","operation":"2,000 randomized ledger operations with invariant checks","budget_ms":1000}
+  ]
+}

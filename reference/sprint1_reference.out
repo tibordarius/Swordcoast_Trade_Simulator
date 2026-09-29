@@ -1,0 +1,7 @@
+seed=12345 ticks=10000 hash=ea50aa8c6fbd16cb production_signal=-19 next_sequence=1668
+repeat same seed hash=ea50aa8c6fbd16cb
+seed=54321 ticks=10000 hash=5edace93f102180b production_signal=95
+named-stream isolation: PASS
+scheduled-event ordering: PASS
+deterministic delta commit: PASS
+determinism reference: PASS

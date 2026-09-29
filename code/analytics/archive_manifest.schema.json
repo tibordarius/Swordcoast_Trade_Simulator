@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WDEX historical archive manifest",
+  "type": "object",
+  "required": ["schema_version", "simulation_version", "world_id", "branch_id", "min_tick", "max_tick", "source_rows", "files"],
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "simulation_version": {"type": "string", "minLength": 1},
+    "world_id": {"type": "string", "minLength": 1},
+    "branch_id": {"type": "string", "minLength": 1},
+    "min_tick": {"type": "integer", "minimum": 0},
+    "max_tick": {"type": "integer", "minimum": 0},
+    "source_rows": {"type": "integer", "minimum": 0},
+    "source_snapshot": {"type": ["string", "null"]},
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "rows"],
+        "properties": {
+          "path": {"type": "string"},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "rows": {"type": "integer", "minimum": 0}
+        }
+      }
+    }
+  }
+}

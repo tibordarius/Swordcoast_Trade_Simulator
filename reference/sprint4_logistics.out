@@ -1,0 +1,7 @@
+route=SEA-ATH-WD travel_ticks=5184 cost_mcp=31500000
+shipment_eta=105184 progress_final_bps=10000
+reservation/departure accounting: PASS
+derived position: PASS
+arrival idempotency: PASS
+route capacity hook: PASS
+loss state hook: PASS

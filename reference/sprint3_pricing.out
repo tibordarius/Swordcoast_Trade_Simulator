@@ -1,0 +1,10 @@
+surplus {'fundamental_mcp': 1000, 'bid_mcp': 996, 'ask_mcp': 1004, 'components': PriceExplanation(reserve_bps=-5000, unmet_bps=0, incoming_bps=0, risk_bps=0, total_multiplier_bps=5000)}
+normal {'fundamental_mcp': 2000, 'bid_mcp': 1992, 'ask_mcp': 2008, 'components': PriceExplanation(reserve_bps=0, unmet_bps=0, incoming_bps=0, risk_bps=0, total_multiplier_bps=10000)}
+shortage {'fundamental_mcp': 3500, 'bid_mcp': 3486, 'ask_mcp': 3514, 'components': PriceExplanation(reserve_bps=7500, unmet_bps=0, incoming_bps=0, risk_bps=0, total_multiplier_bps=17500)}
+severe {'fundamental_mcp': 5260, 'bid_mcp': 5239, 'ask_mcp': 5281, 'components': PriceExplanation(reserve_bps=13927, unmet_bps=2500, incoming_bps=-428, risk_bps=300, total_multiplier_bps=26299)}
+small buy {'average_price_mcp': 2013, 'terminal_impact_bps': 50, 'total_mcp': 20130000}
+large buy {'average_price_mcp': 2058, 'terminal_impact_bps': 500, 'total_mcp': 205800000}
+price monotonicity: PASS
+incoming supply expectation: PASS
+market slippage: PASS
+integer pricing: PASS

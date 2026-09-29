@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "routes": [
+    {
+      "id": "SEA-CAL-ATH",
+      "distance_km": 1049.6,
+      "status": "direct_geodesic_with_provisional_endpoint"
+    },
+    {
+      "id": "SEA-ATH-BG",
+      "distance_km": 472.4,
+      "status": "direct_geodesic_with_provisional_endpoint"
+    },
+    {
+      "id": "SEA-BG-WD",
+      "distance_km": 884,
+      "status": "direct_geodesic_exact_endpoints"
+    },
+    {
+      "id": "SEA-WD-NW",
+      "distance_km": 490.1,
+      "status": "direct_geodesic_exact_endpoints"
+    },
+    {
+      "id": "SEA-NW-LUS",
+      "distance_km": 230,
+      "status": "direct_geodesic_exact_endpoints"
+    },
+    {
+      "id": "SEA-ATH-WD",
+      "distance_km": 1332.2,
+      "status": "direct_geodesic_with_provisional_endpoint"
+    },
+    {
+      "id": "SEA-BG-NW",
+      "distance_km": 1374,
+      "status": "direct_geodesic_exact_endpoints"
+    },
+    {
+      "id": "SEA-WD-LUS",
+      "distance_km": 715.6,
+      "status": "direct_geodesic_exact_endpoints"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "stable_key": "sword_coast_campaign_map_v1",
+  "source": {
+    "classification": "campaign_canon",
+    "note": "Whale Campaign/Misc/SwordCoastMap.md",
+    "image_reference": "Whale Campaign/World Maps/The Swordcoast/Sword-Coast-Map_HighRes.jpg"
+  },
+  "canvas": {
+    "width_px": 6600,
+    "height_px": 10200,
+    "center_x_px": 3300,
+    "center_y_px": 5100,
+    "km_per_px": 0.275
+  },
+  "derived": {
+    "nominal_width_km": 1815.0,
+    "nominal_height_km": 2805.0
+  },
+  "coordinate_policy": {
+    "raw_storage": "image pixel coordinate pair [x,y]",
+    "axis_orientation": "preserve image coordinates until visual calibration is confirmed",
+    "postgis_srid": 0,
+    "distance_policy": "do not infer canonical route length from Euclidean pixel distance without route calibration"
+  },
+  "required_control_points": [
+    "Calimport",
+    "Athkatla",
+    "Baldur's Gate",
+    "Waterdeep",
+    "Neverwinter",
+    "Luskan"
+  ]
+}

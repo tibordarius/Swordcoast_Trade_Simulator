@@ -1,0 +1,8 @@
+ATHEX->LUSEX ROI 19.65% days=24 risk=4.53% path=SEA-ATH-BG > SEA-BG-NW > SEA-NW-LUS
+ATHEX->NWEX ROI 13.04% days=20 risk=3.37% path=SEA-ATH-BG > SEA-BG-NW
+ATHEX->BGEX ROI 12.24% days=7 risk=1.60% path=SEA-ATH-BG
+WDEX->LUSEX ROI 10.30% days=9 risk=2.09% path=SEA-WD-NW > SEA-NW-LUS
+ATHEX->CALEX ROI 8.57% days=8 risk=1.20% path=SEA-CAL-ATH
+BGEX->LUSEX ROI 6.67% days=17 risk=2.98% path=SEA-BG-NW > SEA-NW-LUS
+ATHEX->WDEX ROI 6.22% days=17 risk=2.98% path=SEA-ATH-BG > SEA-BG-WD
+WDEX->NWEX ROI 4.06% days=5 risk=0.90% path=SEA-WD-NW

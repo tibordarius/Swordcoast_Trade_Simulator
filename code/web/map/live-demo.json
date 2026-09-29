@@ -1,0 +1,20 @@
+{
+  "current_tick": "1500",
+  "shipments": [
+    {"id":"SHP-001","route_id":"SEA-BG-WD","departure_tick":"1000","eta_tick":"1800","commodity":"grain","quantity_milli":"180000000","owner":"OTC"},
+    {"id":"SHP-002","route_id":"SEA-WD-NW","departure_tick":"1200","eta_tick":"1650","commodity":"wine","quantity_milli":"42000000","owner":"DTC"},
+    {"id":"SHP-003","route_id":"SEA-NW-LUS","departure_tick":"1420","eta_tick":"1720","commodity":"tools","quantity_milli":"28000000","owner":"Independent"},
+    {"id":"SHP-004","route_id":"SEA-ATH-WD","departure_tick":"700","eta_tick":"2200","commodity":"grain","quantity_milli":"240000000","owner":"OTC"},
+    {"id":"SHP-005","route_id":"SEA-CAL-ATH","departure_tick":"600","eta_tick":"1600","commodity":"spices","quantity_milli":"12000000","owner":"DTC"}
+  ],
+  "flow_by_route": {
+    "SEA-CAL-ATH":"220000000",
+    "SEA-ATH-BG":"360000000",
+    "SEA-BG-WD":"500000000",
+    "SEA-WD-NW":"310000000",
+    "SEA-NW-LUS":"180000000",
+    "SEA-ATH-WD":"420000000",
+    "SEA-BG-NW":"110000000",
+    "SEA-WD-LUS":"95000000"
+  }
+}

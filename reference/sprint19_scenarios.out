@@ -1,0 +1,5 @@
+SPRINT19_SCENARIOS: PASS
+main_hash b46864a09bcf61b0ec3ae1148a350507f5a96c7e9c7f2fbd0b72b3a547762765
+blockade_final_price_mcp 4217
+baseline_final_price_mcp 2300
+monte_carlo {'runs': 100, 'min': 4118, 'p50': 4192, 'max': 4276, 'mean': 4188.45}

@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: market buy moves cash, market inventory and warehouse title atomically
+ok 1 - market buy moves cash, market inventory and warehouse title atomically
+  ---
+  duration_ms: 0.86796
+  type: 'test'
+  ...
+# Subtest: stale order preview cannot mutate state
+ok 2 - stale order preview cannot mutate state
+  ---
+  duration_ms: 1.210204
+  type: 'test'
+  ...
+# Subtest: limit buy reserves funds and fills only when executable average clears limit
+ok 3 - limit buy reserves funds and fills only when executable average clears limit
+  ---
+  duration_ms: 0.375514
+  type: 'test'
+  ...
+# Subtest: owned warehouse goods can become physical vessel cargo
+ok 4 - owned warehouse goods can become physical vessel cargo
+  ---
+  duration_ms: 0.178553
+  type: 'test'
+  ...
+# Subtest: market sell returns warehouse stock to market and credits account
+ok 5 - market sell returns warehouse stock to market and credits account
+  ---
+  duration_ms: 0.174857
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 59.008174

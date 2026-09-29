@@ -1,0 +1,9 @@
+without merchant  Result(wd_stock=0, wd_unmet=3560000000, wd_avg_price=4911.85, wd_max_price=5032, ath_stock=7550000000, shipments=0, realized_profit=0, capital=500000000)
+2-slot logistics  Result(wd_stock=0, wd_unmet=2360000000, wd_avg_price=4765.773972602739, wd_max_price=5032, ath_stock=6150000000, shipments=14, realized_profit=4317000000, capital=4592800000)
+8-slot logistics  Result(wd_stock=1068750000, wd_unmet=428750000, wd_avg_price=3538.3581560283687, wd_max_price=5032, ath_stock=2550000000, shipments=50, realized_profit=9223500000, capital=8826700000)
+merchant reduces unmet demand: PASS
+merchant reduces average scarcity price: PASS
+higher logistics throughput reduces shortage further: PASS
+route/merchant throughput bottleneck is economically visible: PASS
+no negative stock/capital: PASS
+integrated 120-day vertical slice: PASS

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "world_id": "WORLD-SWORD-COAST-V0",
+  "name": "Sword Coast Economic Simulator MVP",
+  "world_seed": 12345,
+  "simulation_version": "0.1.0-dev",
+  "tick_minutes": 5,
+  "currency_unit": "cp",
+  "quantity_scale": 1000,
+  "calendar_adapter": "harptos",
+  "canonical_branch": "main",
+  "mvp_markets": ["MKT-WD", "MKT-BG", "MKT-ATH", "MKT-CAL", "MKT-NW", "MKT-LUS"]
+}

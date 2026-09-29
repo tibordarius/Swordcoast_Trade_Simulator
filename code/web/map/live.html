@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sword Coast Live Logistics</title>
+  <link rel="stylesheet" href="live.css">
+</head>
+<body>
+  <header>
+    <div><strong>[[Sword Coast Live Logistics]]</strong><span id="coord-mode">Toril GCS · FRIA storage</span></div>
+    <div class="controls"><label>Tick <input id="tick" type="range" min="500" max="2300" value="1500" step="5"></label><output id="tick-value">1500</output></div>
+  </header>
+  <main>
+    <section class="map-card">
+      <svg id="map" viewBox="0 0 1000 900" role="img" aria-label="Live Sword Coast trade routes"></svg>
+      <div class="legend"><span>line width = trade volume</span><span>dot = shipment</span><span class="provisional">dashed = provisional coordinate involved</span></div>
+    </section>
+    <aside>
+      <h2>Live shipments</h2>
+      <div id="shipments"></div>
+      <h2>Coordinate note</h2>
+      <p>Five exchange cities come directly from Toril GIS. [[Athkatla]] is provisional until the upstream dataset publishes or identifies it.</p>
+    </aside>
+  </main>
+  <script type="module" src="live.js"></script>
+</body>
+</html>

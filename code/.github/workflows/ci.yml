@@ -1,0 +1,61 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --workspace --all-targets
+
+  reference-model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate seed data
+        run: python tools/validate_seed.py
+      - name: Run reference suite
+        run: python tools/run_reference_suite.py
+
+  postgres-schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:18-3.6
+        env:
+          POSTGRES_USER: wdex
+          POSTGRES_PASSWORD: wdex_ci
+          POSTGRES_DB: wdex
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U wdex -d wdex"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      PGPASSWORD: wdex_ci
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply migrations
+        run: |
+          for migration in migrations/0*.sql; do
+            echo "Applying $migration"
+            psql -h localhost -U wdex -d wdex -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - name: Schema assertions
+        run: psql -h localhost -U wdex -d wdex -v ON_ERROR_STOP=1 -f migrations/9000_ci_assertions.sql

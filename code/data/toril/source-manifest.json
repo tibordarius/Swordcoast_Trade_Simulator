@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "Toril GIS by Geospatial Grimoire",
+  "repository": "geospatial-grimoire/toril-gis",
+  "commit": "8f9bffae356ec32ec6f76ce788abf700d6e56c3b",
+  "export_batch": "2026-07-30_1",
+  "base_raw_url": "https://raw.githubusercontent.com/geospatial-grimoire/toril-gis/8f9bffae356ec32ec6f76ce788abf700d6e56c3b/exports/geojson/layers",
+  "coordinate_system": "Toril GCS / FRIA",
+  "layers": [
+    {"id":"srf_civ_populated_places_pt","file":"srf_civ_populated_places_pt.geojson","purpose":"settlements","required":true},
+    {"id":"srf_civ_pathways_ln","file":"srf_civ_pathways_ln.geojson","purpose":"roads and travel corridors","required":true},
+    {"id":"srf_nat_rivers_ln","file":"srf_nat_rivers_ln.geojson","purpose":"river transport","required":true},
+    {"id":"srf_nat_land_pg","file":"srf_nat_land_pg.geojson","purpose":"land/coast collision and rendering","required":true},
+    {"id":"srf_nat_ocean_pg","file":"srf_nat_ocean_pg.geojson","purpose":"marine routing/rendering","required":false},
+    {"id":"srf_con_named_regions_pg","file":"srf_con_named_regions_pg.geojson","purpose":"regional economic attribution","required":false},
+    {"id":"srf_nat_land_cover_pg","file":"srf_nat_land_cover_pg.geojson","purpose":"resource productivity and terrain","required":false}
+  ],
+  "initial_clip": {
+    "name":"Sword Coast economic MVP",
+    "bbox_fria":[-82,20,-64,55]
+  }
+}

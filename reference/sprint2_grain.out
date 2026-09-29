@@ -1,0 +1,16 @@
+normal case:
+  on_hand_mkg=838418883
+  produced_mkg=900000000
+  consumed_mkg=750000000
+  spoiled_mkg=11581117
+  unmet_mkg=0
+shortage case:
+  on_hand_mkg=0
+  produced_mkg=50000000
+  consumed_mkg=99980008
+  spoiled_mkg=19992
+  unmet_mkg=150019992
+conservation-of-goods: PASS
+exact hourly rate distribution: PASS
+unmet demand accounting: PASS
+spoilage hook: PASS

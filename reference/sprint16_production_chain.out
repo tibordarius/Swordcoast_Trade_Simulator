@@ -1,0 +1,7 @@
+SPRINT16_PRODUCTION_CHAIN: PASS
+baseline_tools_milli 60000
+shock_tools_milli 50000
+shock_first_forge_short_day 19
+shock_zero_output_days 10
+baseline_ore_mined_milli 12000000000
+shock_ore_mined_milli 9000000000

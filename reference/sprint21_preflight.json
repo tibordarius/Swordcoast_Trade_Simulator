@@ -1,0 +1,42 @@
+{
+  "project": "Sword Coast Economic Simulator",
+  "reference_suite": "tools/run_reference_suite.py",
+  "checks": {
+    "python": {
+      "available": true,
+      "version": "3.13.5"
+    },
+    "node": {
+      "available": true,
+      "path": "/opt/nvm/versions/node/v22.16.0/bin/node",
+      "version": "v22.16.0"
+    },
+    "cargo": {
+      "available": false,
+      "path": null
+    },
+    "rustc": {
+      "available": false,
+      "path": null
+    },
+    "docker": {
+      "available": false,
+      "path": null
+    },
+    "psql": {
+      "available": false,
+      "path": null
+    },
+    "duckdb_python": {
+      "available": false
+    }
+  },
+  "native_release_blockers": [
+    "cargo",
+    "rustc",
+    "docker",
+    "psql",
+    "duckdb_python"
+  ],
+  "native_ready": false
+}

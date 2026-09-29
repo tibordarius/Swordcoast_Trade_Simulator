@@ -1,0 +1,22 @@
+{
+  "scenario_class":"simulation_generated",
+  "commodity":{"id":"1","name":"Grain","base_unit":"kg"},
+  "markets":[
+    {"market_id":"1","code":"CALEX","name":"Calimport","bid_mcp":"1940","ask_mcp":"1970","on_hand_milli":"6200000000","depth_milli":"1800000000"},
+    {"market_id":"2","code":"ATHEX","name":"Athkatla","bid_mcp":"1630","ask_mcp":"1660","on_hand_milli":"9800000000","depth_milli":"2500000000"},
+    {"market_id":"3","code":"BGEX","name":"Baldur's Gate","bid_mcp":"2030","ask_mcp":"2060","on_hand_milli":"4600000000","depth_milli":"1700000000"},
+    {"market_id":"4","code":"WDEX","name":"Waterdeep","bid_mcp":"2110","ask_mcp":"2136","on_hand_milli":"2520000000","depth_milli":"1600000000"},
+    {"market_id":"5","code":"NWEX","name":"Neverwinter","bid_mcp":"2350","ask_mcp":"2400","on_hand_milli":"1450000000","depth_milli":"950000000"},
+    {"market_id":"6","code":"LUSEX","name":"Luskan","bid_mcp":"2620","ask_mcp":"2680","on_hand_milli":"880000000","depth_milli":"700000000"}
+  ],
+  "routes":[
+    {"id":"SEA-CAL-ATH","from":"1","to":"2","bidirectional":true,"days":8,"freight_mcp_per_unit":"105","risk_bps":120,"capacity_milli":"600000000"},
+    {"id":"SEA-ATH-BG","from":"2","to":"3","bidirectional":true,"days":7,"freight_mcp_per_unit":"120","risk_bps":160,"capacity_milli":"550000000"},
+    {"id":"SEA-BG-WD","from":"3","to":"4","bidirectional":true,"days":10,"freight_mcp_per_unit":"155","risk_bps":140,"capacity_milli":"500000000"},
+    {"id":"SEA-WD-NW","from":"4","to":"5","bidirectional":true,"days":5,"freight_mcp_per_unit":"100","risk_bps":90,"capacity_milli":"420000000"},
+    {"id":"SEA-NW-LUS","from":"5","to":"6","bidirectional":true,"days":4,"freight_mcp_per_unit":"90","risk_bps":120,"capacity_milli":"320000000"},
+    {"id":"SEA-ATH-WD","from":"2","to":"4","bidirectional":true,"days":18,"freight_mcp_per_unit":"315","risk_bps":210,"capacity_milli":"400000000"},
+    {"id":"SEA-BG-NW","from":"3","to":"5","bidirectional":true,"days":13,"freight_mcp_per_unit":"240","risk_bps":180,"capacity_milli":"360000000"},
+    {"id":"SEA-WD-LUS","from":"4","to":"6","bidirectional":true,"days":8,"freight_mcp_per_unit":"205","risk_bps":160,"capacity_milli":"280000000"}
+  ]
+}

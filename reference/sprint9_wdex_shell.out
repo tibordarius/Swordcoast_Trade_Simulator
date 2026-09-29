@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: formats exact milli-copper without float loss
+ok 1 - formats exact milli-copper without float loss
+  ---
+  duration_ms: 18.952462
+  type: 'test'
+  ...
+# Subtest: price change is integer-based
+ok 2 - price change is integer-based
+  ---
+  duration_ms: 0.132145
+  type: 'test'
+  ...
+# Subtest: days cover uses fixed point quantities
+ok 3 - days cover uses fixed point quantities
+  ---
+  duration_ms: 0.099247
+  type: 'test'
+  ...
+# Subtest: delta gap is rejected
+ok 4 - delta gap is rejected
+  ---
+  duration_ms: 0.246133
+  type: 'test'
+  ...
+# Subtest: market order preview respects slippage
+ok 5 - market order preview respects slippage
+  ---
+  duration_ms: 0.171703
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 77.865309

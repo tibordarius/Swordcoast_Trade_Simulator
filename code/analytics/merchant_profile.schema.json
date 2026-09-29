@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"Merchant strategy profile",
+  "type":"object",
+  "required":["id","parameters"],
+  "properties":{
+    "id":{"type":"string"},
+    "parameters":{
+      "type":"object",
+      "required":["min_roi_bps","max_information_age_ticks","max_route_distance_km","bulk_weight","value_density_weight","distance_weight","controlled_route_bonus","remote_market_bonus","warehouse_patience_bps","information_quality_bps","risk_tolerance_bps"]
+    }
+  }
+}
