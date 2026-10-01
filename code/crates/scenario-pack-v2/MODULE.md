@@ -1,26 +1,34 @@
 # scenario-pack-v2 Module Contract
 
 ## Purpose
-Parse, validate, and compile external ScenarioPack v2 data into deterministic initialization commands for sim-kernel-v2.
+Own the external ScenarioPack v2 schema, validate it, compile immutable runtime registry data, and initialize sim-kernel-v2 only through deterministic reducer commands.
 
 ## Owns
-- external pack schema;
-- validation;
+- external pack JSON schema;
+- schema versioning;
 - provenance/status classification at the pack boundary;
-- deterministic initialization-command compilation.
+- executable unit/commodity/place/market/route records;
+- opening account/balance declarations;
+- validation;
+- deterministic initialization-command compilation;
+- the safe `initialize()` entry point.
 
 ## Does not own
 - Forgotten Realms source interpretation;
 - Google Drive/TorilGIS crawling;
-- live simulation state;
-- market/production/logistics behavior;
-- frontend rendering.
+- mutable simulation behavior after initialization;
+- markets/production/logistics logic;
+- frontend rendering;
+- database connections.
 
 ## Public API
-- load_json
-- validate
-- ValidatedScenarioPack
-- compile_initialization_commands
+- `load_json`
+- `validate_pack`
+- `ValidatedScenarioPack`
+- `compile_registry`
+- `compile_initialization_commands`
+- `initialize`
+- `InitializedScenario`
 
 ## Dependencies
 - serde / serde_json
@@ -33,10 +41,14 @@ Parse, validate, and compile external ScenarioPack v2 data into deterministic in
 - database connections
 
 ## Invariants
-- invalid external data cannot become executable commands;
+- invalid external data cannot become executable runtime state;
 - no direct WorldState mutation;
+- initialization uses WorldReducer/replay only;
 - command ordering is deterministic;
-- opening balances use balanced EconomicTransaction postings.
+- opening balances use balanced EconomicTransaction postings;
+- source/campaign/derived/generated status remains explicit;
+- active commodities have executable physical dimensions;
+- routes have explicit positive travel time and distance.
 
 ## Focused tests
-cargo test -p scenario-pack-v2
+`cargo test -p scenario-pack-v2`
