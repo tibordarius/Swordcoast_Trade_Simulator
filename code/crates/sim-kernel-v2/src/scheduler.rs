@@ -51,6 +51,24 @@ pub struct ScheduledEvent {
 }
 
 impl ScheduledEvent {
+    pub(crate) fn new(
+        event_id: EventId,
+        at_tick: SimTick,
+        domain: EventDomain,
+        sequence: u64,
+        generation: u64,
+        payload: EventPayload,
+    ) -> Self {
+        Self {
+            event_id,
+            at_tick,
+            domain,
+            sequence,
+            generation,
+            payload,
+        }
+    }
+
     #[must_use]
     pub fn event_id(&self) -> &EventId {
         &self.event_id
@@ -196,28 +214,12 @@ impl EventSchedulerState {
             .checked_add(1)
     }
 
-    pub(crate) fn commit_schedule(
-        &mut self,
-        event_id: EventId,
-        at_tick: SimTick,
-        domain: EventDomain,
-        sequence: u64,
-        generation: u64,
-        payload: EventPayload,
-    ) {
-        self.next_sequence = sequence;
-        self.versions.insert(event_id.clone(), generation);
-        self.active.insert(event_id.clone(), generation);
-
-        let event = ScheduledEvent {
-            event_id,
-            at_tick,
-            domain,
-            sequence,
-            generation,
-            payload,
-        };
-
+    pub(crate) fn commit_scheduled(&mut self, event: ScheduledEvent) {
+        self.next_sequence = event.sequence();
+        self.versions
+            .insert(event.event_id().clone(), event.generation());
+        self.active
+            .insert(event.event_id().clone(), event.generation());
         self.queue.insert(EventOrderKey::for_event(&event), event);
     }
 
@@ -254,16 +256,12 @@ impl EventSchedulerState {
         self.fired_events.push(event.into());
     }
 
-    pub(crate) fn drain_due(&mut self, through: SimTick) {
-        while let Some(event) = self.pop_next_due(through) {
-            self.record_fired(event);
-        }
-    }
+
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{EventDomain, EventPayload, EventSchedulerState};
+    use super::{EventDomain, EventPayload, EventSchedulerState, ScheduledEvent};
     use crate::{EventId, SimTick};
 
     #[test]
@@ -280,28 +278,30 @@ mod tests {
         let logistics_id = EventId::new("logistics");
         let logistics_sequence = scheduler.next_sequence().unwrap();
         let logistics_generation = scheduler.next_generation(&logistics_id).unwrap();
-        scheduler.commit_schedule(
+        scheduler.commit_scheduled(ScheduledEvent::new(
             logistics_id,
             SimTick::new(10),
             EventDomain::Logistics,
             logistics_sequence,
             logistics_generation,
             EventPayload::Noop,
-        );
+        ));
 
         let production_id = EventId::new("production");
         let production_sequence = scheduler.next_sequence().unwrap();
         let production_generation = scheduler.next_generation(&production_id).unwrap();
-        scheduler.commit_schedule(
+        scheduler.commit_scheduled(ScheduledEvent::new(
             production_id,
             SimTick::new(10),
             EventDomain::Production,
             production_sequence,
             production_generation,
             EventPayload::Noop,
-        );
+        ));
 
-        scheduler.drain_due(SimTick::new(10));
+        while let Some(event) = scheduler.pop_next_due(SimTick::new(10)) {
+            scheduler.record_fired(event);
+        }
 
         let ids: Vec<&str> = scheduler
             .fired_events()
