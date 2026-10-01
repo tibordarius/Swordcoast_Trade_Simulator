@@ -1,6 +1,6 @@
 use scenario_pack_v2::{
-    compile_initialization_commands, compile_registry, load_json, validate_pack, ScenarioPack,
-    SCENARIO_PACK_SCHEMA_VERSION,
+    compile_initialization_commands, compile_registry, initialize, load_json, validate_pack,
+    ScenarioPack, SCENARIO_PACK_SCHEMA_VERSION,
 };
 use sim_kernel_v2::{
     replay, state_hash, CommodityId, DataStatus, InventoryAccountId, MarketId, MoneyAccountId,
@@ -295,5 +295,19 @@ fn opening_balances_are_explicitly_balanced_against_system_accounts() {
     assert_eq!(
         world.money_balance(&MoneyAccountId::new("system.opening.money")),
         Some(MoneyCp::new(-150000))
+    );
+}
+
+
+#[test]
+fn initialize_is_the_safe_one_step_runtime_entry_point() {
+    let validated = load_json(TINY).unwrap();
+    let initialized = initialize(validated).unwrap();
+
+    assert_eq!(initialized.registry().markets().len(), 3);
+    assert_eq!(initialized.world_state().world_seed(), 424242);
+    assert_eq!(
+        initialized.world_state().money_balance(&MoneyAccountId::new("cash.waterdeep")),
+        Some(MoneyCp::new(50000))
     );
 }
