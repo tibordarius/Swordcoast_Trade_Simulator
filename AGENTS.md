@@ -20,6 +20,12 @@ Sword Coast / Toril economic simulator. Phase 4 introduces a new `sim-kernel-v2`
 
 ## Verification
 From `code/`:
+- `cargo xtask check`
+- `cargo xtask test-v2`
+- `cargo xtask test-tiny`
+- `cargo xtask pack-validate crates/scenario-pack-v2/tests/fixtures/tiny_sword_coast.json`
+
+The underlying workspace gates remain:
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo test --workspace --all-targets`

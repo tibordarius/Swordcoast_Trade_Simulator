@@ -7,6 +7,7 @@ pub mod hash;
 pub mod ids;
 pub mod ledger;
 pub mod reducer;
+pub mod registry;
 pub mod replay;
 pub mod rng;
 pub mod scheduler;
@@ -19,14 +20,17 @@ pub mod values;
 pub use command::{Command, CommandEnvelope};
 pub use hash::fnv1a64;
 pub use ids::{
-    ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MoneyAccountId, ShipmentId,
-    TransactionId,
+    ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MoneyAccountId, PlaceId,
+    RouteEdgeId, ShipmentId, TransactionId, UnitId,
 };
 pub use ledger::{
     InventoryAccount, InventoryAccountKind, InventoryLedgerEntry, MoneyAccount, MoneyAccountKind,
     MoneyLedgerEntry,
 };
 pub use reducer::{ApplyError, WorldReducer};
+pub use registry::{
+    CommodityDef, MarketDef, PlaceDef, RegistryError, RouteDef, ScenarioRegistry, UnitDef,
+};
 pub use replay::{replay, ReplayError};
 pub use rng::{derive_stream_seed, SplitMix64};
 pub use scheduler::{EventDomain, EventSchedulerState, FiredEvent, ScheduledEvent};
