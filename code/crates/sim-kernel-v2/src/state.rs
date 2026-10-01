@@ -3,8 +3,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    EconomicTransaction, InventoryAccount, InventoryAccountId, InventoryLedgerEntry, MoneyAccount,
-    MoneyAccountId, MoneyLedgerEntry, Quantity, SimTick, TransactionId,
+    EconomicTransaction, EventDomain, EventId, EventSchedulerState, InventoryAccount,
+    InventoryAccountId, InventoryLedgerEntry, MoneyAccount, MoneyAccountId, MoneyLedgerEntry,
+    Quantity, SimTick, TransactionId,
 };
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -34,6 +35,7 @@ pub struct WorldState {
     inventory_ledger: Vec<InventoryLedgerEntry>,
     money_ledger: Vec<MoneyLedgerEntry>,
     applied_transactions: BTreeSet<TransactionId>,
+    scheduler: EventSchedulerState,
 }
 
 impl WorldState {
@@ -48,6 +50,7 @@ impl WorldState {
             inventory_ledger: Vec::new(),
             money_ledger: Vec::new(),
             applied_transactions: BTreeSet::new(),
+            scheduler: EventSchedulerState::default(),
         }
     }
 
@@ -64,6 +67,11 @@ impl WorldState {
     #[must_use]
     pub const fn revision(&self) -> WorldRevision {
         self.revision
+    }
+
+    #[must_use]
+    pub fn scheduler(&self) -> &EventSchedulerState {
+        &self.scheduler
     }
 
     #[must_use]
@@ -106,7 +114,8 @@ impl WorldState {
         self.applied_transactions.contains(transaction_id)
     }
 
-    pub(crate) fn commit_tick(&mut self, tick: SimTick, revision: WorldRevision) {
+    pub(crate) fn commit_advance(&mut self, tick: SimTick, revision: WorldRevision) {
+        self.scheduler.drain_due(tick);
         self.tick = tick;
         self.revision = revision;
     }
@@ -122,6 +131,30 @@ impl WorldState {
 
     pub(crate) fn commit_money_account(&mut self, account: MoneyAccount, revision: WorldRevision) {
         self.money_accounts.insert(account.id().clone(), account);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_schedule_event(
+        &mut self,
+        event_id: EventId,
+        at_tick: SimTick,
+        domain: EventDomain,
+        sequence: u64,
+        generation: u64,
+        revision: WorldRevision,
+    ) {
+        self.scheduler
+            .commit_schedule(event_id, at_tick, domain, sequence, generation);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_cancel_event(
+        &mut self,
+        event_id: &EventId,
+        generation: u64,
+        revision: WorldRevision,
+    ) {
+        self.scheduler.commit_cancel(event_id, generation);
         self.revision = revision;
     }
 
@@ -182,5 +215,6 @@ mod tests {
         assert_eq!(state.world_seed(), 42);
         assert!(state.inventory_ledger().is_empty());
         assert!(state.money_ledger().is_empty());
+        assert_eq!(state.scheduler().active_event_count(), 0);
     }
 }
