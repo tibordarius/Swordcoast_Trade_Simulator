@@ -1,0 +1,183 @@
+{
+  "manifest": {
+    "schema_version": 1,
+    "pack_id": "pack.sword-coast-corridor.tiny.001",
+    "revision": 1,
+    "campaign_epoch": "1492 DR",
+    "world_seed": 424242
+  },
+  "units": [
+    {
+      "id": "unit.kg",
+      "name": "kilogram",
+      "dimension": "mass",
+      "base_unit": "unit.kg",
+      "numerator": 1,
+      "denominator": 1,
+      "status": "ReviewedMapping"
+    }
+  ],
+  "commodities": [
+    {
+      "id": "commodity.grain",
+      "name": "Grain",
+      "base_unit": "unit.kg",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1300,
+      "status": "ScenarioAssumption"
+    },
+    {
+      "id": "commodity.flour",
+      "name": "Flour",
+      "base_unit": "unit.kg",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1800,
+      "status": "ScenarioAssumption"
+    },
+    {
+      "id": "commodity.fish",
+      "name": "Preserved Fish",
+      "base_unit": "unit.kg",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1100,
+      "status": "ScenarioAssumption"
+    },
+    {
+      "id": "commodity.timber",
+      "name": "Timber",
+      "base_unit": "unit.kg",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 2200,
+      "status": "ScenarioAssumption"
+    },
+    {
+      "id": "commodity.iron",
+      "name": "Iron",
+      "base_unit": "unit.kg",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 130,
+      "status": "ScenarioAssumption"
+    }
+  ],
+  "places": [
+    {
+      "id": "place.waterdeep",
+      "name": "Waterdeep",
+      "kind": "Settlement",
+      "status": "Source"
+    },
+    {
+      "id": "place.neverwinter",
+      "name": "Neverwinter",
+      "kind": "Settlement",
+      "status": "Source"
+    },
+    {
+      "id": "place.luskan",
+      "name": "Luskan",
+      "kind": "Settlement",
+      "status": "Source"
+    }
+  ],
+  "markets": [
+    {
+      "id": "market.waterdeep",
+      "name": "Waterdeep Market",
+      "place_id": "place.waterdeep",
+      "status": "Generated"
+    },
+    {
+      "id": "market.neverwinter",
+      "name": "Neverwinter Market",
+      "place_id": "place.neverwinter",
+      "status": "Generated"
+    },
+    {
+      "id": "market.luskan",
+      "name": "Luskan Market",
+      "place_id": "place.luskan",
+      "status": "Generated"
+    }
+  ],
+  "routes": [
+    {
+      "id": "route.waterdeep-neverwinter",
+      "from_market": "market.waterdeep",
+      "to_market": "market.neverwinter",
+      "bidirectional": true,
+      "distance_meters": 560000,
+      "base_travel_ticks": 3456,
+      "status": "ScenarioAssumption"
+    },
+    {
+      "id": "route.neverwinter-luskan",
+      "from_market": "market.neverwinter",
+      "to_market": "market.luskan",
+      "bidirectional": true,
+      "distance_meters": 160000,
+      "base_travel_ticks": 1152,
+      "status": "ScenarioAssumption"
+    }
+  ],
+  "inventory_accounts": [
+    {
+      "id": "inventory.waterdeep",
+      "kind": "Holding",
+      "opening_balances": [
+        {
+          "commodity_id": "commodity.grain",
+          "quantity": 1000
+        },
+        {
+          "commodity_id": "commodity.flour",
+          "quantity": 200
+        }
+      ]
+    },
+    {
+      "id": "inventory.neverwinter",
+      "kind": "Holding",
+      "opening_balances": [
+        {
+          "commodity_id": "commodity.grain",
+          "quantity": 500
+        },
+        {
+          "commodity_id": "commodity.fish",
+          "quantity": 300
+        }
+      ]
+    },
+    {
+      "id": "inventory.luskan",
+      "kind": "Holding",
+      "opening_balances": [
+        {
+          "commodity_id": "commodity.timber",
+          "quantity": 1000
+        },
+        {
+          "commodity_id": "commodity.iron",
+          "quantity": 500
+        }
+      ]
+    }
+  ],
+  "money_accounts": [
+    {
+      "id": "money.waterdeep.merchant",
+      "kind": "Holding",
+      "opening_balance": 100000
+    },
+    {
+      "id": "money.neverwinter.merchant",
+      "kind": "Holding",
+      "opening_balance": 75000
+    },
+    {
+      "id": "money.luskan.merchant",
+      "kind": "Holding",
+      "opening_balance": 50000
+    }
+  ]
+}
