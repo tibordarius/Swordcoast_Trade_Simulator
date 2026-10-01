@@ -684,6 +684,186 @@ impl WorldReducer {
         )
     }
 
+    fn register_market_listing(
+        state: &mut WorldState,
+        listing: &MarketListing,
+    ) -> Result<(), ApplyError> {
+        if state
+            .market_listing(listing.market_id(), listing.commodity_id())
+            .is_some()
+        {
+            return Err(ApplyError::DuplicateMarketListing {
+                market_id: listing.market_id().clone(),
+                commodity_id: listing.commodity_id().clone(),
+            });
+        }
+
+        if !listing.reference_price().is_positive() {
+            return Err(ApplyError::InvalidMarketReferencePrice);
+        }
+
+        if listing.target_stock().get() <= 0 {
+            return Err(ApplyError::InvalidMarketTargetStock);
+        }
+
+        if listing.depth().get() <= 0 {
+            return Err(ApplyError::InvalidMarketDepth);
+        }
+
+        if listing.spread_bps() == 0 || listing.spread_bps() > 10_000 {
+            return Err(ApplyError::InvalidMarketSpread);
+        }
+
+        if listing.demand_window_ticks() == 0 {
+            return Err(ApplyError::InvalidMarketDemandWindow);
+        }
+
+        Self::require_inventory_account_kind(
+            state,
+            listing.inventory_account(),
+            InventoryAccountKind::Holding,
+        )?;
+        Self::require_money_account_kind(
+            state,
+            listing.money_account(),
+            MoneyAccountKind::Holding,
+        )?;
+
+        let revision = Self::next_revision(state)?;
+        state.commit_market_listing(listing.clone(), revision);
+        Ok(())
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn execute_market_trade(
+        state: &mut WorldState,
+        command_sequence: u64,
+        trade_id: &MarketTradeId,
+        market_id: &MarketId,
+        commodity_id: &CommodityId,
+        side: MarketSide,
+        quantity: Quantity,
+        actor_inventory_account: &InventoryAccountId,
+        actor_money_account: &MoneyAccountId,
+    ) -> Result<(), ApplyError> {
+        if quantity.get() <= 0 {
+            return Err(ApplyError::InvalidMarketTradeQuantity);
+        }
+
+        if state.has_market_trade(trade_id) {
+            return Err(ApplyError::DuplicateMarketTrade(trade_id.clone()));
+        }
+
+        let listing = state
+            .market_listing(market_id, commodity_id)
+            .cloned()
+            .ok_or_else(|| ApplyError::UnknownMarketListing {
+                market_id: market_id.clone(),
+                commodity_id: commodity_id.clone(),
+            })?;
+
+        if actor_inventory_account == listing.inventory_account()
+            || actor_money_account == listing.money_account()
+        {
+            return Err(ApplyError::MarketTradeAccountCollision);
+        }
+
+        Self::require_inventory_account_kind(
+            state,
+            actor_inventory_account,
+            InventoryAccountKind::Holding,
+        )?;
+        Self::require_money_account_kind(
+            state,
+            actor_money_account,
+            MoneyAccountKind::Holding,
+        )?;
+
+        let quote = derive_market_quote(state, &listing).map_err(ApplyError::MarketMath)?;
+        let average_unit_price =
+            execution_price(&quote, side, quantity, listing.depth()).map_err(ApplyError::MarketMath)?;
+        let total_value = average_unit_price
+            .total_for(quantity)
+            .map_err(|_| ApplyError::ArithmeticOverflow)?;
+
+        if total_value.get() <= 0 {
+            return Err(ApplyError::MarketTradeValueTooSmall);
+        }
+
+        let negative_quantity = quantity
+            .get()
+            .checked_neg()
+            .ok_or(ApplyError::ArithmeticOverflow)?;
+        let negative_value = total_value
+            .get()
+            .checked_neg()
+            .ok_or(ApplyError::ArithmeticOverflow)?;
+
+        let (inventory_postings, money_postings) = match side {
+            MarketSide::Buy => (
+                vec![
+                    InventoryPosting::new(
+                        listing.inventory_account().clone(),
+                        commodity_id.clone(),
+                        Quantity::new(negative_quantity),
+                    ),
+                    InventoryPosting::new(
+                        actor_inventory_account.clone(),
+                        commodity_id.clone(),
+                        quantity,
+                    ),
+                ],
+                vec![
+                    MoneyPosting::new(actor_money_account.clone(), MoneyCp::new(negative_value)),
+                    MoneyPosting::new(listing.money_account().clone(), total_value),
+                ],
+            ),
+            MarketSide::Sell => (
+                vec![
+                    InventoryPosting::new(
+                        actor_inventory_account.clone(),
+                        commodity_id.clone(),
+                        Quantity::new(negative_quantity),
+                    ),
+                    InventoryPosting::new(
+                        listing.inventory_account().clone(),
+                        commodity_id.clone(),
+                        quantity,
+                    ),
+                ],
+                vec![
+                    MoneyPosting::new(listing.money_account().clone(), MoneyCp::new(negative_value)),
+                    MoneyPosting::new(actor_money_account.clone(), total_value),
+                ],
+            ),
+        };
+
+        let transaction = EconomicTransaction::new(
+            TransactionId::new(format!("market.trade.{trade_id}")),
+            inventory_postings,
+            money_postings,
+        );
+
+        Self::validate_transaction(state, &transaction)?;
+        let revision = Self::next_revision(state)?;
+        state.commit_transaction(&transaction, command_sequence, revision);
+        state.commit_market_trade(
+            MarketTrade::new(
+                trade_id.clone(),
+                state.tick(),
+                market_id.clone(),
+                commodity_id.clone(),
+                side,
+                quantity,
+                average_unit_price,
+                total_value,
+            ),
+            revision,
+        );
+
+        Ok(())
+    }
+
     fn require_inventory_account_kind(
         state: &WorldState,
         account_id: &InventoryAccountId,
@@ -695,6 +875,25 @@ impl WorldReducer {
 
         if account.kind() != expected {
             return Err(ApplyError::InvalidInventoryAccountKind {
+                account_id: account_id.clone(),
+                expected,
+            });
+        }
+
+        Ok(())
+    }
+
+    fn require_money_account_kind(
+        state: &WorldState,
+        account_id: &MoneyAccountId,
+        expected: MoneyAccountKind,
+    ) -> Result<(), ApplyError> {
+        let account = state
+            .money_account(account_id)
+            .ok_or_else(|| ApplyError::UnknownMoneyAccount(account_id.clone()))?;
+
+        if account.kind() != expected {
+            return Err(ApplyError::InvalidMoneyAccountKind {
                 account_id: account_id.clone(),
                 expected,
             });
