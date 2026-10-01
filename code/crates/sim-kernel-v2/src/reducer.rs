@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use crate::{
     Command, CommandEnvelope, CommodityId, ConsumptionRecord, EconomicTransaction, EventDomain,
     EventId, EventPayload, InventoryAccount, InventoryAccountId, InventoryAccountKind,
-    InventoryPosting, MoneyAccount, MoneyAccountId, MoneyAccountKind, MoneyCp, MoneyPosting,
+    InventoryPosting, MoneyAccount, MoneyAccountId, MoneyAccountKind, MoneyCp,
     PopulationCohort, PopulationCohortId, ProductionBatch, ProductionBatchId,
     ProductionBatchStatus, ProductionRecipe, ProductionSite, ProductionSiteId, Quantity, RecipeId,
     ScheduledEvent, SimTick, TransactionId, WorldRevision, WorldState,
@@ -53,7 +53,7 @@ pub enum ApplyError {
     DuplicateProductionSite(ProductionSiteId),
     UnknownRecipe(RecipeId),
     InvalidProductionDuration(ProductionSiteId),
-    InvalidProductionAccountKind {
+    InvalidInventoryAccountKind {
         account_id: InventoryAccountId,
         expected: InventoryAccountKind,
     },
@@ -196,12 +196,14 @@ impl WorldReducer {
         let revision = Self::next_revision(state)?;
 
         state.commit_schedule_event(
-            event_id.clone(),
-            at_tick,
-            domain,
-            sequence,
-            generation,
-            payload,
+            ScheduledEvent::new(
+                event_id.clone(),
+                at_tick,
+                domain,
+                sequence,
+                generation,
+                payload,
+            ),
             revision,
         );
         Ok(())
@@ -225,12 +227,7 @@ impl WorldReducer {
             .ok_or_else(|| ApplyError::EventGenerationOverflow(event_id.clone()))?;
 
         state.commit_schedule_event(
-            event_id,
-            at_tick,
-            domain,
-            sequence,
-            generation,
-            payload,
+            ScheduledEvent::new(event_id, at_tick, domain, sequence, generation, payload),
             revision,
         );
         Ok(())
@@ -416,14 +413,16 @@ impl WorldReducer {
             revision,
         );
         state.commit_schedule_event(
-            event_id,
-            completes_at,
-            EventDomain::Production,
-            event_sequence,
-            event_generation,
-            EventPayload::ProductionBatchComplete {
-                batch_id: batch_id.clone(),
-            },
+            ScheduledEvent::new(
+                event_id,
+                completes_at,
+                EventDomain::Production,
+                event_sequence,
+                event_generation,
+                EventPayload::ProductionBatchComplete {
+                    batch_id: batch_id.clone(),
+                },
+            ),
             revision,
         );
 
@@ -543,15 +542,17 @@ impl WorldReducer {
 
         state.commit_cohort(cohort.clone(), revision);
         state.commit_schedule_event(
-            event_id,
-            first_due,
-            EventDomain::Population,
-            event_sequence,
-            event_generation,
-            EventPayload::PopulationConsumptionDue {
-                cohort_id: cohort.id().clone(),
-                cycle: 1,
-            },
+            ScheduledEvent::new(
+                event_id,
+                first_due,
+                EventDomain::Population,
+                event_sequence,
+                event_generation,
+                EventPayload::PopulationConsumptionDue {
+                    cohort_id: cohort.id().clone(),
+                    cycle: 1,
+                },
+            ),
             revision,
         );
 
@@ -648,7 +649,7 @@ impl WorldReducer {
             .ok_or_else(|| ApplyError::UnknownInventoryAccount(account_id.clone()))?;
 
         if account.kind() != expected {
-            return Err(ApplyError::InvalidProductionAccountKind {
+            return Err(ApplyError::InvalidInventoryAccountKind {
                 account_id: account_id.clone(),
                 expected,
             });
