@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{fnv1a64, WorldState};
 
-/// Snapshot schema version.
+/// Snapshot schema version for the v2 kernel.
 ///
-/// Version 2 adds authoritative account, ledger, and applied-transaction state.
-pub const SNAPSHOT_FORMAT_V2: u32 = 2;
+/// Version 3 adds deterministic scheduled-event state and fired-event history.
+pub const SNAPSHOT_FORMAT_VERSION: u32 = 3;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SnapshotError {
@@ -21,7 +21,7 @@ struct SnapshotEnvelope {
 
 pub fn encode_snapshot(state: &WorldState) -> Result<Vec<u8>, SnapshotError> {
     bincode::serialize(&SnapshotEnvelope {
-        format: SNAPSHOT_FORMAT_V2,
+        format: SNAPSHOT_FORMAT_VERSION,
         state: state.clone(),
     })
     .map_err(|error| SnapshotError::Codec(error.to_string()))
@@ -31,7 +31,7 @@ pub fn decode_snapshot(bytes: &[u8]) -> Result<WorldState, SnapshotError> {
     let envelope: SnapshotEnvelope =
         bincode::deserialize(bytes).map_err(|error| SnapshotError::Codec(error.to_string()))?;
 
-    if envelope.format != SNAPSHOT_FORMAT_V2 {
+    if envelope.format != SNAPSHOT_FORMAT_VERSION {
         return Err(SnapshotError::UnsupportedFormat(envelope.format));
     }
 
