@@ -1,9 +1,12 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    Command, CommandEnvelope, CommodityId, EconomicTransaction, EventDomain, EventId,
-    InventoryAccount, InventoryAccountId, InventoryAccountKind, MoneyAccount, MoneyAccountId,
-    MoneyAccountKind, MoneyCp, Quantity, SimTick, TransactionId, WorldRevision, WorldState,
+    Command, CommandEnvelope, CommodityId, ConsumptionRecord, EconomicTransaction, EventDomain,
+    EventId, EventPayload, InventoryAccount, InventoryAccountId, InventoryAccountKind,
+    InventoryPosting, MoneyAccount, MoneyAccountId, MoneyAccountKind, MoneyCp, MoneyPosting,
+    PopulationCohort, PopulationCohortId, ProductionBatch, ProductionBatchId,
+    ProductionBatchStatus, ProductionRecipe, ProductionSite, ProductionSiteId, Quantity, RecipeId,
+    ScheduledEvent, SimTick, TransactionId, WorldRevision, WorldState,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -19,6 +22,8 @@ pub enum ApplyError {
     UnknownActiveEvent(EventId),
     EventSequenceOverflow,
     EventGenerationOverflow(EventId),
+    TimeOverflow,
+    CycleOverflow,
     RevisionOverflow,
     DuplicateInventoryAccount(InventoryAccountId),
     DuplicateMoneyAccount(MoneyAccountId),
@@ -43,6 +48,30 @@ pub enum ApplyError {
         attempted: MoneyCp,
     },
     ArithmeticOverflow,
+    DuplicateRecipe(RecipeId),
+    InvalidRecipeQuantity(RecipeId),
+    DuplicateProductionSite(ProductionSiteId),
+    UnknownRecipe(RecipeId),
+    InvalidProductionDuration(ProductionSiteId),
+    InvalidProductionAccountKind {
+        account_id: InventoryAccountId,
+        expected: InventoryAccountKind,
+    },
+    ProductionAccountsMustBeDistinct(ProductionSiteId),
+    DuplicateProductionBatch(ProductionBatchId),
+    UnknownProductionSite(ProductionSiteId),
+    UnknownProductionBatch(ProductionBatchId),
+    ProductionBatchAlreadyCompleted(ProductionBatchId),
+    ProductionBatchNotDue {
+        batch_id: ProductionBatchId,
+        completes_at: SimTick,
+        current: SimTick,
+    },
+    DuplicatePopulationCohort(PopulationCohortId),
+    InvalidPopulationSize(PopulationCohortId),
+    InvalidConsumptionQuantity(PopulationCohortId),
+    InvalidConsumptionInterval(PopulationCohortId),
+    UnknownPopulationCohort(PopulationCohortId),
 }
 
 pub struct WorldReducer;
@@ -50,12 +79,18 @@ pub struct WorldReducer;
 impl WorldReducer {
     pub fn apply(state: &mut WorldState, envelope: &CommandEnvelope) -> Result<(), ApplyError> {
         match envelope.command() {
-            Command::AdvanceTo { tick } => Self::advance_to(state, *tick),
+            Command::AdvanceTo { tick } => Self::advance_to(state, envelope.sequence(), *tick),
             Command::ScheduleEvent {
                 event_id,
                 at_tick,
                 domain,
-            } => Self::schedule_event(state, event_id, *at_tick, *domain),
+            } => Self::schedule_event(
+                state,
+                event_id,
+                *at_tick,
+                *domain,
+                EventPayload::Noop,
+            ),
             Command::CancelEvent { event_id } => Self::cancel_event(state, event_id),
             Command::OpenInventoryAccount { account_id, kind } => {
                 Self::open_inventory_account(state, account_id, *kind)
@@ -65,6 +100,16 @@ impl WorldReducer {
             }
             Command::ApplyTransaction { transaction } => {
                 Self::apply_transaction(state, envelope.sequence(), transaction)
+            }
+            Command::RegisterProductionRecipe { recipe } => {
+                Self::register_recipe(state, recipe)
+            }
+            Command::RegisterProductionSite { site } => Self::register_site(state, site),
+            Command::StartProductionBatch { batch_id, site_id } => {
+                Self::start_batch(state, envelope.sequence(), batch_id, site_id)
+            }
+            Command::RegisterPopulationCohort { cohort } => {
+                Self::register_cohort(state, cohort)
             }
         }
     }
@@ -78,15 +123,51 @@ impl WorldReducer {
             .ok_or(ApplyError::RevisionOverflow)
     }
 
-    fn advance_to(state: &mut WorldState, requested: SimTick) -> Result<(), ApplyError> {
+    fn advance_to(
+        state: &mut WorldState,
+        command_sequence: u64,
+        requested: SimTick,
+    ) -> Result<(), ApplyError> {
         let current = state.tick();
         if requested < current {
             return Err(ApplyError::TimeRegression { current, requested });
         }
 
         let revision = Self::next_revision(state)?;
-        state.commit_advance(requested, revision);
+        let mut staged = state.clone();
+
+        while let Some(event) = staged.scheduler_mut().pop_next_due(requested) {
+            staged.set_tick_unversioned(event.at_tick());
+            Self::dispatch_scheduled_event(&mut staged, command_sequence, revision, &event)?;
+            staged.scheduler_mut().record_fired(event);
+        }
+
+        staged.commit_advance(requested, revision);
+        *state = staged;
         Ok(())
+    }
+
+    fn dispatch_scheduled_event(
+        state: &mut WorldState,
+        command_sequence: u64,
+        revision: WorldRevision,
+        event: &ScheduledEvent,
+    ) -> Result<(), ApplyError> {
+        match event.payload() {
+            EventPayload::Noop => Ok(()),
+            EventPayload::ProductionBatchComplete { batch_id } => {
+                Self::complete_batch(state, command_sequence, revision, batch_id)
+            }
+            EventPayload::PopulationConsumptionDue { cohort_id, cycle } => {
+                Self::consume_cohort(
+                    state,
+                    command_sequence,
+                    revision,
+                    cohort_id,
+                    *cycle,
+                )
+            }
+        }
     }
 
     fn schedule_event(
@@ -94,6 +175,7 @@ impl WorldReducer {
         event_id: &EventId,
         at_tick: SimTick,
         domain: EventDomain,
+        payload: EventPayload,
     ) -> Result<(), ApplyError> {
         let current = state.tick();
         if at_tick < current {
@@ -119,6 +201,36 @@ impl WorldReducer {
             domain,
             sequence,
             generation,
+            payload,
+            revision,
+        );
+        Ok(())
+    }
+
+    fn schedule_event_with_revision(
+        state: &mut WorldState,
+        event_id: EventId,
+        at_tick: SimTick,
+        domain: EventDomain,
+        payload: EventPayload,
+        revision: WorldRevision,
+    ) -> Result<(), ApplyError> {
+        let sequence = state
+            .scheduler()
+            .next_sequence()
+            .ok_or(ApplyError::EventSequenceOverflow)?;
+        let generation = state
+            .scheduler()
+            .next_generation(&event_id)
+            .ok_or_else(|| ApplyError::EventGenerationOverflow(event_id.clone()))?;
+
+        state.commit_schedule_event(
+            event_id,
+            at_tick,
+            domain,
+            sequence,
+            generation,
+            payload,
             revision,
         );
         Ok(())
@@ -164,6 +276,384 @@ impl WorldReducer {
 
         let revision = Self::next_revision(state)?;
         state.commit_money_account(MoneyAccount::new(account_id.clone(), kind), revision);
+        Ok(())
+    }
+
+    fn register_recipe(
+        state: &mut WorldState,
+        recipe: &ProductionRecipe,
+    ) -> Result<(), ApplyError> {
+        if state.production_recipe(recipe.id()).is_some() {
+            return Err(ApplyError::DuplicateRecipe(recipe.id().clone()));
+        }
+
+        if recipe.input_quantity().get() <= 0 || recipe.output_quantity().get() <= 0 {
+            return Err(ApplyError::InvalidRecipeQuantity(recipe.id().clone()));
+        }
+
+        let revision = Self::next_revision(state)?;
+        state.commit_recipe(recipe.clone(), revision);
+        Ok(())
+    }
+
+    fn register_site(state: &mut WorldState, site: &ProductionSite) -> Result<(), ApplyError> {
+        if state.production_site(site.id()).is_some() {
+            return Err(ApplyError::DuplicateProductionSite(site.id().clone()));
+        }
+
+        if state.production_recipe(site.recipe_id()).is_none() {
+            return Err(ApplyError::UnknownRecipe(site.recipe_id().clone()));
+        }
+
+        if site.batch_duration_ticks() == 0 {
+            return Err(ApplyError::InvalidProductionDuration(site.id().clone()));
+        }
+
+        let account_ids = [
+            site.input_account(),
+            site.wip_account(),
+            site.output_account(),
+            site.source_sink_account(),
+        ];
+
+        let mut distinct = std::collections::BTreeSet::new();
+        if !account_ids
+            .iter()
+            .all(|account_id| distinct.insert((*account_id).clone()))
+        {
+            return Err(ApplyError::ProductionAccountsMustBeDistinct(site.id().clone()));
+        }
+
+        Self::require_inventory_account_kind(
+            state,
+            site.input_account(),
+            InventoryAccountKind::Holding,
+        )?;
+        Self::require_inventory_account_kind(
+            state,
+            site.wip_account(),
+            InventoryAccountKind::Holding,
+        )?;
+        Self::require_inventory_account_kind(
+            state,
+            site.output_account(),
+            InventoryAccountKind::Holding,
+        )?;
+        Self::require_inventory_account_kind(
+            state,
+            site.source_sink_account(),
+            InventoryAccountKind::SourceOrSink,
+        )?;
+
+        let revision = Self::next_revision(state)?;
+        state.commit_site(site.clone(), revision);
+        Ok(())
+    }
+
+    fn start_batch(
+        state: &mut WorldState,
+        command_sequence: u64,
+        batch_id: &ProductionBatchId,
+        site_id: &ProductionSiteId,
+    ) -> Result<(), ApplyError> {
+        if state.production_batch(batch_id).is_some() {
+            return Err(ApplyError::DuplicateProductionBatch(batch_id.clone()));
+        }
+
+        let site = state
+            .production_site(site_id)
+            .cloned()
+            .ok_or_else(|| ApplyError::UnknownProductionSite(site_id.clone()))?;
+        let recipe = state
+            .production_recipe(site.recipe_id())
+            .cloned()
+            .ok_or_else(|| ApplyError::UnknownRecipe(site.recipe_id().clone()))?;
+
+        let completes_at = state
+            .tick()
+            .checked_add(site.batch_duration_ticks())
+            .ok_or(ApplyError::TimeOverflow)?;
+
+        let transaction = EconomicTransaction::new(
+            TransactionId::new(format!("production.start.{batch_id}")),
+            vec![
+                InventoryPosting::new(
+                    site.input_account().clone(),
+                    recipe.input_commodity().clone(),
+                    Quantity::new(-recipe.input_quantity().get()),
+                ),
+                InventoryPosting::new(
+                    site.wip_account().clone(),
+                    recipe.input_commodity().clone(),
+                    recipe.input_quantity(),
+                ),
+            ],
+            vec![],
+        );
+
+        Self::validate_transaction(state, &transaction)?;
+
+        let event_id = EventId::new(format!("production.complete.{batch_id}"));
+        let event_sequence = state
+            .scheduler()
+            .next_sequence()
+            .ok_or(ApplyError::EventSequenceOverflow)?;
+        let event_generation = state
+            .scheduler()
+            .next_generation(&event_id)
+            .ok_or_else(|| ApplyError::EventGenerationOverflow(event_id.clone()))?;
+        let revision = Self::next_revision(state)?;
+
+        state.commit_transaction(&transaction, command_sequence, revision);
+        state.commit_batch_started(
+            ProductionBatch::new(
+                batch_id.clone(),
+                site.id().clone(),
+                recipe.id().clone(),
+                state.tick(),
+                completes_at,
+            ),
+            revision,
+        );
+        state.commit_schedule_event(
+            event_id,
+            completes_at,
+            EventDomain::Production,
+            event_sequence,
+            event_generation,
+            EventPayload::ProductionBatchComplete {
+                batch_id: batch_id.clone(),
+            },
+            revision,
+        );
+
+        Ok(())
+    }
+
+    fn complete_batch(
+        state: &mut WorldState,
+        command_sequence: u64,
+        revision: WorldRevision,
+        batch_id: &ProductionBatchId,
+    ) -> Result<(), ApplyError> {
+        let batch = state
+            .production_batch(batch_id)
+            .cloned()
+            .ok_or_else(|| ApplyError::UnknownProductionBatch(batch_id.clone()))?;
+
+        if batch.status() == ProductionBatchStatus::Completed {
+            return Err(ApplyError::ProductionBatchAlreadyCompleted(batch_id.clone()));
+        }
+
+        if state.tick() < batch.completes_at() {
+            return Err(ApplyError::ProductionBatchNotDue {
+                batch_id: batch_id.clone(),
+                completes_at: batch.completes_at(),
+                current: state.tick(),
+            });
+        }
+
+        let site = state
+            .production_site(batch.site_id())
+            .cloned()
+            .ok_or_else(|| ApplyError::UnknownProductionSite(batch.site_id().clone()))?;
+        let recipe = state
+            .production_recipe(batch.recipe_id())
+            .cloned()
+            .ok_or_else(|| ApplyError::UnknownRecipe(batch.recipe_id().clone()))?;
+
+        let transaction = EconomicTransaction::new(
+            TransactionId::new(format!("production.complete.{batch_id}")),
+            vec![
+                InventoryPosting::new(
+                    site.wip_account().clone(),
+                    recipe.input_commodity().clone(),
+                    Quantity::new(-recipe.input_quantity().get()),
+                ),
+                InventoryPosting::new(
+                    site.source_sink_account().clone(),
+                    recipe.input_commodity().clone(),
+                    recipe.input_quantity(),
+                ),
+                InventoryPosting::new(
+                    site.source_sink_account().clone(),
+                    recipe.output_commodity().clone(),
+                    Quantity::new(-recipe.output_quantity().get()),
+                ),
+                InventoryPosting::new(
+                    site.output_account().clone(),
+                    recipe.output_commodity().clone(),
+                    recipe.output_quantity(),
+                ),
+            ],
+            vec![],
+        );
+
+        Self::validate_transaction(state, &transaction)?;
+        state.commit_transaction(&transaction, command_sequence, revision);
+        state.commit_batch_completed(batch_id, revision);
+        Ok(())
+    }
+
+    fn register_cohort(
+        state: &mut WorldState,
+        cohort: &PopulationCohort,
+    ) -> Result<(), ApplyError> {
+        if state.population_cohort(cohort.id()).is_some() {
+            return Err(ApplyError::DuplicatePopulationCohort(cohort.id().clone()));
+        }
+
+        if cohort.population() == 0 {
+            return Err(ApplyError::InvalidPopulationSize(cohort.id().clone()));
+        }
+
+        if cohort.quantity_per_cycle().get() <= 0 {
+            return Err(ApplyError::InvalidConsumptionQuantity(cohort.id().clone()));
+        }
+
+        if cohort.interval_ticks() == 0 {
+            return Err(ApplyError::InvalidConsumptionInterval(cohort.id().clone()));
+        }
+
+        Self::require_inventory_account_kind(
+            state,
+            cohort.inventory_account(),
+            InventoryAccountKind::Holding,
+        )?;
+        Self::require_inventory_account_kind(
+            state,
+            cohort.sink_account(),
+            InventoryAccountKind::SourceOrSink,
+        )?;
+
+        let first_due = state
+            .tick()
+            .checked_add(cohort.interval_ticks())
+            .ok_or(ApplyError::TimeOverflow)?;
+        let event_id = EventId::new(format!("population.consume.{}", cohort.id()));
+        let event_sequence = state
+            .scheduler()
+            .next_sequence()
+            .ok_or(ApplyError::EventSequenceOverflow)?;
+        let event_generation = state
+            .scheduler()
+            .next_generation(&event_id)
+            .ok_or_else(|| ApplyError::EventGenerationOverflow(event_id.clone()))?;
+        let revision = Self::next_revision(state)?;
+
+        state.commit_cohort(cohort.clone(), revision);
+        state.commit_schedule_event(
+            event_id,
+            first_due,
+            EventDomain::Population,
+            event_sequence,
+            event_generation,
+            EventPayload::PopulationConsumptionDue {
+                cohort_id: cohort.id().clone(),
+                cycle: 1,
+            },
+            revision,
+        );
+
+        Ok(())
+    }
+
+    fn consume_cohort(
+        state: &mut WorldState,
+        command_sequence: u64,
+        revision: WorldRevision,
+        cohort_id: &PopulationCohortId,
+        cycle: u64,
+    ) -> Result<(), ApplyError> {
+        let cohort = state
+            .population_cohort(cohort_id)
+            .cloned()
+            .ok_or_else(|| ApplyError::UnknownPopulationCohort(cohort_id.clone()))?;
+
+        let requested = cohort.quantity_per_cycle();
+        let available = state
+            .inventory_balance(cohort.inventory_account(), cohort.commodity_id())
+            .ok_or_else(|| ApplyError::UnknownInventoryAccount(cohort.inventory_account().clone()))?;
+
+        let served_value = available.get().max(0).min(requested.get());
+        let served = Quantity::new(served_value);
+        let unmet = Quantity::new(
+            requested
+                .get()
+                .checked_sub(served_value)
+                .ok_or(ApplyError::ArithmeticOverflow)?,
+        );
+
+        if served_value > 0 {
+            let transaction = EconomicTransaction::new(
+                TransactionId::new(format!("consumption.{cohort_id}.{cycle}")),
+                vec![
+                    InventoryPosting::new(
+                        cohort.inventory_account().clone(),
+                        cohort.commodity_id().clone(),
+                        Quantity::new(-served_value),
+                    ),
+                    InventoryPosting::new(
+                        cohort.sink_account().clone(),
+                        cohort.commodity_id().clone(),
+                        served,
+                    ),
+                ],
+                vec![],
+            );
+
+            Self::validate_transaction(state, &transaction)?;
+            state.commit_transaction(&transaction, command_sequence, revision);
+        }
+
+        state.commit_consumption_record(
+            ConsumptionRecord::new(
+                cohort_id.clone(),
+                cycle,
+                state.tick(),
+                cohort.commodity_id().clone(),
+                requested,
+                served,
+                unmet,
+            ),
+            revision,
+        );
+
+        let next_cycle = cycle.checked_add(1).ok_or(ApplyError::CycleOverflow)?;
+        let next_tick = state
+            .tick()
+            .checked_add(cohort.interval_ticks())
+            .ok_or(ApplyError::TimeOverflow)?;
+
+        Self::schedule_event_with_revision(
+            state,
+            EventId::new(format!("population.consume.{cohort_id}")),
+            next_tick,
+            EventDomain::Population,
+            EventPayload::PopulationConsumptionDue {
+                cohort_id: cohort_id.clone(),
+                cycle: next_cycle,
+            },
+            revision,
+        )
+    }
+
+    fn require_inventory_account_kind(
+        state: &WorldState,
+        account_id: &InventoryAccountId,
+        expected: InventoryAccountKind,
+    ) -> Result<(), ApplyError> {
+        let account = state
+            .inventory_account(account_id)
+            .ok_or_else(|| ApplyError::UnknownInventoryAccount(account_id.clone()))?;
+
+        if account.kind() != expected {
+            return Err(ApplyError::InvalidProductionAccountKind {
+                account_id: account_id.clone(),
+                expected,
+            });
+        }
+
         Ok(())
     }
 
