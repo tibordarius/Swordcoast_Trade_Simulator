@@ -1,7 +1,10 @@
 # PH4-005 Checkpoint
 
 ## Current intent
-Implement a minimal executable ScenarioPack and deterministic loader.
+Finish verification of the standalone executable ScenarioPack boundary.
+
+## Current state
+Schema, validation, registry compilation, initialization compilation, safe initialize API, and fixture tests are implemented.
 
 ## Exact next step
-Add scenario IDs and schema structs.
+Inspect the latest GitHub Actions result. If green, close PH4-005 and merge.
