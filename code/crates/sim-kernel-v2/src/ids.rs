@@ -32,6 +32,10 @@ string_id!(InventoryAccountId);
 string_id!(MarketId);
 string_id!(MoneyAccountId);
 string_id!(PlaceId);
+string_id!(PopulationCohortId);
+string_id!(ProductionBatchId);
+string_id!(ProductionSiteId);
+string_id!(RecipeId);
 string_id!(RouteEdgeId);
 string_id!(ShipmentId);
 string_id!(TransactionId);
@@ -39,7 +43,10 @@ string_id!(UnitId);
 
 #[cfg(test)]
 mod tests {
-    use super::{ActorId, EventId, RouteEdgeId, TransactionId, UnitId};
+    use super::{
+        ActorId, EventId, PopulationCohortId, ProductionBatchId, RecipeId, RouteEdgeId,
+        TransactionId, UnitId,
+    };
 
     #[test]
     fn stable_id_keeps_exact_external_value() {
@@ -66,6 +73,19 @@ mod tests {
         assert_eq!(
             RouteEdgeId::new("route.waterdeep-neverwinter").as_str(),
             "route.waterdeep-neverwinter"
+        );
+    }
+
+    #[test]
+    fn economy_domain_ids_remain_distinct() {
+        assert_eq!(RecipeId::new("recipe.flour").as_str(), "recipe.flour");
+        assert_eq!(
+            ProductionBatchId::new("batch.001").as_str(),
+            "batch.001"
+        );
+        assert_eq!(
+            PopulationCohortId::new("cohort.waterdeep.common").as_str(),
+            "cohort.waterdeep.common"
         );
     }
 }
