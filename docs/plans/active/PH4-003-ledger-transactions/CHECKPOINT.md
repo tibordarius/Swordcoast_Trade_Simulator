@@ -1,7 +1,13 @@
 # PH4-003 Checkpoint
 
 ## Current intent
-Implement account and transaction primitives, then wire them into WorldState/WorldReducer.
+PH4-003 implementation and verification are complete.
+
+## Commands / verification
+GitHub Actions run 36870329971 passed all jobs.
+
+## Current failure
+None.
 
 ## Exact next step
-Extend typed IDs and create ledger/transaction modules.
+Review and merge PH4-003.
