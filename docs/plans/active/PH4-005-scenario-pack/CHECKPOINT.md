@@ -1,7 +1,13 @@
 # PH4-005 Checkpoint
 
 ## Current intent
-Implement standalone JSON model/validator, then compile opening balances into reducer commands.
+PH4-005 implementation and verification are complete.
+
+## Commands / verification
+GitHub Actions run 36878536869 passed all jobs, including the xtask pack-validation gate.
+
+## Current failure
+None.
 
 ## Exact next step
-Create scenario-pack-v2 crate and register it in the workspace.
+Review and merge PH4-005.
