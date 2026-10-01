@@ -2,12 +2,13 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{EventId, SimTick};
+use crate::{EventId, PopulationCohortId, ProductionBatchId, SimTick};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum EventDomain {
     System,
     Production,
+    Population,
     Logistics,
     Information,
     Shock,
@@ -19,11 +20,24 @@ impl EventDomain {
         match self {
             Self::System => 0,
             Self::Production => 10,
-            Self::Logistics => 20,
-            Self::Information => 30,
-            Self::Shock => 40,
+            Self::Population => 20,
+            Self::Logistics => 30,
+            Self::Information => 40,
+            Self::Shock => 50,
         }
     }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum EventPayload {
+    Noop,
+    ProductionBatchComplete {
+        batch_id: ProductionBatchId,
+    },
+    PopulationConsumptionDue {
+        cohort_id: PopulationCohortId,
+        cycle: u64,
+    },
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -33,6 +47,7 @@ pub struct ScheduledEvent {
     domain: EventDomain,
     sequence: u64,
     generation: u64,
+    payload: EventPayload,
 }
 
 impl ScheduledEvent {
@@ -60,6 +75,11 @@ impl ScheduledEvent {
     pub const fn generation(&self) -> u64 {
         self.generation
     }
+
+    #[must_use]
+    pub fn payload(&self) -> &EventPayload {
+        &self.payload
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -69,6 +89,7 @@ pub struct FiredEvent {
     domain: EventDomain,
     sequence: u64,
     generation: u64,
+    payload: EventPayload,
 }
 
 impl FiredEvent {
@@ -96,6 +117,11 @@ impl FiredEvent {
     pub const fn generation(&self) -> u64 {
         self.generation
     }
+
+    #[must_use]
+    pub fn payload(&self) -> &EventPayload {
+        &self.payload
+    }
 }
 
 impl From<ScheduledEvent> for FiredEvent {
@@ -106,6 +132,7 @@ impl From<ScheduledEvent> for FiredEvent {
             domain: event.domain,
             sequence: event.sequence,
             generation: event.generation,
+            payload: event.payload,
         }
     }
 }
@@ -176,6 +203,7 @@ impl EventSchedulerState {
         domain: EventDomain,
         sequence: u64,
         generation: u64,
+        payload: EventPayload,
     ) {
         self.next_sequence = sequence;
         self.versions.insert(event_id.clone(), generation);
@@ -187,6 +215,7 @@ impl EventSchedulerState {
             domain,
             sequence,
             generation,
+            payload,
         };
 
         self.queue.insert(EventOrderKey::for_event(&event), event);
@@ -197,42 +226,50 @@ impl EventSchedulerState {
         self.active.remove(event_id);
     }
 
-    pub(crate) fn drain_due(&mut self, through: SimTick) {
-        let keys: Vec<EventOrderKey> = self
-            .queue
-            .keys()
-            .take_while(|key| key.at_tick <= through)
-            .copied()
-            .collect();
+    pub(crate) fn pop_next_due(&mut self, through: SimTick) -> Option<ScheduledEvent> {
+        loop {
+            let key = self.queue.keys().next().copied()?;
+            if key.at_tick > through {
+                return None;
+            }
 
-        for key in keys {
             let event = self
                 .queue
                 .remove(&key)
-                .expect("queued event key disappeared during deterministic drain");
+                .expect("queued event key disappeared during deterministic pop");
 
             match self.active.get(event.event_id()) {
                 Some(active_generation) if *active_generation == event.generation() => {
                     self.active.remove(event.event_id());
-                    self.fired_events.push(event.into());
+                    return Some(event);
                 }
                 _ => {
-                    // Old generations remain queued until their scheduled tick.
-                    // When encountered, they are discarded without firing.
+                    // Stale generations are discarded when their scheduled time is reached.
                 }
             }
+        }
+    }
+
+    pub(crate) fn record_fired(&mut self, event: ScheduledEvent) {
+        self.fired_events.push(event.into());
+    }
+
+    pub(crate) fn drain_due(&mut self, through: SimTick) {
+        while let Some(event) = self.pop_next_due(through) {
+            self.record_fired(event);
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{EventDomain, EventSchedulerState};
+    use super::{EventDomain, EventPayload, EventSchedulerState};
     use crate::{EventId, SimTick};
 
     #[test]
     fn domain_priority_is_explicit_and_stable() {
-        assert!(EventDomain::Production.priority() < EventDomain::Logistics.priority());
+        assert!(EventDomain::Production.priority() < EventDomain::Population.priority());
+        assert!(EventDomain::Population.priority() < EventDomain::Logistics.priority());
         assert!(EventDomain::Logistics.priority() < EventDomain::Information.priority());
     }
 
@@ -249,6 +286,7 @@ mod tests {
             EventDomain::Logistics,
             logistics_sequence,
             logistics_generation,
+            EventPayload::Noop,
         );
 
         let production_id = EventId::new("production");
@@ -260,6 +298,7 @@ mod tests {
             EventDomain::Production,
             production_sequence,
             production_generation,
+            EventPayload::Noop,
         );
 
         scheduler.drain_due(SimTick::new(10));
