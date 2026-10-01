@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::{CommodityId, MarketId, PlaceId, RouteEdgeId, SimTick, UnitId};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum DataStatus {
     Source,
     ReviewedMapping,
@@ -14,6 +15,7 @@ pub enum DataStatus {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PlaceKind {
     Region,
     Settlement,
