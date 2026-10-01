@@ -4,8 +4,8 @@ use crate::{fnv1a64, WorldState};
 
 /// Snapshot schema version for the v2 kernel.
 ///
-/// Version 3 adds deterministic scheduled-event state and fired-event history.
-pub const SNAPSHOT_FORMAT_VERSION: u32 = 3;
+/// Version 4 adds production recipes/sites/batches, population cohorts, consumption records, and typed scheduler payload state.
+pub const SNAPSHOT_FORMAT_VERSION: u32 = 4;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SnapshotError {

@@ -2,7 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     EconomicTransaction, EventDomain, EventId, InventoryAccountId, InventoryAccountKind,
-    MoneyAccountId, MoneyAccountKind, SimTick,
+    MoneyAccountId, MoneyAccountKind, PopulationCohort, ProductionBatchId, ProductionRecipe,
+    ProductionSite, ProductionSiteId, SimTick,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -51,5 +52,18 @@ pub enum Command {
     },
     ApplyTransaction {
         transaction: EconomicTransaction,
+    },
+    RegisterProductionRecipe {
+        recipe: ProductionRecipe,
+    },
+    RegisterProductionSite {
+        site: ProductionSite,
+    },
+    StartProductionBatch {
+        batch_id: ProductionBatchId,
+        site_id: ProductionSiteId,
+    },
+    RegisterPopulationCohort {
+        cohort: PopulationCohort,
     },
 }
