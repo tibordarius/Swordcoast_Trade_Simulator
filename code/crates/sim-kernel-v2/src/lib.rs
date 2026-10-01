@@ -31,7 +31,7 @@ pub use replay::{replay, ReplayError};
 pub use rng::{derive_stream_seed, SplitMix64};
 pub use scheduler::{EventDomain, EventSchedulerState, FiredEvent, ScheduledEvent};
 pub use snapshot::{
-    decode_snapshot, encode_snapshot, state_hash, SnapshotError, SNAPSHOT_FORMAT_V2,
+    decode_snapshot, encode_snapshot, state_hash, SnapshotError, SNAPSHOT_FORMAT_VERSION,
 };
 pub use state::{WorldRevision, WorldState};
 pub use time::SimTick;
