@@ -2,6 +2,7 @@ mod compile;
 mod constants;
 mod error;
 mod model;
+mod registry;
 mod validate;
 
 pub use compile::compile_initialization_commands;
@@ -11,6 +12,7 @@ pub use model::{
     OpeningMoneySpec, PackManifest, PlaceSpec, ProvenanceStatus, RouteSpec, ScenarioPack,
     UnitSpec, SCENARIO_PACK_SCHEMA_VERSION,
 };
+pub use registry::compile_registry;
 pub use validate::validate;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
