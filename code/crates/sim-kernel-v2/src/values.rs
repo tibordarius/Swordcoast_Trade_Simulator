@@ -6,10 +6,26 @@ pub struct MoneyCp(pub i128);
 
 impl MoneyCp {
     pub const ZERO: Self = Self(0);
-    #[must_use] pub const fn new(value: i128) -> Self { Self(value) }
-    #[must_use] pub const fn get(self) -> i128 { self.0 }
-    #[must_use] pub fn checked_add(self, rhs: Self) -> Option<Self> { self.0.checked_add(rhs.0).map(Self) }
-    #[must_use] pub fn checked_sub(self, rhs: Self) -> Option<Self> { self.0.checked_sub(rhs.0).map(Self) }
+
+    #[must_use]
+    pub const fn new(value: i128) -> Self {
+        Self(value)
+    }
+
+    #[must_use]
+    pub const fn get(self) -> i128 {
+        self.0
+    }
+
+    #[must_use]
+    pub fn checked_add(self, rhs: Self) -> Option<Self> {
+        self.0.checked_add(rhs.0).map(Self)
+    }
+
+    #[must_use]
+    pub fn checked_sub(self, rhs: Self) -> Option<Self> {
+        self.0.checked_sub(rhs.0).map(Self)
+    }
 }
 
 /// Integral base-unit commodity quantity.
@@ -18,11 +34,20 @@ pub struct Quantity(pub i64);
 
 impl Quantity {
     pub const ZERO: Self = Self(0);
-    #[must_use] pub const fn new(value: i64) -> Self { Self(value) }
-    #[must_use] pub const fn get(self) -> i64 { self.0 }
+
+    #[must_use]
+    pub const fn new(value: i64) -> Self {
+        Self(value)
+    }
+
+    #[must_use]
+    pub const fn get(self) -> i64 {
+        self.0
+    }
 }
 
 /// Fixed-point copper pieces per commodity base unit.
+///
 /// scaled_value divided by scale equals copper pieces per base unit.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct UnitPrice {
@@ -32,27 +57,71 @@ pub struct UnitPrice {
 
 impl UnitPrice {
     pub const DEFAULT_SCALE: u32 = 1_000;
+    pub const PPM_SCALE: i128 = 1_000_000;
 
     pub fn new(scaled_value: i128, scale: u32) -> Result<Self, UnitPriceError> {
-        if scale == 0 { return Err(UnitPriceError::ZeroScale); }
-        Ok(Self { scaled_value, scale })
+        if scale == 0 {
+            return Err(UnitPriceError::ZeroScale);
+        }
+
+        Ok(Self {
+            scaled_value,
+            scale,
+        })
     }
 
-    #[must_use] pub const fn from_milli_cp(scaled_value: i128) -> Self {
-        Self { scaled_value, scale: Self::DEFAULT_SCALE }
+    #[must_use]
+    pub const fn from_milli_cp(scaled_value: i128) -> Self {
+        Self {
+            scaled_value,
+            scale: Self::DEFAULT_SCALE,
+        }
     }
 
-    #[must_use] pub const fn scaled_value(self) -> i128 { self.scaled_value }
-    #[must_use] pub const fn scale(self) -> u32 { self.scale }
+    #[must_use]
+    pub const fn scaled_value(self) -> i128 {
+        self.scaled_value
+    }
+
+    #[must_use]
+    pub const fn scale(self) -> u32 {
+        self.scale
+    }
+
+    #[must_use]
+    pub const fn is_positive(self) -> bool {
+        self.scaled_value > 0
+    }
+
+    pub fn checked_mul_ppm(self, factor_ppm: i64) -> Result<Self, UnitPriceError> {
+        if factor_ppm < 0 {
+            return Err(UnitPriceError::NegativeFactor);
+        }
+
+        let numerator = self
+            .scaled_value
+            .checked_mul(i128::from(factor_ppm))
+            .ok_or(UnitPriceError::Overflow)?;
+        let scaled_value = numerator / Self::PPM_SCALE;
+
+        Self::new(scaled_value, self.scale)
+    }
 
     pub fn total_for(self, quantity: Quantity) -> Result<MoneyCp, UnitPriceError> {
-        let numerator = self.scaled_value.checked_mul(i128::from(quantity.0)).ok_or(UnitPriceError::Overflow)?;
+        let numerator = self
+            .scaled_value
+            .checked_mul(i128::from(quantity.0))
+            .ok_or(UnitPriceError::Overflow)?;
         Ok(MoneyCp(numerator / i128::from(self.scale)))
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum UnitPriceError { ZeroScale, Overflow }
+pub enum UnitPriceError {
+    ZeroScale,
+    NegativeFactor,
+    Overflow,
+}
 
 #[cfg(test)]
 mod tests {
@@ -65,13 +134,25 @@ mod tests {
     }
 
     #[test]
+    fn ppm_scaling_is_fixed_point_and_deterministic() {
+        let price = UnitPrice::from_milli_cp(2_000);
+        assert_eq!(
+            price.checked_mul_ppm(1_250_000).unwrap(),
+            UnitPrice::from_milli_cp(2_500)
+        );
+    }
+
+    #[test]
     fn rejects_zero_scale() {
         assert_eq!(UnitPrice::new(1, 0), Err(UnitPriceError::ZeroScale));
     }
 
     #[test]
     fn money_arithmetic_is_checked() {
-        assert_eq!(MoneyCp::new(10).checked_sub(MoneyCp::new(3)), Some(MoneyCp::new(7)));
+        assert_eq!(
+            MoneyCp::new(10).checked_sub(MoneyCp::new(3)),
+            Some(MoneyCp::new(7))
+        );
         assert_eq!(MoneyCp::new(i128::MAX).checked_add(MoneyCp::new(1)), None);
     }
 }
