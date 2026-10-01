@@ -6,6 +6,7 @@ pub mod command;
 pub mod hash;
 pub mod ids;
 pub mod ledger;
+pub mod market;
 pub mod population;
 pub mod production;
 pub mod reducer;
@@ -22,13 +23,17 @@ pub mod values;
 pub use command::{Command, CommandEnvelope};
 pub use hash::fnv1a64;
 pub use ids::{
-    ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MoneyAccountId, PlaceId,
+    ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MarketTradeId, MoneyAccountId, PlaceId,
     PopulationCohortId, ProductionBatchId, ProductionSiteId, RecipeId, RouteEdgeId,
     ScenarioPackId, ShipmentId, TransactionId, UnitId,
 };
 pub use ledger::{
     InventoryAccount, InventoryAccountKind, InventoryLedgerEntry, MoneyAccount, MoneyAccountKind,
     MoneyLedgerEntry,
+};
+pub use market::{
+    derive_market_quote, execution_price, MarketListing, MarketMathError, MarketQuote, MarketSide,
+    MarketTrade, PriceExplanation,
 };
 pub use population::{ConsumptionRecord, PopulationCohort};
 pub use production::{
