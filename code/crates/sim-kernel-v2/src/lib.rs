@@ -19,8 +19,8 @@ pub mod values;
 pub use command::{Command, CommandEnvelope};
 pub use hash::fnv1a64;
 pub use ids::{
-    ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MoneyAccountId, ShipmentId,
-    TransactionId,
+    ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MoneyAccountId, PlaceId,
+    RouteEdgeId, ShipmentId, TransactionId, UnitId,
 };
 pub use ledger::{
     InventoryAccount, InventoryAccountKind, InventoryLedgerEntry, MoneyAccount, MoneyAccountKind,
