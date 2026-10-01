@@ -7,12 +7,14 @@ use crate::{
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum InventoryAccountKind {
     Holding,
     SourceOrSink,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum MoneyAccountKind {
     Holding,
     External,
