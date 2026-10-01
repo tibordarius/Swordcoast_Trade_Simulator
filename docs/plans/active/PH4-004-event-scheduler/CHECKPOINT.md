@@ -1,7 +1,13 @@
 # PH4-004 Checkpoint
 
 ## Current intent
-Implement deterministic event queue, invalidation generations, and AdvanceTo draining.
+PH4-004 implementation and verification are complete.
+
+## Commands / verification
+GitHub Actions run 36876220349 passed all jobs.
+
+## Current failure
+None.
 
 ## Exact next step
-Add EventId and scheduler module.
+Review and merge PH4-004.
