@@ -2,7 +2,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{fnv1a64, WorldState};
 
-pub const SNAPSHOT_FORMAT_V2: u32 = 1;
+/// Snapshot schema version.
+///
+/// Version 2 adds authoritative account, ledger, and applied-transaction state.
+pub const SNAPSHOT_FORMAT_V2: u32 = 2;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SnapshotError {
