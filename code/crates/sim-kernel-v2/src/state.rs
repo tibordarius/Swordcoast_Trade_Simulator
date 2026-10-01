@@ -3,9 +3,10 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    EconomicTransaction, EventDomain, EventId, EventSchedulerState, InventoryAccount,
-    InventoryAccountId, InventoryLedgerEntry, MoneyAccount, MoneyAccountId, MoneyLedgerEntry,
-    Quantity, SimTick, TransactionId,
+    ConsumptionRecord, EconomicTransaction, EventDomain, EventId, EventPayload, EventSchedulerState,
+    InventoryAccount, InventoryAccountId, InventoryLedgerEntry, MoneyAccount, MoneyAccountId,
+    MoneyLedgerEntry, PopulationCohort, PopulationCohortId, ProductionBatch, ProductionBatchId,
+    ProductionRecipe, ProductionSite, ProductionSiteId, Quantity, RecipeId, SimTick, TransactionId,
 };
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -36,6 +37,11 @@ pub struct WorldState {
     money_ledger: Vec<MoneyLedgerEntry>,
     applied_transactions: BTreeSet<TransactionId>,
     scheduler: EventSchedulerState,
+    production_recipes: BTreeMap<RecipeId, ProductionRecipe>,
+    production_sites: BTreeMap<ProductionSiteId, ProductionSite>,
+    production_batches: BTreeMap<ProductionBatchId, ProductionBatch>,
+    population_cohorts: BTreeMap<PopulationCohortId, PopulationCohort>,
+    consumption_records: Vec<ConsumptionRecord>,
 }
 
 impl WorldState {
@@ -51,6 +57,11 @@ impl WorldState {
             money_ledger: Vec::new(),
             applied_transactions: BTreeSet::new(),
             scheduler: EventSchedulerState::default(),
+            production_recipes: BTreeMap::new(),
+            production_sites: BTreeMap::new(),
+            production_batches: BTreeMap::new(),
+            population_cohorts: BTreeMap::new(),
+            consumption_records: Vec::new(),
         }
     }
 
@@ -114,8 +125,40 @@ impl WorldState {
         self.applied_transactions.contains(transaction_id)
     }
 
+    #[must_use]
+    pub fn production_recipe(&self, recipe_id: &RecipeId) -> Option<&ProductionRecipe> {
+        self.production_recipes.get(recipe_id)
+    }
+
+    #[must_use]
+    pub fn production_site(&self, site_id: &ProductionSiteId) -> Option<&ProductionSite> {
+        self.production_sites.get(site_id)
+    }
+
+    #[must_use]
+    pub fn production_batch(&self, batch_id: &ProductionBatchId) -> Option<&ProductionBatch> {
+        self.production_batches.get(batch_id)
+    }
+
+    #[must_use]
+    pub fn population_cohort(&self, cohort_id: &PopulationCohortId) -> Option<&PopulationCohort> {
+        self.population_cohorts.get(cohort_id)
+    }
+
+    #[must_use]
+    pub fn consumption_records(&self) -> &[ConsumptionRecord] {
+        &self.consumption_records
+    }
+
+    pub(crate) fn scheduler_mut(&mut self) -> &mut EventSchedulerState {
+        &mut self.scheduler
+    }
+
+    pub(crate) fn set_tick_unversioned(&mut self, tick: SimTick) {
+        self.tick = tick;
+    }
+
     pub(crate) fn commit_advance(&mut self, tick: SimTick, revision: WorldRevision) {
-        self.scheduler.drain_due(tick);
         self.tick = tick;
         self.revision = revision;
     }
@@ -141,10 +184,11 @@ impl WorldState {
         domain: EventDomain,
         sequence: u64,
         generation: u64,
+        payload: EventPayload,
         revision: WorldRevision,
     ) {
         self.scheduler
-            .commit_schedule(event_id, at_tick, domain, sequence, generation);
+            .commit_schedule(event_id, at_tick, domain, sequence, generation, payload);
         self.revision = revision;
     }
 
@@ -155,6 +199,59 @@ impl WorldState {
         revision: WorldRevision,
     ) {
         self.scheduler.commit_cancel(event_id, generation);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_recipe(
+        &mut self,
+        recipe: ProductionRecipe,
+        revision: WorldRevision,
+    ) {
+        self.production_recipes.insert(recipe.id().clone(), recipe);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_site(&mut self, site: ProductionSite, revision: WorldRevision) {
+        self.production_sites.insert(site.id().clone(), site);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_batch_started(
+        &mut self,
+        batch: ProductionBatch,
+        revision: WorldRevision,
+    ) {
+        self.production_batches.insert(batch.id().clone(), batch);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_batch_completed(
+        &mut self,
+        batch_id: &ProductionBatchId,
+        revision: WorldRevision,
+    ) {
+        self.production_batches
+            .get_mut(batch_id)
+            .expect("validated production batch missing during completion")
+            .mark_completed();
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_cohort(
+        &mut self,
+        cohort: PopulationCohort,
+        revision: WorldRevision,
+    ) {
+        self.population_cohorts.insert(cohort.id().clone(), cohort);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_consumption_record(
+        &mut self,
+        record: ConsumptionRecord,
+        revision: WorldRevision,
+    ) {
+        self.consumption_records.push(record);
         self.revision = revision;
     }
 
@@ -216,5 +313,6 @@ mod tests {
         assert!(state.inventory_ledger().is_empty());
         assert!(state.money_ledger().is_empty());
         assert_eq!(state.scheduler().active_event_count(), 0);
+        assert!(state.consumption_records().is_empty());
     }
 }
