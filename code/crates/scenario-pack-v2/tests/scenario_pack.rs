@@ -168,3 +168,50 @@ fn reserved_system_account_ids_are_rejected() {
     let error = validate_pack(pack).unwrap_err();
     assert!(issue_codes(error).contains(&"reserved_id".to_owned()));
 }
+
+
+#[test]
+fn dangling_market_place_is_rejected() {
+    let mut pack = raw_pack();
+    pack.markets[0].place_id = sim_kernel_v2::PlaceId::new("place.missing");
+
+    let error = validate_pack(pack).unwrap_err();
+    assert!(issue_codes(error).contains(&"unknown_place".to_owned()));
+}
+
+#[test]
+fn dangling_opening_balance_commodity_is_rejected() {
+    let mut pack = raw_pack();
+    pack.opening_inventory[0].commodity_id =
+        CommodityId::new("commodity.missing");
+
+    let error = validate_pack(pack).unwrap_err();
+    assert!(issue_codes(error).contains(&"unknown_commodity".to_owned()));
+}
+
+#[test]
+fn dangling_opening_money_account_is_rejected() {
+    let mut pack = raw_pack();
+    pack.opening_money[0].account_id = MoneyAccountId::new("cash.missing");
+
+    let error = validate_pack(pack).unwrap_err();
+    assert!(issue_codes(error).contains(&"unknown_money_account".to_owned()));
+}
+
+#[test]
+fn negative_opening_balances_are_rejected() {
+    let mut pack = raw_pack();
+    pack.opening_inventory[0].quantity = -1;
+    pack.opening_money[0].amount_cp = -1;
+
+    let error = validate_pack(pack).unwrap_err();
+    let codes = issue_codes(error);
+
+    assert_eq!(
+        codes
+            .iter()
+            .filter(|code| code.as_str() == "negative_opening_balance")
+            .count(),
+        2
+    );
+}
