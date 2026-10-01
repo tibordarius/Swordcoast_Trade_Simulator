@@ -2,8 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     EconomicTransaction, EventDomain, EventId, InventoryAccountId, InventoryAccountKind,
-    MoneyAccountId, MoneyAccountKind, PopulationCohort, ProductionBatchId, ProductionRecipe,
-    ProductionSite, ProductionSiteId, SimTick,
+    MarketId, MarketListing, MarketSide, MarketTradeId, MoneyAccountId, MoneyAccountKind,
+    PopulationCohort, ProductionBatchId, ProductionRecipe, ProductionSite, ProductionSiteId,
+    Quantity, SimTick, CommodityId,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -65,5 +66,17 @@ pub enum Command {
     },
     RegisterPopulationCohort {
         cohort: PopulationCohort,
+    },
+    RegisterMarketListing {
+        listing: MarketListing,
+    },
+    ExecuteMarketTrade {
+        trade_id: MarketTradeId,
+        market_id: MarketId,
+        commodity_id: CommodityId,
+        side: MarketSide,
+        quantity: Quantity,
+        actor_inventory_account: InventoryAccountId,
+        actor_money_account: MoneyAccountId,
     },
 }
