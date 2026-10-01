@@ -44,6 +44,8 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Tests
         run: cargo test --workspace --all-targets
+      - name: Validate v2 tiny ScenarioPack through xtask
+        run: cargo xtask pack-validate crates/scenario-pack-v2/tests/fixtures/tiny_sword_coast.json
 
   reference-model:
     runs-on: ubuntu-latest
