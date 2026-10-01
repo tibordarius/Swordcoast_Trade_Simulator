@@ -2,8 +2,10 @@
 resolver = "2"
 members = [
     "crates/sim-core",
+    "crates/sim-kernel-v2",
     "crates/world-data",
     "crates/persistence-pg",
     "apps/sim-cli",
     "apps/api",
+    "tools/xtask",
 ]

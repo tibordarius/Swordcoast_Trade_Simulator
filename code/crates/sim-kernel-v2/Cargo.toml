@@ -1,0 +1,8 @@
+[package]
+name = "sim-kernel-v2"
+version = "0.1.0"
+edition = "2021"
+license = "UNLICENSED"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
