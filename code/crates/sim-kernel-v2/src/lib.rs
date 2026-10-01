@@ -6,6 +6,8 @@ pub mod command;
 pub mod hash;
 pub mod ids;
 pub mod ledger;
+pub mod population;
+pub mod production;
 pub mod reducer;
 pub mod registry;
 pub mod replay;
@@ -21,11 +23,16 @@ pub use command::{Command, CommandEnvelope};
 pub use hash::fnv1a64;
 pub use ids::{
     ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MoneyAccountId, PlaceId,
-    RouteEdgeId, ScenarioPackId, ShipmentId, TransactionId, UnitId,
+    PopulationCohortId, ProductionBatchId, ProductionSiteId, RecipeId, RouteEdgeId,
+    ScenarioPackId, ShipmentId, TransactionId, UnitId,
 };
 pub use ledger::{
     InventoryAccount, InventoryAccountKind, InventoryLedgerEntry, MoneyAccount, MoneyAccountKind,
     MoneyLedgerEntry,
+};
+pub use population::{ConsumptionRecord, PopulationCohort};
+pub use production::{
+    ProductionBatch, ProductionBatchStatus, ProductionRecipe, ProductionSite,
 };
 pub use reducer::{ApplyError, WorldReducer};
 pub use registry::{
@@ -34,7 +41,9 @@ pub use registry::{
 };
 pub use replay::{replay, ReplayError};
 pub use rng::{derive_stream_seed, SplitMix64};
-pub use scheduler::{EventDomain, EventSchedulerState, FiredEvent, ScheduledEvent};
+pub use scheduler::{
+    EventDomain, EventPayload, EventSchedulerState, FiredEvent, ScheduledEvent,
+};
 pub use snapshot::{
     decode_snapshot, encode_snapshot, state_hash, SnapshotError, SNAPSHOT_FORMAT_VERSION,
 };
