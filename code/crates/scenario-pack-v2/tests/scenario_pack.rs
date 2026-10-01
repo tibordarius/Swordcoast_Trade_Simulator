@@ -1,10 +1,10 @@
 use scenario_pack_v2::{
-    compile_initialization_commands, load_json, validate_pack, ScenarioPack,
+    compile_initialization_commands, compile_registry, load_json, validate_pack, ScenarioPack,
     SCENARIO_PACK_SCHEMA_VERSION,
 };
 use sim_kernel_v2::{
-    replay, state_hash, CommodityId, InventoryAccountId, MoneyAccountId, MoneyCp, Quantity,
-    WorldState,
+    replay, state_hash, CommodityId, InventoryAccountId, MarketId, MoneyAccountId, MoneyCp,
+    Quantity, RouteEdgeId, WorldState,
 };
 
 const TINY: &str = include_str!("fixtures/tiny_sword_coast.json");
@@ -20,12 +20,23 @@ fn issue_codes(error: scenario_pack_v2::ValidationError) -> Vec<String> {
 #[test]
 fn tiny_pack_loads_with_expected_shape() {
     let pack = load_json(TINY).unwrap();
+    let registry = compile_registry(&pack).unwrap();
 
     assert_eq!(pack.pack().manifest.schema_version, SCENARIO_PACK_SCHEMA_VERSION);
     assert_eq!(pack.pack().markets.len(), 3);
     assert_eq!(pack.pack().commodities.len(), 5);
     assert_eq!(pack.pack().routes.len(), 2);
     assert_eq!(pack.pack().places.len(), 3);
+
+    assert_eq!(registry.markets().len(), 3);
+    assert_eq!(registry.commodities().len(), 5);
+    assert_eq!(registry.routes().len(), 2);
+    assert!(registry.markets().contains_key(&MarketId::new("market.waterdeep")));
+    assert!(
+        registry
+            .routes()
+            .contains_key(&RouteEdgeId::new("route.neverwinter-luskan"))
+    );
 }
 
 #[test]
@@ -143,8 +154,7 @@ fn self_loop_and_zero_distance_route_are_rejected() {
 #[test]
 fn dangling_opening_balance_account_is_rejected() {
     let mut pack = raw_pack();
-    pack.opening_inventory[0].account_id =
-        InventoryAccountId::new("inventory.missing");
+    pack.opening_inventory[0].account_id = InventoryAccountId::new("inventory.missing");
 
     let error = validate_pack(pack).unwrap_err();
     assert!(issue_codes(error).contains(&"unknown_inventory_account".to_owned()));
@@ -153,8 +163,7 @@ fn dangling_opening_balance_account_is_rejected() {
 #[test]
 fn reserved_system_account_ids_are_rejected() {
     let mut pack = raw_pack();
-    pack.inventory_accounts[0].id =
-        InventoryAccountId::new("system.opening.inventory");
+    pack.inventory_accounts[0].id = InventoryAccountId::new("system.opening.inventory");
 
     let error = validate_pack(pack).unwrap_err();
     assert!(issue_codes(error).contains(&"reserved_id".to_owned()));
