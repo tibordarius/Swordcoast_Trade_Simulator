@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    Command, CommandEnvelope, CommodityId, EconomicTransaction, InventoryAccount,
-    InventoryAccountId, InventoryAccountKind, MoneyAccount, MoneyAccountId, MoneyAccountKind,
-    MoneyCp, Quantity, SimTick, TransactionId, WorldRevision, WorldState,
+    Command, CommandEnvelope, CommodityId, EconomicTransaction, EventDomain, EventId,
+    InventoryAccount, InventoryAccountId, InventoryAccountKind, MoneyAccount, MoneyAccountId,
+    MoneyAccountKind, MoneyCp, Quantity, SimTick, TransactionId, WorldRevision, WorldState,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -12,6 +12,13 @@ pub enum ApplyError {
         current: SimTick,
         requested: SimTick,
     },
+    EventInPast {
+        current: SimTick,
+        requested: SimTick,
+    },
+    UnknownActiveEvent(EventId),
+    EventSequenceOverflow,
+    EventGenerationOverflow(EventId),
     RevisionOverflow,
     DuplicateInventoryAccount(InventoryAccountId),
     DuplicateMoneyAccount(MoneyAccountId),
@@ -44,6 +51,12 @@ impl WorldReducer {
     pub fn apply(state: &mut WorldState, envelope: &CommandEnvelope) -> Result<(), ApplyError> {
         match envelope.command() {
             Command::AdvanceTo { tick } => Self::advance_to(state, *tick),
+            Command::ScheduleEvent {
+                event_id,
+                at_tick,
+                domain,
+            } => Self::schedule_event(state, event_id, *at_tick, *domain),
+            Command::CancelEvent { event_id } => Self::cancel_event(state, event_id),
             Command::OpenInventoryAccount { account_id, kind } => {
                 Self::open_inventory_account(state, account_id, *kind)
             }
@@ -72,7 +85,57 @@ impl WorldReducer {
         }
 
         let revision = Self::next_revision(state)?;
-        state.commit_tick(requested, revision);
+        state.commit_advance(requested, revision);
+        Ok(())
+    }
+
+    fn schedule_event(
+        state: &mut WorldState,
+        event_id: &EventId,
+        at_tick: SimTick,
+        domain: EventDomain,
+    ) -> Result<(), ApplyError> {
+        let current = state.tick();
+        if at_tick < current {
+            return Err(ApplyError::EventInPast {
+                current,
+                requested: at_tick,
+            });
+        }
+
+        let sequence = state
+            .scheduler()
+            .next_sequence()
+            .ok_or(ApplyError::EventSequenceOverflow)?;
+        let generation = state
+            .scheduler()
+            .next_generation(event_id)
+            .ok_or_else(|| ApplyError::EventGenerationOverflow(event_id.clone()))?;
+        let revision = Self::next_revision(state)?;
+
+        state.commit_schedule_event(
+            event_id.clone(),
+            at_tick,
+            domain,
+            sequence,
+            generation,
+            revision,
+        );
+        Ok(())
+    }
+
+    fn cancel_event(state: &mut WorldState, event_id: &EventId) -> Result<(), ApplyError> {
+        if !state.scheduler().is_active(event_id) {
+            return Err(ApplyError::UnknownActiveEvent(event_id.clone()));
+        }
+
+        let generation = state
+            .scheduler()
+            .next_generation(event_id)
+            .ok_or_else(|| ApplyError::EventGenerationOverflow(event_id.clone()))?;
+        let revision = Self::next_revision(state)?;
+
+        state.commit_cancel_event(event_id, generation, revision);
         Ok(())
     }
 
@@ -229,7 +292,7 @@ impl WorldReducer {
 #[cfg(test)]
 mod tests {
     use super::{ApplyError, WorldReducer};
-    use crate::{Command, CommandEnvelope, SimTick, WorldState};
+    use crate::{Command, CommandEnvelope, EventDomain, EventId, SimTick, WorldState};
 
     #[test]
     fn successful_command_advances_time_and_revision_once() {
@@ -267,5 +330,36 @@ mod tests {
         );
         assert_eq!(state.tick(), SimTick::new(12));
         assert_eq!(state.revision().get(), 1);
+    }
+
+    #[test]
+    fn event_cannot_be_scheduled_in_the_past() {
+        let mut state = WorldState::new(7);
+        WorldReducer::apply(
+            &mut state,
+            &CommandEnvelope::new(1, Command::AdvanceTo { tick: SimTick::new(12) }),
+        )
+        .unwrap();
+
+        let error = WorldReducer::apply(
+            &mut state,
+            &CommandEnvelope::new(
+                2,
+                Command::ScheduleEvent {
+                    event_id: EventId::new("late"),
+                    at_tick: SimTick::new(11),
+                    domain: EventDomain::System,
+                },
+            ),
+        )
+        .unwrap_err();
+
+        assert_eq!(
+            error,
+            ApplyError::EventInPast {
+                current: SimTick::new(12),
+                requested: SimTick::new(11),
+            }
+        );
     }
 }
