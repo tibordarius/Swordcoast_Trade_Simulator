@@ -54,3 +54,33 @@ impl fmt::Display for PackLoadError {
 }
 
 impl std::error::Error for PackLoadError {}
+
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum InitializeError {
+    Registry(sim_kernel_v2::RegistryError),
+    Replay(sim_kernel_v2::ReplayError),
+}
+
+impl From<sim_kernel_v2::RegistryError> for InitializeError {
+    fn from(value: sim_kernel_v2::RegistryError) -> Self {
+        Self::Registry(value)
+    }
+}
+
+impl From<sim_kernel_v2::ReplayError> for InitializeError {
+    fn from(value: sim_kernel_v2::ReplayError) -> Self {
+        Self::Replay(value)
+    }
+}
+
+impl fmt::Display for InitializeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Registry(error) => write!(f, "scenario registry compilation failed: {error:?}"),
+            Self::Replay(error) => write!(f, "scenario world initialization failed: {error:?}"),
+        }
+    }
+}
+
+impl std::error::Error for InitializeError {}
