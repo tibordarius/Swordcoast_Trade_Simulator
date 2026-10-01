@@ -3,10 +3,10 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ConsumptionRecord, EconomicTransaction, EventDomain, EventId, EventPayload, EventSchedulerState,
-    InventoryAccount, InventoryAccountId, InventoryLedgerEntry, MoneyAccount, MoneyAccountId,
-    MoneyLedgerEntry, PopulationCohort, PopulationCohortId, ProductionBatch, ProductionBatchId,
-    ProductionRecipe, ProductionSite, ProductionSiteId, Quantity, RecipeId, SimTick, TransactionId,
+    ConsumptionRecord, EconomicTransaction, EventId, EventSchedulerState, InventoryAccount,
+    InventoryAccountId, InventoryLedgerEntry, MoneyAccount, MoneyAccountId, MoneyLedgerEntry,
+    PopulationCohort, PopulationCohortId, ProductionBatch, ProductionBatchId, ProductionRecipe,
+    ProductionSite, ProductionSiteId, Quantity, RecipeId, ScheduledEvent, SimTick, TransactionId,
 };
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -179,16 +179,10 @@ impl WorldState {
 
     pub(crate) fn commit_schedule_event(
         &mut self,
-        event_id: EventId,
-        at_tick: SimTick,
-        domain: EventDomain,
-        sequence: u64,
-        generation: u64,
-        payload: EventPayload,
+        event: ScheduledEvent,
         revision: WorldRevision,
     ) {
-        self.scheduler
-            .commit_schedule(event_id, at_tick, domain, sequence, generation, payload);
+        self.scheduler.commit_scheduled(event);
         self.revision = revision;
     }
 
