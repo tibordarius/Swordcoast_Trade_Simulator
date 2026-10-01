@@ -7,6 +7,7 @@ pub mod hash;
 pub mod ids;
 pub mod ledger;
 pub mod reducer;
+pub mod registry;
 pub mod replay;
 pub mod rng;
 pub mod scheduler;
@@ -27,6 +28,9 @@ pub use ledger::{
     MoneyLedgerEntry,
 };
 pub use reducer::{ApplyError, WorldReducer};
+pub use registry::{
+    CommodityDef, MarketDef, PlaceDef, RegistryError, RouteDef, ScenarioRegistry, UnitDef,
+};
 pub use replay::{replay, ReplayError};
 pub use rng::{derive_stream_seed, SplitMix64};
 pub use scheduler::{EventDomain, EventSchedulerState, FiredEvent, ScheduledEvent};
