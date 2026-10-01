@@ -31,12 +31,15 @@ string_id!(EventId);
 string_id!(InventoryAccountId);
 string_id!(MarketId);
 string_id!(MoneyAccountId);
+string_id!(PlaceId);
+string_id!(RouteEdgeId);
 string_id!(ShipmentId);
 string_id!(TransactionId);
+string_id!(UnitId);
 
 #[cfg(test)]
 mod tests {
-    use super::{ActorId, EventId, TransactionId};
+    use super::{ActorId, EventId, RouteEdgeId, TransactionId, UnitId};
 
     #[test]
     fn stable_id_keeps_exact_external_value() {
@@ -55,5 +58,14 @@ mod tests {
     fn event_ids_are_stable_external_values() {
         let id = EventId::new("event.production.batch.001");
         assert_eq!(id.as_str(), "event.production.batch.001");
+    }
+
+    #[test]
+    fn scenario_registry_ids_remain_exact() {
+        assert_eq!(UnitId::new("unit.kg").as_str(), "unit.kg");
+        assert_eq!(
+            RouteEdgeId::new("route.waterdeep-neverwinter").as_str(),
+            "route.waterdeep-neverwinter"
+        );
     }
 }
