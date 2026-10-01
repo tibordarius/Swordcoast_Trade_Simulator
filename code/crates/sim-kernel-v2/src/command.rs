@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    EconomicTransaction, InventoryAccountId, InventoryAccountKind, MoneyAccountId, MoneyAccountKind,
-    SimTick,
+    EconomicTransaction, EventDomain, EventId, InventoryAccountId, InventoryAccountKind,
+    MoneyAccountId, MoneyAccountKind, SimTick,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -32,6 +32,14 @@ impl CommandEnvelope {
 pub enum Command {
     AdvanceTo {
         tick: SimTick,
+    },
+    ScheduleEvent {
+        event_id: EventId,
+        at_tick: SimTick,
+        domain: EventDomain,
+    },
+    CancelEvent {
+        event_id: EventId,
     },
     OpenInventoryAccount {
         account_id: InventoryAccountId,
