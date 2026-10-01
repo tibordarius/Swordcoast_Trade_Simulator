@@ -27,6 +27,7 @@ macro_rules! string_id {
 
 string_id!(ActorId);
 string_id!(CommodityId);
+string_id!(EventId);
 string_id!(InventoryAccountId);
 string_id!(MarketId);
 string_id!(MoneyAccountId);
@@ -35,7 +36,7 @@ string_id!(TransactionId);
 
 #[cfg(test)]
 mod tests {
-    use super::{ActorId, TransactionId};
+    use super::{ActorId, EventId, TransactionId};
 
     #[test]
     fn stable_id_keeps_exact_external_value() {
@@ -48,5 +49,11 @@ mod tests {
     fn transaction_ids_are_distinct_typed_values() {
         let id = TransactionId::new("tx.seed.001");
         assert_eq!(id.as_str(), "tx.seed.001");
+    }
+
+    #[test]
+    fn event_ids_are_stable_external_values() {
+        let id = EventId::new("event.production.batch.001");
+        assert_eq!(id.as_str(), "event.production.batch.001");
     }
 }
