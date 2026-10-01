@@ -21,7 +21,7 @@ pub use command::{Command, CommandEnvelope};
 pub use hash::fnv1a64;
 pub use ids::{
     ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MoneyAccountId, PlaceId,
-    RouteEdgeId, ShipmentId, TransactionId, UnitId,
+    RouteEdgeId, ScenarioPackId, ShipmentId, TransactionId, UnitId,
 };
 pub use ledger::{
     InventoryAccount, InventoryAccountKind, InventoryLedgerEntry, MoneyAccount, MoneyAccountKind,
@@ -29,7 +29,8 @@ pub use ledger::{
 };
 pub use reducer::{ApplyError, WorldReducer};
 pub use registry::{
-    CommodityDef, MarketDef, PlaceDef, RegistryError, RouteDef, ScenarioRegistry, UnitDef,
+    CommodityDef, DataStatus, MarketDef, PlaceDef, PlaceKind, RegistryError, RouteDef,
+    ScenarioRegistry, UnitDef,
 };
 pub use replay::{replay, ReplayError};
 pub use rng::{derive_stream_seed, SplitMix64};

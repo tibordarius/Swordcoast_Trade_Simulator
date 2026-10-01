@@ -3,7 +3,8 @@
     "schema_version": 1,
     "pack_id": "toril.tiny.sword-coast.001",
     "revision": 1,
-    "world_seed": 424242
+    "world_seed": 424242,
+    "campaign_epoch": "1492 DR"
   },
   "units": [
     {
@@ -17,21 +18,86 @@
     }
   ],
   "commodities": [
-    {"id": "commodity.grain", "name": "Grain", "base_unit": "unit.kg", "status": "generated"},
-    {"id": "commodity.flour", "name": "Flour", "base_unit": "unit.kg", "status": "generated"},
-    {"id": "commodity.preserved_fish", "name": "Preserved Fish", "base_unit": "unit.kg", "status": "generated"},
-    {"id": "commodity.timber", "name": "Timber", "base_unit": "unit.kg", "status": "generated"},
-    {"id": "commodity.iron", "name": "Iron", "base_unit": "unit.kg", "status": "generated"}
+    {
+      "id": "commodity.grain",
+      "name": "Grain",
+      "base_unit": "unit.kg",
+      "status": "generated",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1300
+    },
+    {
+      "id": "commodity.flour",
+      "name": "Flour",
+      "base_unit": "unit.kg",
+      "status": "generated",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1800
+    },
+    {
+      "id": "commodity.preserved_fish",
+      "name": "Preserved Fish",
+      "base_unit": "unit.kg",
+      "status": "generated",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 1100
+    },
+    {
+      "id": "commodity.timber",
+      "name": "Timber",
+      "base_unit": "unit.kg",
+      "status": "generated",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 2200
+    },
+    {
+      "id": "commodity.iron",
+      "name": "Iron",
+      "base_unit": "unit.kg",
+      "status": "generated",
+      "mass_grams_per_base_unit": 1000,
+      "volume_cm3_per_base_unit": 130
+    }
   ],
   "places": [
-    {"id": "place.waterdeep", "name": "Waterdeep", "status": "generated"},
-    {"id": "place.neverwinter", "name": "Neverwinter", "status": "generated"},
-    {"id": "place.luskan", "name": "Luskan", "status": "generated"}
+    {
+      "id": "place.waterdeep",
+      "name": "Waterdeep",
+      "status": "generated",
+      "kind": "settlement"
+    },
+    {
+      "id": "place.neverwinter",
+      "name": "Neverwinter",
+      "status": "generated",
+      "kind": "settlement"
+    },
+    {
+      "id": "place.luskan",
+      "name": "Luskan",
+      "status": "generated",
+      "kind": "settlement"
+    }
   ],
   "markets": [
-    {"id": "market.waterdeep", "name": "Waterdeep Market", "place_id": "place.waterdeep", "status": "generated"},
-    {"id": "market.neverwinter", "name": "Neverwinter Market", "place_id": "place.neverwinter", "status": "generated"},
-    {"id": "market.luskan", "name": "Luskan Market", "place_id": "place.luskan", "status": "generated"}
+    {
+      "id": "market.waterdeep",
+      "name": "Waterdeep Market",
+      "place_id": "place.waterdeep",
+      "status": "generated"
+    },
+    {
+      "id": "market.neverwinter",
+      "name": "Neverwinter Market",
+      "place_id": "place.neverwinter",
+      "status": "generated"
+    },
+    {
+      "id": "market.luskan",
+      "name": "Luskan Market",
+      "place_id": "place.luskan",
+      "status": "generated"
+    }
   ],
   "routes": [
     {
@@ -40,7 +106,8 @@
       "to_market": "market.neverwinter",
       "bidirectional": true,
       "distance_meters": 100000,
-      "status": "generated"
+      "status": "generated",
+      "base_travel_ticks": 3456
     },
     {
       "id": "route.neverwinter-luskan",
@@ -48,41 +115,127 @@
       "to_market": "market.luskan",
       "bidirectional": true,
       "distance_meters": 120000,
-      "status": "generated"
+      "status": "generated",
+      "base_travel_ticks": 1152
     }
   ],
   "inventory_accounts": [
-    {"id": "inventory.waterdeep", "kind": "holding"},
-    {"id": "inventory.neverwinter", "kind": "holding"},
-    {"id": "inventory.luskan", "kind": "holding"}
+    {
+      "id": "inventory.waterdeep",
+      "kind": "holding"
+    },
+    {
+      "id": "inventory.neverwinter",
+      "kind": "holding"
+    },
+    {
+      "id": "inventory.luskan",
+      "kind": "holding"
+    }
   ],
   "money_accounts": [
-    {"id": "cash.waterdeep", "kind": "holding"},
-    {"id": "cash.neverwinter", "kind": "holding"},
-    {"id": "cash.luskan", "kind": "holding"}
+    {
+      "id": "cash.waterdeep",
+      "kind": "holding"
+    },
+    {
+      "id": "cash.neverwinter",
+      "kind": "holding"
+    },
+    {
+      "id": "cash.luskan",
+      "kind": "holding"
+    }
   ],
   "opening_inventory": [
-    {"account_id": "inventory.waterdeep", "commodity_id": "commodity.grain", "quantity": 1000},
-    {"account_id": "inventory.waterdeep", "commodity_id": "commodity.flour", "quantity": 300},
-    {"account_id": "inventory.waterdeep", "commodity_id": "commodity.preserved_fish", "quantity": 500},
-    {"account_id": "inventory.waterdeep", "commodity_id": "commodity.timber", "quantity": 200},
-    {"account_id": "inventory.waterdeep", "commodity_id": "commodity.iron", "quantity": 100},
-
-    {"account_id": "inventory.neverwinter", "commodity_id": "commodity.grain", "quantity": 700},
-    {"account_id": "inventory.neverwinter", "commodity_id": "commodity.flour", "quantity": 200},
-    {"account_id": "inventory.neverwinter", "commodity_id": "commodity.preserved_fish", "quantity": 400},
-    {"account_id": "inventory.neverwinter", "commodity_id": "commodity.timber", "quantity": 900},
-    {"account_id": "inventory.neverwinter", "commodity_id": "commodity.iron", "quantity": 200},
-
-    {"account_id": "inventory.luskan", "commodity_id": "commodity.grain", "quantity": 300},
-    {"account_id": "inventory.luskan", "commodity_id": "commodity.flour", "quantity": 100},
-    {"account_id": "inventory.luskan", "commodity_id": "commodity.preserved_fish", "quantity": 1200},
-    {"account_id": "inventory.luskan", "commodity_id": "commodity.timber", "quantity": 700},
-    {"account_id": "inventory.luskan", "commodity_id": "commodity.iron", "quantity": 300}
+    {
+      "account_id": "inventory.waterdeep",
+      "commodity_id": "commodity.grain",
+      "quantity": 1000
+    },
+    {
+      "account_id": "inventory.waterdeep",
+      "commodity_id": "commodity.flour",
+      "quantity": 300
+    },
+    {
+      "account_id": "inventory.waterdeep",
+      "commodity_id": "commodity.preserved_fish",
+      "quantity": 500
+    },
+    {
+      "account_id": "inventory.waterdeep",
+      "commodity_id": "commodity.timber",
+      "quantity": 200
+    },
+    {
+      "account_id": "inventory.waterdeep",
+      "commodity_id": "commodity.iron",
+      "quantity": 100
+    },
+    {
+      "account_id": "inventory.neverwinter",
+      "commodity_id": "commodity.grain",
+      "quantity": 700
+    },
+    {
+      "account_id": "inventory.neverwinter",
+      "commodity_id": "commodity.flour",
+      "quantity": 200
+    },
+    {
+      "account_id": "inventory.neverwinter",
+      "commodity_id": "commodity.preserved_fish",
+      "quantity": 400
+    },
+    {
+      "account_id": "inventory.neverwinter",
+      "commodity_id": "commodity.timber",
+      "quantity": 900
+    },
+    {
+      "account_id": "inventory.neverwinter",
+      "commodity_id": "commodity.iron",
+      "quantity": 200
+    },
+    {
+      "account_id": "inventory.luskan",
+      "commodity_id": "commodity.grain",
+      "quantity": 300
+    },
+    {
+      "account_id": "inventory.luskan",
+      "commodity_id": "commodity.flour",
+      "quantity": 100
+    },
+    {
+      "account_id": "inventory.luskan",
+      "commodity_id": "commodity.preserved_fish",
+      "quantity": 1200
+    },
+    {
+      "account_id": "inventory.luskan",
+      "commodity_id": "commodity.timber",
+      "quantity": 700
+    },
+    {
+      "account_id": "inventory.luskan",
+      "commodity_id": "commodity.iron",
+      "quantity": 300
+    }
   ],
   "opening_money": [
-    {"account_id": "cash.waterdeep", "amount_cp": 50000},
-    {"account_id": "cash.neverwinter", "amount_cp": 50000},
-    {"account_id": "cash.luskan", "amount_cp": 50000}
+    {
+      "account_id": "cash.waterdeep",
+      "amount_cp": 50000
+    },
+    {
+      "account_id": "cash.neverwinter",
+      "amount_cp": 50000
+    },
+    {
+      "account_id": "cash.luskan",
+      "amount_cp": 50000
+    }
   ]
 }

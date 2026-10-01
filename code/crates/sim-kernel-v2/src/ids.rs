@@ -33,13 +33,14 @@ string_id!(MarketId);
 string_id!(MoneyAccountId);
 string_id!(PlaceId);
 string_id!(RouteEdgeId);
+string_id!(ScenarioPackId);
 string_id!(ShipmentId);
 string_id!(TransactionId);
 string_id!(UnitId);
 
 #[cfg(test)]
 mod tests {
-    use super::{ActorId, EventId, RouteEdgeId, TransactionId, UnitId};
+    use super::{ActorId, EventId, RouteEdgeId, ScenarioPackId, TransactionId, UnitId};
 
     #[test]
     fn stable_id_keeps_exact_external_value() {
@@ -63,6 +64,7 @@ mod tests {
     #[test]
     fn scenario_registry_ids_remain_exact() {
         assert_eq!(UnitId::new("unit.kg").as_str(), "unit.kg");
+        assert_eq!(ScenarioPackId::new("pack.tiny.001").as_str(), "pack.tiny.001");
         assert_eq!(
             RouteEdgeId::new("route.waterdeep-neverwinter").as_str(),
             "route.waterdeep-neverwinter"

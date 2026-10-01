@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 use sim_kernel_v2::{
     CommodityId, InventoryAccountId, InventoryAccountKind, MarketId, MoneyAccountId,
-    MoneyAccountKind, PlaceId, RouteEdgeId, UnitId,
+    MoneyAccountKind, PlaceId, PlaceKind, RouteEdgeId, ScenarioPackId, SimTick, UnitId,
 };
 
 pub const SCENARIO_PACK_SCHEMA_VERSION: u32 = 1;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ProvenanceStatus {
     Source,
@@ -19,8 +19,9 @@ pub enum ProvenanceStatus {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PackManifest {
     pub schema_version: u32,
-    pub pack_id: String,
+    pub pack_id: ScenarioPackId,
     pub revision: u32,
+    pub campaign_epoch: String,
     pub world_seed: u64,
 }
 
@@ -40,6 +41,8 @@ pub struct CommoditySpec {
     pub id: CommodityId,
     pub name: String,
     pub base_unit: UnitId,
+    pub mass_grams_per_base_unit: u64,
+    pub volume_cm3_per_base_unit: u64,
     pub status: ProvenanceStatus,
 }
 
@@ -47,6 +50,7 @@ pub struct CommoditySpec {
 pub struct PlaceSpec {
     pub id: PlaceId,
     pub name: String,
+    pub kind: PlaceKind,
     pub status: ProvenanceStatus,
 }
 
@@ -65,6 +69,7 @@ pub struct RouteSpec {
     pub to_market: MarketId,
     pub bidirectional: bool,
     pub distance_meters: u64,
+    pub base_travel_ticks: SimTick,
     pub status: ProvenanceStatus,
 }
 

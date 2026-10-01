@@ -45,11 +45,19 @@ pub fn validate(pack: &ScenarioPack) -> Result<(), ValidationError> {
         ));
     }
 
-    if pack.manifest.pack_id.trim().is_empty() {
+    if pack.manifest.pack_id.as_str().trim().is_empty() {
         issues.push(ValidationIssue::new(
             "manifest.pack_id",
             "empty_pack_id",
             "pack_id must not be empty",
+        ));
+    }
+
+    if pack.manifest.campaign_epoch.trim().is_empty() {
+        issues.push(ValidationIssue::new(
+            "manifest.campaign_epoch",
+            "empty_campaign_epoch",
+            "campaign_epoch must not be empty",
         ));
     }
 
@@ -152,6 +160,14 @@ pub fn validate(pack: &ScenarioPack) -> Result<(), ValidationError> {
                 format!("unknown base unit {}", commodity.base_unit),
             ));
         }
+
+        if commodity.mass_grams_per_base_unit == 0 || commodity.volume_cm3_per_base_unit == 0 {
+            issues.push(ValidationIssue::new(
+                format!("{path}.physical_dimensions"),
+                "invalid_physical_dimensions",
+                "active commodity mass and volume per base unit must both be greater than zero",
+            ));
+        }
     }
 
     for place in &pack.places {
@@ -207,6 +223,14 @@ pub fn validate(pack: &ScenarioPack) -> Result<(), ValidationError> {
                 format!("{path}.distance_meters"),
                 "invalid_distance",
                 "route distance must be greater than zero",
+            ));
+        }
+
+        if route.base_travel_ticks == sim_kernel_v2::SimTick::ZERO {
+            issues.push(ValidationIssue::new(
+                format!("{path}.base_travel_ticks"),
+                "invalid_travel_time",
+                "route base travel time must be greater than zero",
             ));
         }
     }

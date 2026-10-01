@@ -2,7 +2,28 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{CommodityId, MarketId, PlaceId, RouteEdgeId, UnitId};
+use crate::{CommodityId, MarketId, PlaceId, RouteEdgeId, SimTick, UnitId};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DataStatus {
+    Source,
+    ReviewedMapping,
+    ScenarioAssumption,
+    Derived,
+    Generated,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PlaceKind {
+    Region,
+    Settlement,
+    Port,
+    Harbor,
+    RouteNode,
+    Facility,
+}
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct UnitDef {
@@ -12,6 +33,7 @@ pub struct UnitDef {
     pub base_unit: UnitId,
     pub numerator: u64,
     pub denominator: u64,
+    pub status: DataStatus,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -19,12 +41,17 @@ pub struct CommodityDef {
     pub id: CommodityId,
     pub name: String,
     pub base_unit: UnitId,
+    pub mass_grams_per_base_unit: u64,
+    pub volume_cm3_per_base_unit: u64,
+    pub status: DataStatus,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PlaceDef {
     pub id: PlaceId,
     pub name: String,
+    pub kind: PlaceKind,
+    pub status: DataStatus,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -32,6 +59,7 @@ pub struct MarketDef {
     pub id: MarketId,
     pub name: String,
     pub place_id: PlaceId,
+    pub status: DataStatus,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -41,6 +69,8 @@ pub struct RouteDef {
     pub to_market: MarketId,
     pub bidirectional: bool,
     pub distance_meters: u64,
+    pub base_travel_ticks: SimTick,
+    pub status: DataStatus,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -67,6 +97,9 @@ pub enum RegistryError {
     },
     InvalidUnitConversion {
         unit_id: UnitId,
+    },
+    InvalidCommodityDimensions {
+        commodity_id: CommodityId,
     },
 }
 
@@ -111,12 +144,19 @@ impl ScenarioRegistry {
 
         let mut commodity_map = BTreeMap::new();
         for commodity in commodities {
+            if commodity.mass_grams_per_base_unit == 0 || commodity.volume_cm3_per_base_unit == 0 {
+                return Err(RegistryError::InvalidCommodityDimensions {
+                    commodity_id: commodity.id,
+                });
+            }
+
             if !unit_map.contains_key(&commodity.base_unit) {
                 return Err(RegistryError::UnknownBaseUnit {
                     owner: commodity.id.to_string(),
                     unit_id: commodity.base_unit,
                 });
             }
+
             let id = commodity.id.clone();
             if commodity_map.insert(id.clone(), commodity).is_some() {
                 return Err(RegistryError::DuplicateCommodity(id));
@@ -147,7 +187,10 @@ impl ScenarioRegistry {
 
         let mut route_map = BTreeMap::new();
         for route in routes {
-            if route.from_market == route.to_market || route.distance_meters == 0 {
+            if route.from_market == route.to_market
+                || route.distance_meters == 0
+                || route.base_travel_ticks == SimTick::ZERO
+            {
                 return Err(RegistryError::InvalidRoute {
                     route_id: route.id,
                 });

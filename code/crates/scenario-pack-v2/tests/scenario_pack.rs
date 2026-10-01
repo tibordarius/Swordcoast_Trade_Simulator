@@ -1,10 +1,10 @@
 use scenario_pack_v2::{
-    compile_initialization_commands, compile_registry, load_json, validate_pack, ScenarioPack,
-    SCENARIO_PACK_SCHEMA_VERSION,
+    compile_initialization_commands, compile_registry, initialize, load_json, validate_pack,
+    ScenarioPack, SCENARIO_PACK_SCHEMA_VERSION,
 };
 use sim_kernel_v2::{
-    replay, state_hash, CommodityId, InventoryAccountId, MarketId, MoneyAccountId, MoneyCp,
-    Quantity, RouteEdgeId, WorldState,
+    replay, state_hash, CommodityId, DataStatus, InventoryAccountId, MarketId, MoneyAccountId,
+    MoneyCp, PlaceKind, Quantity, RouteEdgeId, SimTick, WorldState,
 };
 
 const TINY: &str = include_str!("fixtures/tiny_sword_coast.json");
@@ -213,5 +213,101 @@ fn negative_opening_balances_are_rejected() {
             .filter(|code| code.as_str() == "negative_opening_balance")
             .count(),
         2
+    );
+}
+
+
+#[test]
+fn json_roundtrip_preserves_pack() {
+    let pack = raw_pack();
+    let json = serde_json::to_string_pretty(&pack).unwrap();
+    let decoded: ScenarioPack = serde_json::from_str(&json).unwrap();
+    assert_eq!(pack, decoded);
+}
+
+#[test]
+fn compiled_registry_preserves_executable_metadata() {
+    let pack = load_json(TINY).unwrap();
+    let registry = compile_registry(&pack).unwrap();
+
+    let grain = registry
+        .commodities()
+        .get(&CommodityId::new("commodity.grain"))
+        .unwrap();
+    assert_eq!(grain.mass_grams_per_base_unit, 1000);
+    assert_eq!(grain.volume_cm3_per_base_unit, 1300);
+    assert_eq!(grain.status, DataStatus::Generated);
+
+    let waterdeep = registry
+        .places()
+        .get(&sim_kernel_v2::PlaceId::new("place.waterdeep"))
+        .unwrap();
+    assert_eq!(waterdeep.kind, PlaceKind::Settlement);
+
+    let route = registry
+        .routes()
+        .get(&RouteEdgeId::new("route.waterdeep-neverwinter"))
+        .unwrap();
+    assert_eq!(route.base_travel_ticks, SimTick::new(3456));
+}
+
+#[test]
+fn empty_campaign_epoch_is_rejected() {
+    let mut pack = raw_pack();
+    pack.manifest.campaign_epoch.clear();
+
+    let error = validate_pack(pack).unwrap_err();
+    assert!(issue_codes(error).contains(&"empty_campaign_epoch".to_owned()));
+}
+
+#[test]
+fn zero_physical_dimensions_are_rejected() {
+    let mut pack = raw_pack();
+    pack.commodities[0].volume_cm3_per_base_unit = 0;
+
+    let error = validate_pack(pack).unwrap_err();
+    assert!(issue_codes(error).contains(&"invalid_physical_dimensions".to_owned()));
+}
+
+#[test]
+fn zero_route_travel_time_is_rejected() {
+    let mut pack = raw_pack();
+    pack.routes[0].base_travel_ticks = SimTick::ZERO;
+
+    let error = validate_pack(pack).unwrap_err();
+    assert!(issue_codes(error).contains(&"invalid_travel_time".to_owned()));
+}
+
+#[test]
+fn opening_balances_are_explicitly_balanced_against_system_accounts() {
+    let pack = load_json(TINY).unwrap();
+    let commands = compile_initialization_commands(&pack);
+    let world = replay(&WorldState::new(pack.world_seed()), &commands).unwrap();
+
+    assert_eq!(
+        world.inventory_balance(
+            &InventoryAccountId::new("system.opening.inventory"),
+            &CommodityId::new("commodity.grain"),
+        ),
+        Some(Quantity::new(-2000))
+    );
+
+    assert_eq!(
+        world.money_balance(&MoneyAccountId::new("system.opening.money")),
+        Some(MoneyCp::new(-150000))
+    );
+}
+
+
+#[test]
+fn initialize_is_the_safe_one_step_runtime_entry_point() {
+    let validated = load_json(TINY).unwrap();
+    let initialized = initialize(validated).unwrap();
+
+    assert_eq!(initialized.registry().markets().len(), 3);
+    assert_eq!(initialized.world_state().world_seed(), 424242);
+    assert_eq!(
+        initialized.world_state().money_balance(&MoneyAccountId::new("cash.waterdeep")),
+        Some(MoneyCp::new(50000))
     );
 }
