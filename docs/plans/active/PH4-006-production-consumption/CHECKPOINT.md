@@ -1,10 +1,16 @@
 # PH4-006 Checkpoint
 
 ## Current intent
-Add production/population state, reducer commands, and atomic event dispatch on top of the typed scheduler payload layer.
+PH4-006 implementation and verification are complete.
 
-## Current branch
+## Branch
 `phase4/v2-production-consumption-impl`
 
+## Verification
+GitHub Actions run 36888446229 passed all jobs.
+
+## Current failure
+None.
+
 ## Exact next step
-Create production.rs and population.rs domain types.
+Review and merge PH4-006.
