@@ -1,12 +1,13 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    Command, CommandEnvelope, CommodityId, ConsumptionRecord, EconomicTransaction, EventDomain,
-    EventId, EventPayload, InventoryAccount, InventoryAccountId, InventoryAccountKind,
-    InventoryPosting, MoneyAccount, MoneyAccountId, MoneyAccountKind, MoneyCp,
-    PopulationCohort, PopulationCohortId, ProductionBatch, ProductionBatchId,
-    ProductionBatchStatus, ProductionRecipe, ProductionSite, ProductionSiteId, Quantity, RecipeId,
-    ScheduledEvent, SimTick, TransactionId, WorldRevision, WorldState,
+    derive_market_quote, execution_price, Command, CommandEnvelope, CommodityId,
+    ConsumptionRecord, EconomicTransaction, EventDomain, EventId, EventPayload, InventoryAccount,
+    InventoryAccountId, InventoryAccountKind, InventoryPosting, MarketId, MarketListing,
+    MarketMathError, MarketSide, MarketTrade, MarketTradeId, MoneyAccount, MoneyAccountId,
+    MoneyAccountKind, MoneyCp, MoneyPosting, PopulationCohort, PopulationCohortId, ProductionBatch,
+    ProductionBatchId, ProductionBatchStatus, ProductionRecipe, ProductionSite, ProductionSiteId,
+    Quantity, RecipeId, ScheduledEvent, SimTick, TransactionId, WorldRevision, WorldState,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -72,6 +73,28 @@ pub enum ApplyError {
     InvalidConsumptionQuantity(PopulationCohortId),
     InvalidConsumptionInterval(PopulationCohortId),
     UnknownPopulationCohort(PopulationCohortId),
+    DuplicateMarketListing {
+        market_id: MarketId,
+        commodity_id: CommodityId,
+    },
+    UnknownMarketListing {
+        market_id: MarketId,
+        commodity_id: CommodityId,
+    },
+    InvalidMarketReferencePrice,
+    InvalidMarketTargetStock,
+    InvalidMarketDepth,
+    InvalidMarketSpread,
+    InvalidMarketDemandWindow,
+    InvalidMoneyAccountKind {
+        account_id: MoneyAccountId,
+        expected: MoneyAccountKind,
+    },
+    DuplicateMarketTrade(MarketTradeId),
+    InvalidMarketTradeQuantity,
+    MarketTradeAccountCollision,
+    MarketTradeValueTooSmall,
+    MarketMath(MarketMathError),
 }
 
 pub struct WorldReducer;
@@ -111,6 +134,28 @@ impl WorldReducer {
             Command::RegisterPopulationCohort { cohort } => {
                 Self::register_cohort(state, cohort)
             }
+            Command::RegisterMarketListing { listing } => {
+                Self::register_market_listing(state, listing)
+            }
+            Command::ExecuteMarketTrade {
+                trade_id,
+                market_id,
+                commodity_id,
+                side,
+                quantity,
+                actor_inventory_account,
+                actor_money_account,
+            } => Self::execute_market_trade(
+                state,
+                envelope.sequence(),
+                trade_id,
+                market_id,
+                commodity_id,
+                *side,
+                *quantity,
+                actor_inventory_account,
+                actor_money_account,
+            ),
         }
     }
 
