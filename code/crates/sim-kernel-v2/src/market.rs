@@ -205,6 +205,8 @@ impl MarketTrade {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MarketMathError {
     MissingInventoryAccount(InventoryAccountId),
+    InvalidConfiguration,
+    InvalidQuantity,
     ArithmeticOverflow,
     InvalidPrice,
 }
@@ -213,6 +215,16 @@ pub fn derive_market_quote(
     state: &WorldState,
     listing: &MarketListing,
 ) -> Result<MarketQuote, MarketMathError> {
+    if !listing.reference_price().is_positive()
+        || listing.target_stock().get() <= 0
+        || listing.depth().get() <= 0
+        || listing.spread_bps() == 0
+        || listing.spread_bps() > 10_000
+        || listing.demand_window_ticks() == 0
+    {
+        return Err(MarketMathError::InvalidConfiguration);
+    }
+
     let stock = state
         .inventory_balance(listing.inventory_account(), listing.commodity_id())
         .ok_or_else(|| MarketMathError::MissingInventoryAccount(listing.inventory_account().clone()))?;
@@ -354,6 +366,10 @@ pub fn execution_price(
     quantity: Quantity,
     depth: Quantity,
 ) -> Result<UnitPrice, MarketMathError> {
+    if quantity.get() <= 0 || depth.get() <= 0 {
+        return Err(MarketMathError::InvalidQuantity);
+    }
+
     let impact_ppm = i128::from(quantity.get())
         .checked_mul(250_000)
         .ok_or(MarketMathError::ArithmeticOverflow)?
