@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::SimTick;
+use crate::{
+    EconomicTransaction, InventoryAccountId, InventoryAccountKind, MoneyAccountId, MoneyAccountKind,
+    SimTick,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CommandEnvelope {
@@ -27,5 +30,18 @@ impl CommandEnvelope {
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum Command {
-    AdvanceTo { tick: SimTick },
+    AdvanceTo {
+        tick: SimTick,
+    },
+    OpenInventoryAccount {
+        account_id: InventoryAccountId,
+        kind: InventoryAccountKind,
+    },
+    OpenMoneyAccount {
+        account_id: MoneyAccountId,
+        kind: MoneyAccountKind,
+    },
+    ApplyTransaction {
+        transaction: EconomicTransaction,
+    },
 }
