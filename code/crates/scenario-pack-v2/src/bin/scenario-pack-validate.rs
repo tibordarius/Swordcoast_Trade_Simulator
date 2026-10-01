@@ -2,7 +2,9 @@ use std::env;
 use std::fs;
 use std::process::ExitCode;
 
-use scenario_pack_v2::{compile_initialization_commands, load_json};
+use scenario_pack_v2::{
+    compile_initialization_commands, compile_registry, load_json,
+};
 use sim_kernel_v2::{replay, state_hash, WorldState};
 
 fn main() -> ExitCode {
@@ -23,6 +25,14 @@ fn main() -> ExitCode {
         Ok(pack) => pack,
         Err(error) => {
             eprintln!("{error}");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    let registry = match compile_registry(&validated) {
+        Ok(registry) => registry,
+        Err(error) => {
+            eprintln!("validated pack failed ScenarioRegistry compilation: {error:?}");
             return ExitCode::FAILURE;
         }
     };
@@ -49,11 +59,11 @@ fn main() -> ExitCode {
         "valid pack={} revision={} units={} commodities={} places={} markets={} routes={} init_commands={} state_hash={hash:016x}",
         validated.pack().manifest.pack_id,
         validated.pack().manifest.revision,
-        validated.pack().units.len(),
-        validated.pack().commodities.len(),
-        validated.pack().places.len(),
-        validated.pack().markets.len(),
-        validated.pack().routes.len(),
+        registry.units().len(),
+        registry.commodities().len(),
+        registry.places().len(),
+        registry.markets().len(),
+        registry.routes().len(),
         commands.len(),
     );
 
