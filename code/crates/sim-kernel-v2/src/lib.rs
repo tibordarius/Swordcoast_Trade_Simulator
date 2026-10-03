@@ -5,6 +5,7 @@
 pub mod command;
 pub mod hash;
 pub mod ids;
+pub mod information;
 pub mod ledger;
 pub mod market;
 pub mod population;
@@ -23,10 +24,12 @@ pub mod values;
 pub use command::{Command, CommandEnvelope};
 pub use hash::fnv1a64;
 pub use ids::{
-    ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MarketTradeId, MoneyAccountId, PlaceId,
+    ActorId, CommodityId, EventId, InventoryAccountId, MarketId, MarketObservationId, MarketTradeId,
+    MoneyAccountId, PlaceId,
     PopulationCohortId, ProductionBatchId, ProductionSiteId, RecipeId, RouteEdgeId,
     ScenarioPackId, ShipmentId, TransactionId, UnitId,
 };
+pub use information::{InformationState, KnowledgeView, MarketObservation};
 pub use ledger::{
     InventoryAccount, InventoryAccountKind, InventoryLedgerEntry, MoneyAccount, MoneyAccountKind,
     MoneyLedgerEntry,

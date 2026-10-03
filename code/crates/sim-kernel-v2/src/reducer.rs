@@ -1,10 +1,11 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    derive_market_quote, execution_price, Command, CommandEnvelope, CommodityId,
+    derive_market_quote, execution_price, ActorId, Command, CommandEnvelope, CommodityId,
     ConsumptionRecord, EconomicTransaction, EventDomain, EventId, EventPayload, InventoryAccount,
     InventoryAccountId, InventoryAccountKind, InventoryPosting, MarketId, MarketListing,
-    MarketMathError, MarketSide, MarketTrade, MarketTradeId, MoneyAccount, MoneyAccountId,
+    MarketMathError, MarketObservation, MarketObservationId, MarketSide, MarketTrade, MarketTradeId,
+    MoneyAccount, MoneyAccountId,
     MoneyAccountKind, MoneyCp, MoneyPosting, PopulationCohort, PopulationCohortId, ProductionBatch,
     ProductionBatchId, ProductionBatchStatus, ProductionRecipe, ProductionSite, ProductionSiteId,
     Quantity, RecipeId, ScheduledEvent, SimTick, TransactionId, WorldRevision, WorldState,
@@ -91,6 +92,9 @@ pub enum ApplyError {
         expected: MoneyAccountKind,
     },
     DuplicateMarketTrade(MarketTradeId),
+    DuplicateKnowledgeActor(ActorId),
+    UnknownKnowledgeActor(ActorId),
+    DuplicateMarketObservation(MarketObservationId),
     InvalidMarketTradeQuantity,
     MarketTradeAccountCollision,
     MarketTradeValueTooSmall,
@@ -137,6 +141,24 @@ impl WorldReducer {
             Command::RegisterMarketListing { listing } => {
                 Self::register_market_listing(state, listing)
             }
+            Command::RegisterKnowledgeActor { actor_id } => {
+                Self::register_knowledge_actor(state, actor_id)
+            }
+            Command::DispatchMarketObservation {
+                observation_id,
+                actor_id,
+                market_id,
+                commodity_id,
+                delay_ticks,
+            } => Self::dispatch_market_observation(
+                state,
+                envelope.sequence(),
+                observation_id,
+                actor_id,
+                market_id,
+                commodity_id,
+                *delay_ticks,
+            ),
             Command::ExecuteMarketTrade {
                 trade_id,
                 market_id,
@@ -211,6 +233,10 @@ impl WorldReducer {
                     cohort_id,
                     *cycle,
                 )
+            }
+            EventPayload::MarketObservationDelivery { observation } => {
+                state.commit_market_observation_delivered(observation.as_ref().clone(), revision);
+                Ok(())
             }
         }
     }
@@ -731,6 +757,88 @@ impl WorldReducer {
 
         let revision = Self::next_revision(state)?;
         state.commit_market_listing(listing.clone(), revision);
+        Ok(())
+    }
+
+    fn register_knowledge_actor(
+        state: &mut WorldState,
+        actor_id: &ActorId,
+    ) -> Result<(), ApplyError> {
+        if state.is_knowledge_actor_registered(actor_id) {
+            return Err(ApplyError::DuplicateKnowledgeActor(actor_id.clone()));
+        }
+
+        let revision = Self::next_revision(state)?;
+        state.commit_knowledge_actor(actor_id.clone(), revision);
+        Ok(())
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn dispatch_market_observation(
+        state: &mut WorldState,
+        command_sequence: u64,
+        observation_id: &MarketObservationId,
+        actor_id: &ActorId,
+        market_id: &MarketId,
+        commodity_id: &CommodityId,
+        delay_ticks: u64,
+    ) -> Result<(), ApplyError> {
+        if !state.is_knowledge_actor_registered(actor_id) {
+            return Err(ApplyError::UnknownKnowledgeActor(actor_id.clone()));
+        }
+
+        if state.has_market_observation(observation_id) {
+            return Err(ApplyError::DuplicateMarketObservation(
+                observation_id.clone(),
+            ));
+        }
+
+        let listing = state
+            .market_listing(market_id, commodity_id)
+            .ok_or_else(|| ApplyError::UnknownMarketListing {
+                market_id: market_id.clone(),
+                commodity_id: commodity_id.clone(),
+            })?;
+
+        let quote = derive_market_quote(state, listing).map_err(ApplyError::MarketMath)?;
+        let delivery_tick = state
+            .tick()
+            .checked_add(delay_ticks)
+            .ok_or(ApplyError::TimeOverflow)?;
+        let event_id = EventId::new(format!("information.deliver.{observation_id}"));
+        let event_sequence = state
+            .scheduler()
+            .next_sequence()
+            .ok_or(ApplyError::EventSequenceOverflow)?;
+        let event_generation = state
+            .scheduler()
+            .next_generation(&event_id)
+            .ok_or_else(|| ApplyError::EventGenerationOverflow(event_id.clone()))?;
+        let revision = Self::next_revision(state)?;
+
+        let observation = MarketObservation::new(
+            observation_id.clone(),
+            actor_id.clone(),
+            quote,
+            delivery_tick,
+            command_sequence,
+        );
+
+        state.commit_market_observation_dispatched(observation_id.clone(), revision);
+        state.commit_schedule_event(
+            ScheduledEvent::new(
+                event_id,
+                delivery_tick,
+                EventDomain::Information,
+                event_sequence,
+                event_generation,
+                EventPayload::MarketObservationDelivery {
+                    observation: Box::new(observation),
+                },
+            ),
+            revision,
+        );
+
         Ok(())
     }
 

@@ -3,7 +3,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    CommodityId, ConsumptionRecord, EconomicTransaction, EventId, EventSchedulerState,
+    ActorId, CommodityId, ConsumptionRecord, EconomicTransaction, EventId, EventSchedulerState,
+    InformationState, KnowledgeView, MarketObservation, MarketObservationId,
     InventoryAccount, InventoryAccountId, InventoryLedgerEntry, MarketId, MarketListing,
     MarketTrade, MarketTradeId, MoneyAccount, MoneyAccountId, MoneyLedgerEntry, PopulationCohort,
     PopulationCohortId, ProductionBatch, ProductionBatchId, ProductionRecipe, ProductionSite,
@@ -46,6 +47,7 @@ pub struct WorldState {
     market_listings: BTreeMap<(MarketId, CommodityId), MarketListing>,
     market_trades: Vec<MarketTrade>,
     market_trade_ids: BTreeSet<MarketTradeId>,
+    information: InformationState,
 }
 
 impl WorldState {
@@ -69,6 +71,7 @@ impl WorldState {
             market_listings: BTreeMap::new(),
             market_trades: Vec::new(),
             market_trade_ids: BTreeSet::new(),
+            information: InformationState::default(),
         }
     }
 
@@ -175,6 +178,26 @@ impl WorldState {
     #[must_use]
     pub fn has_market_trade(&self, trade_id: &MarketTradeId) -> bool {
         self.market_trade_ids.contains(trade_id)
+    }
+
+    #[must_use]
+    pub fn is_knowledge_actor_registered(&self, actor_id: &ActorId) -> bool {
+        self.information.is_actor_registered(actor_id)
+    }
+
+    #[must_use]
+    pub fn has_market_observation(&self, observation_id: &MarketObservationId) -> bool {
+        self.information.has_observation_id(observation_id)
+    }
+
+    #[must_use]
+    pub fn delivered_market_observations(&self) -> &[MarketObservation] {
+        self.information.delivered_observations()
+    }
+
+    #[must_use]
+    pub fn knowledge_view(&self, actor_id: &ActorId) -> Option<KnowledgeView> {
+        self.information.knowledge_view(actor_id, self.tick)
     }
 
     pub(crate) fn scheduler_mut(&mut self) -> &mut EventSchedulerState {
@@ -296,6 +319,34 @@ impl WorldState {
     ) {
         self.market_trade_ids.insert(trade.trade_id().clone());
         self.market_trades.push(trade);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_knowledge_actor(
+        &mut self,
+        actor_id: ActorId,
+        revision: WorldRevision,
+    ) {
+        self.information.commit_actor(actor_id);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_market_observation_dispatched(
+        &mut self,
+        observation_id: MarketObservationId,
+        revision: WorldRevision,
+    ) {
+        self.information
+            .commit_observation_dispatched(observation_id);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_market_observation_delivered(
+        &mut self,
+        observation: MarketObservation,
+        revision: WorldRevision,
+    ) {
+        self.information.commit_observation_delivered(observation);
         self.revision = revision;
     }
 
