@@ -1,7 +1,13 @@
 # PH4-007 Checkpoint
 
 ## Current intent
-Implement market value types and pure quote derivation first, then settlement commands.
+PH4-007 implementation and verification are complete.
+
+## Commands / verification
+GitHub Actions run 37110636610 passed all jobs, including Rust tests and v2 tiny ScenarioPack validation.
+
+## Current failure
+None.
 
 ## Exact next step
-Add MarketTradeId and UnitPrice checked scaling helpers.
+Review and merge PH4-007.
