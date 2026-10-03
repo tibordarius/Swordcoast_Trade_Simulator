@@ -138,6 +138,7 @@ pub struct MarketTrade {
 }
 
 impl MarketTrade {
+    #[allow(clippy::too_many_arguments)]
     #[must_use]
     pub fn new(
         trade_id: MarketTradeId,
