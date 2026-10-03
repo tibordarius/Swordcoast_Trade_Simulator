@@ -482,11 +482,9 @@ fn insufficient_cash_or_inventory_rejects_without_partial_state() {
 
 #[test]
 fn invalid_listing_configuration_is_rejected() {
-    let mut harness = Harness::new(100, 0, 100_000, 100_000);
-
-    let error = harness
-        .apply(Command::RegisterMarketListing {
-            listing: MarketListing::new(
+    let cases = [
+        (
+            MarketListing::new(
                 market_id(),
                 grain(),
                 InventoryAccountId::new("inventory.market"),
@@ -497,10 +495,48 @@ fn invalid_listing_configuration_is_rejected() {
                 100,
                 10,
             ),
-        })
-        .unwrap_err();
+            ApplyError::InvalidMarketReferencePrice,
+        ),
+        (
+            listing(2_000, 0, 100, 10),
+            ApplyError::InvalidMarketTargetStock,
+        ),
+        (
+            listing(2_000, 100, 0, 10),
+            ApplyError::InvalidMarketDepth,
+        ),
+        (
+            MarketListing::new(
+                market_id(),
+                grain(),
+                InventoryAccountId::new("inventory.market"),
+                MoneyAccountId::new("money.market"),
+                UnitPrice::from_milli_cp(2_000),
+                Quantity::new(100),
+                Quantity::new(100),
+                0,
+                10,
+            ),
+            ApplyError::InvalidMarketSpread,
+        ),
+        (
+            listing(2_000, 100, 100, 0),
+            ApplyError::InvalidMarketDemandWindow,
+        ),
+    ];
 
-    assert_eq!(error, ApplyError::InvalidMarketReferencePrice);
+    for (candidate, expected) in cases {
+        let mut harness = Harness::new(100, 0, 100_000, 100_000);
+        let before = state_hash(&harness.state).unwrap();
+
+        let error = harness
+            .apply(Command::RegisterMarketListing { listing: candidate })
+            .unwrap_err();
+
+        assert_eq!(error, expected);
+        assert_eq!(before, state_hash(&harness.state).unwrap());
+        assert!(harness.state.market_listing(&market_id(), &grain()).is_none());
+    }
 }
 
 #[test]
