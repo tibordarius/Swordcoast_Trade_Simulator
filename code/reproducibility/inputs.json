@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "rust_toolchain": "1.99.0",
+  "cargo_lock_sha256": "0b13d83c0d3f7a9ce689c819f445d96f19406000545b6b2a68cf7d8413d87e8b",
+  "scenario_fixture": {
+    "path": "crates/scenario-pack-v2/tests/fixtures/tiny_sword_coast.json",
+    "sha256": "22739417bee6d82c55ebcb2f3e7082d5601770b2976db40c4539ce61cd020a90",
+    "schema_version": 1,
+    "revision": 1
+  },
+  "snapshot_format_version": 6,
+  "baseline_source_commit": "a6ed57fc45e2e28b8c13708eb52d625ad4879ece"
+}
