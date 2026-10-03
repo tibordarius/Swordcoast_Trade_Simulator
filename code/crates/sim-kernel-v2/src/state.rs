@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     ActorId, CommodityId, ConsumptionRecord, EconomicTransaction, EventId, EventSchedulerState,
-    InformationState, KnowledgeView, MarketObservation, MarketObservationId,
+    InformationState, KnowledgeView, LogisticsState, MarketObservation, MarketObservationId,
     InventoryAccount, InventoryAccountId, InventoryLedgerEntry, MarketId, MarketListing,
     MarketTrade, MarketTradeId, MoneyAccount, MoneyAccountId, MoneyLedgerEntry, PopulationCohort,
     PopulationCohortId, ProductionBatch, ProductionBatchId, ProductionRecipe, ProductionSite,
@@ -48,6 +48,7 @@ pub struct WorldState {
     market_trades: Vec<MarketTrade>,
     market_trade_ids: BTreeSet<MarketTradeId>,
     information: InformationState,
+    logistics: LogisticsState,
 }
 
 impl WorldState {
@@ -72,6 +73,7 @@ impl WorldState {
             market_trades: Vec::new(),
             market_trade_ids: BTreeSet::new(),
             information: InformationState::default(),
+            logistics: LogisticsState::default(),
         }
     }
 
@@ -198,6 +200,15 @@ impl WorldState {
     #[must_use]
     pub fn knowledge_view(&self, actor_id: &ActorId) -> Option<KnowledgeView> {
         self.information.knowledge_view(actor_id, self.tick)
+    }
+
+    #[must_use]
+    pub fn logistics(&self) -> &LogisticsState {
+        &self.logistics
+    }
+
+    pub(crate) fn logistics_mut(&mut self) -> &mut LogisticsState {
+        &mut self.logistics
     }
 
     pub(crate) fn scheduler_mut(&mut self) -> &mut EventSchedulerState {
