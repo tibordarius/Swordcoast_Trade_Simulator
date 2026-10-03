@@ -4,8 +4,8 @@ use crate::{fnv1a64, WorldState};
 
 /// Snapshot schema version for the v2 kernel.
 ///
-/// Version 4 adds production recipes/sites/batches, population cohorts, consumption records, and typed scheduler payload state.
-pub const SNAPSHOT_FORMAT_VERSION: u32 = 4;
+/// Version 5 adds market listings, trade IDs, and real market execution history.
+pub const SNAPSHOT_FORMAT_VERSION: u32 = 5;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SnapshotError {
