@@ -340,6 +340,68 @@ fn larger_buy_has_more_deterministic_market_impact() {
 }
 
 #[test]
+fn sell_trade_moves_goods_and_money_atomically_and_records_real_execution() {
+    let mut harness = Harness::new(1_000, 200, 100_000, 10_000);
+    harness.register_listing(2_000, 1_000, 1_000, 10);
+
+    let listing = harness
+        .state
+        .market_listing(&market_id(), &grain())
+        .unwrap()
+        .clone();
+    let quote = derive_market_quote(&harness.state, &listing).unwrap();
+    let expected_price =
+        execution_price(&quote, MarketSide::Sell, Quantity::new(100), listing.depth()).unwrap();
+    let expected_value = expected_price.total_for(Quantity::new(100)).unwrap();
+
+    let market_cash_before = harness
+        .state
+        .money_balance(&MoneyAccountId::new("money.market"))
+        .unwrap();
+    let actor_cash_before = harness
+        .state
+        .money_balance(&MoneyAccountId::new("money.actor"))
+        .unwrap();
+
+    harness.apply(execute_sell("trade.sell.001", 100)).unwrap();
+
+    assert_eq!(
+        harness.state.inventory_balance(
+            &InventoryAccountId::new("inventory.market"),
+            &grain()
+        ),
+        Some(Quantity::new(1_100))
+    );
+    assert_eq!(
+        harness.state.inventory_balance(
+            &InventoryAccountId::new("inventory.actor"),
+            &grain()
+        ),
+        Some(Quantity::new(100))
+    );
+
+    let trade = &harness.state.market_trades()[0];
+    assert_eq!(trade.side(), MarketSide::Sell);
+    assert_eq!(trade.average_unit_price(), expected_price);
+    assert_eq!(trade.total_value(), expected_value);
+
+    assert_eq!(
+        harness
+            .state
+            .money_balance(&MoneyAccountId::new("money.market"))
+            .unwrap(),
+        MoneyCp::new(market_cash_before.get() - expected_value.get())
+    );
+    assert_eq!(
+        harness
+            .state
+            .money_balance(&MoneyAccountId::new("money.actor"))
+            .unwrap(),
+        MoneyCp::new(actor_cash_before.get() + expected_value.get())
+    );
+}
+
+#[test]
 fn buy_trade_moves_goods_and_money_atomically_and_records_real_execution() {
     let mut harness = Harness::new(1_000, 0, 100_000, 100_000);
     harness.register_listing(2_000, 1_000, 1_000, 10);
