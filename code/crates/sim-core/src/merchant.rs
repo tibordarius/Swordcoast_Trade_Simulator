@@ -1,4 +1,6 @@
-use crate::{compute_price, market_buy, market_sell, CalibratedRoute, CargoProfile, PriceState, BPS};
+use crate::{
+    compute_price, market_buy, market_sell, CalibratedRoute, CargoProfile, PriceState, BPS,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MarketView {
@@ -67,7 +69,11 @@ pub fn evaluate_opportunity(
     );
 
     let buy = market_buy(quantity_milli, origin_price.ask_mcp, origin.depth_milli);
-    let sell = market_sell(quantity_milli, destination_price.bid_mcp, destination.depth_milli);
+    let sell = market_sell(
+        quantity_milli,
+        destination_price.bid_mcp,
+        destination.depth_milli,
+    );
     let transport = route.cost_mcp(quantity_milli);
     let expected_loss = (buy.total_mcp * route.risk_loss_bps) / BPS;
     let deployed = buy.total_mcp + transport;
@@ -95,7 +101,6 @@ pub fn evaluate_opportunity(
         accepted,
     }
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExecutableOpportunity {

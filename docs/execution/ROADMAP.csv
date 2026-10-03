@@ -1,0 +1,38 @@
+task_id,phase,task,depends_on,completion_evidence,status
+R0-01,R0,Audit current repository and existing phases,none,Baseline report with commit and completed/gap matrix,proposed
+R0-02,R0,Run prescribed regression checks and pin fixture,R0-01,Reproduction record and failures; pinned manifest,proposed
+R0-03,R0,Specify command phase ownership and closure semantics,R0-02,Reviewed behaviour contract and acceptance scenarios,proposed
+R0-04,R0,Specify checkpoint history and version retention,R0-02,Persistence contract including active state and retries,proposed
+R1-01,R1,Define configurable campaign continuity and date profile,R0-03,Configuration contract; chosen profile before lore run,proposed
+R1-02,R1,Resolve pilot place identities populations and eras,R1-01,Dated register; scope and overrides explicit,proposed
+R1-03,R1,Validate pinned GIS CRS and pilot transport graph,R0-02;R1-02,Connectivity mode and distance report,proposed
+R1-04,R1,Author stocks recipes capacities and finite boundary markets,R1-02;R1-03,Evidence/estimate register and coherent balances,proposed
+R1-05,R1,Compile reviewed pilot ScenarioPack,R1-04,Validation report and versioned pack,proposed
+R2-01,R2,Complete dated actor information,R0-03,Delayed observations; no hidden global state access,proposed
+R2-02,R2,Implement household needs budgets and retained production,R0-03,Need affordability and consumption reports,proposed
+R2-03,R2,Complete income payment and public spending flows,R2-02,Every payment accounted; finite external issuance,proposed
+R2-04,R2,Implement multi-input labour and work in progress,R0-03,Reservations and capacity constraints reconcile,proposed
+R2-05,R2,Validate synthetic settlement economic loop,R2-01;R2-02;R2-03;R2-04,Conservation and stress-scenario report,proposed
+R3-01,R3,Implement owned lots and carrier capacity,R0-03;R2-05,Exclusive location/ownership and capacity checks,proposed
+R3-02,R3,Implement terminal queues and multi-leg transfers,R3-01,Recorded load transfer unload and delivery,proposed
+R3-03,R3,Add operating costs and pipeline-aware merchant policy,R2-01;R3-02,Finite cash provisioning and no duplicate replenishment,proposed
+R3-04,R3,Demonstrate funded consignment and closure,R3-03,Traceable delivered diverted or stranded outcome,proposed
+R4-01,R4,Implement durable journals and bounded hot state,R0-04;R3-01,Persistence survives restart without history copying,proposed
+R4-02,R4,Implement complete checkpoint restore and idempotency,R4-01;R3-04,Direct equals restored run; retry has no duplicate effect,proposed
+R4-03,R4,Implement immutable lineage forks and typed shocks,R4-02,Parent unchanged; past edit recomputes future,proposed
+R4-04,R4,Validate shared exogenous conditions and event conflicts,R4-03,Aligned weather domains and surfaced incompatibility,proposed
+R5-01,R5,Build read-only map and settlement projections,R3-02,Visible cargo maps to recorded lots; inspection works,proposed
+R5-02,R5,Build date advance preview and branch comparison flows,R4-04;R5-01,Campaign time operations preserve branch semantics,proposed
+R5-03,R5,Integrate reviewed pilot and three shock scenarios,R1-05;R2-05;R3-04;R5-02,Timber closure harbour closure and weapons cargo comparison,proposed
+R5-04,R5,Deliver campaign exports and operating walkthrough,R5-03,DM workflow and short-path notes/data exports,proposed
+R6-01,R6,Complete agriculture weather and resource dynamics,R5-03,Seasonal balance and stress scenarios,proposed
+R6-02,R6,Complete maintenance replacement and constrained investment,R6-01,Capacity cannot grow without materials time and labour,proposed
+R6-03,R6,Add bounded demography migration and housing limits,R6-02,Cohort drivers and stress responses inspectable,proposed
+R6-04,R6,Validate repeated seasons and ten-year scenarios,R6-03,Sensitivity and economic plausibility report,proposed
+R6-05,R6,Measure representative century and historical navigation,R6-04,Runtime memory history checkpoint seek and replay report,proposed
+R7-01,R7,Add reviewed inland Coast and Silver Marches modules,R6-05,Regional evidence graph balances and integration scenarios,proposed
+R7-02,R7,Add southern Inner Sea and eastern modules as needed,R7-01,Finite access institutions and new mechanism coverage,proposed
+R7-03,R7,Validate larger Faerun scenarios and coverage,R7-02,Coverage uncertainty performance and replay report,proposed
+R8-01,R8,Author finite distant maritime boundary interfaces,R7-03,Stock budget lead-time access and evidence registers,proposed
+R8-02,R8,Promote campaign-priority boundaries to regional modules,R8-01,Reviewed local economies and resupply links,proposed
+R8-03,R8,Validate declared Toril coverage and century scale,R8-02,Coverage map scale report and invariant results,proposed

@@ -22,7 +22,10 @@ fn reservation_departure_arrival_is_conservative_and_idempotent() {
     let mut shipment = Shipment::new(1, quantity, departure, departure + route.travel_ticks);
     assert!(shipment.depart(&mut origin));
     assert_eq!(origin.on_hand, 900_000_000);
-    assert_eq!(shipment.progress_bps(departure + route.travel_ticks / 2), 5_000);
+    assert_eq!(
+        shipment.progress_bps(departure + route.travel_ticks / 2),
+        5_000
+    );
 
     assert!(!shipment.arrive(&mut destination, shipment.eta_tick - 1));
     assert!(shipment.arrive(&mut destination, shipment.eta_tick));

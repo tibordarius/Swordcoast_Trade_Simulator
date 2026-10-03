@@ -1,9 +1,14 @@
 /// SplitMix64 deterministic primitive. Not cryptographic.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct SplitMix64 { state: u64 }
+pub struct SplitMix64 {
+    state: u64,
+}
 
 impl SplitMix64 {
-    #[must_use] pub const fn new(seed: u64) -> Self { Self { state: seed } }
+    #[must_use]
+    pub const fn new(seed: u64) -> Self {
+        Self { state: seed }
+    }
 
     pub fn next_u64(&mut self) -> u64 {
         self.state = self.state.wrapping_add(0x9E37_79B9_7F4A_7C15);

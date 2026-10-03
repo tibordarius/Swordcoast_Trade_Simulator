@@ -36,7 +36,12 @@ fn same_tick_events_fire_by_domain_then_insertion_sequence() {
 
     WorldReducer::apply(
         &mut state,
-        &CommandEnvelope::new(4, Command::AdvanceTo { tick: SimTick::new(10) }),
+        &CommandEnvelope::new(
+            4,
+            Command::AdvanceTo {
+                tick: SimTick::new(10),
+            },
+        ),
     )
     .unwrap();
 
@@ -79,7 +84,12 @@ fn cancelled_event_never_fires() {
 
     WorldReducer::apply(
         &mut state,
-        &CommandEnvelope::new(3, Command::AdvanceTo { tick: SimTick::new(10) }),
+        &CommandEnvelope::new(
+            3,
+            Command::AdvanceTo {
+                tick: SimTick::new(10),
+            },
+        ),
     )
     .unwrap();
 
@@ -108,21 +118,28 @@ fn rescheduling_same_id_invalidates_old_generation() {
 
     WorldReducer::apply(
         &mut state,
-        &CommandEnvelope::new(3, Command::AdvanceTo { tick: SimTick::new(10) }),
+        &CommandEnvelope::new(
+            3,
+            Command::AdvanceTo {
+                tick: SimTick::new(10),
+            },
+        ),
     )
     .unwrap();
 
     assert_eq!(state.scheduler().fired_events().len(), 1);
-    assert_eq!(
-        state.scheduler().fired_events()[0].event_id(),
-        &event_id
-    );
+    assert_eq!(state.scheduler().fired_events()[0].event_id(), &event_id);
     assert_eq!(state.scheduler().fired_events()[0].generation(), 2);
     assert_eq!(state.scheduler().queued_entry_count(), 1);
 
     WorldReducer::apply(
         &mut state,
-        &CommandEnvelope::new(4, Command::AdvanceTo { tick: SimTick::new(20) }),
+        &CommandEnvelope::new(
+            4,
+            Command::AdvanceTo {
+                tick: SimTick::new(20),
+            },
+        ),
     )
     .unwrap();
 
@@ -144,7 +161,12 @@ fn advance_drains_every_valid_event_through_target_tick() {
 
     WorldReducer::apply(
         &mut state,
-        &CommandEnvelope::new(4, Command::AdvanceTo { tick: SimTick::new(10) }),
+        &CommandEnvelope::new(
+            4,
+            Command::AdvanceTo {
+                tick: SimTick::new(10),
+            },
+        ),
     )
     .unwrap();
 
@@ -176,7 +198,12 @@ fn snapshot_roundtrip_preserves_pending_and_fired_scheduler_state() {
     .unwrap();
     WorldReducer::apply(
         &mut state,
-        &CommandEnvelope::new(3, Command::AdvanceTo { tick: SimTick::new(10) }),
+        &CommandEnvelope::new(
+            3,
+            Command::AdvanceTo {
+                tick: SimTick::new(10),
+            },
+        ),
     )
     .unwrap();
 
@@ -195,7 +222,12 @@ fn replay_reproduces_event_order_and_state_hash() {
     let commands = vec![
         schedule(1, "logistics", 10, EventDomain::Logistics),
         schedule(2, "production", 10, EventDomain::Production),
-        CommandEnvelope::new(3, Command::AdvanceTo { tick: SimTick::new(10) }),
+        CommandEnvelope::new(
+            3,
+            Command::AdvanceTo {
+                tick: SimTick::new(10),
+            },
+        ),
     ];
 
     let initial = WorldState::new(123);

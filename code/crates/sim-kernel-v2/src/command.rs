@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ActorId, EconomicTransaction, EventDomain, EventId, InventoryAccountId, InventoryAccountKind,
-    MarketId, MarketListing, MarketObservationId, MarketSide, MarketTradeId, MoneyAccountId,
-    MoneyAccountKind,
-    PopulationCohort, ProductionBatchId, ProductionRecipe, ProductionSite, ProductionSiteId,
-    Quantity, SimTick, CommodityId,
+    ActorId, CommodityId, EconomicTransaction, EventDomain, EventId, InventoryAccountId,
+    InventoryAccountKind, MarketId, MarketListing, MarketObservationId, MarketSide, MarketTradeId,
+    MoneyAccountId, MoneyAccountKind, PopulationCohort, ProductionBatchId, ProductionRecipe,
+    ProductionSite, ProductionSiteId, Quantity, SimTick,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

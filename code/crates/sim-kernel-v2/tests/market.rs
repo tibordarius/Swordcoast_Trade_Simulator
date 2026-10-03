@@ -168,12 +168,7 @@ fn inventory_transfer(
     )
 }
 
-fn money_transfer(
-    transaction_id: &str,
-    from: &str,
-    to: &str,
-    amount: i128,
-) -> EconomicTransaction {
+fn money_transfer(transaction_id: &str, from: &str, to: &str, amount: i128) -> EconomicTransaction {
     EconomicTransaction::new(
         TransactionId::new(transaction_id),
         vec![],
@@ -215,7 +210,10 @@ fn low_price_goods_keep_nonzero_bid_ask_spread() {
 
     let quote = derive_market_quote(
         &harness.state,
-        harness.state.market_listing(&market_id(), &grain()).unwrap(),
+        harness
+            .state
+            .market_listing(&market_id(), &grain())
+            .unwrap(),
     )
     .unwrap();
 
@@ -321,20 +319,10 @@ fn larger_buy_has_more_deterministic_market_impact() {
         .unwrap();
     let quote = derive_market_quote(&harness.state, listing).unwrap();
 
-    let small = execution_price(
-        &quote,
-        MarketSide::Buy,
-        Quantity::new(100),
-        listing.depth(),
-    )
-    .unwrap();
-    let large = execution_price(
-        &quote,
-        MarketSide::Buy,
-        Quantity::new(500),
-        listing.depth(),
-    )
-    .unwrap();
+    let small =
+        execution_price(&quote, MarketSide::Buy, Quantity::new(100), listing.depth()).unwrap();
+    let large =
+        execution_price(&quote, MarketSide::Buy, Quantity::new(500), listing.depth()).unwrap();
 
     assert!(large.scaled_value() > small.scaled_value());
 }
@@ -350,8 +338,13 @@ fn sell_trade_moves_goods_and_money_atomically_and_records_real_execution() {
         .unwrap()
         .clone();
     let quote = derive_market_quote(&harness.state, &listing).unwrap();
-    let expected_price =
-        execution_price(&quote, MarketSide::Sell, Quantity::new(100), listing.depth()).unwrap();
+    let expected_price = execution_price(
+        &quote,
+        MarketSide::Sell,
+        Quantity::new(100),
+        listing.depth(),
+    )
+    .unwrap();
     let expected_value = expected_price.total_for(Quantity::new(100)).unwrap();
 
     let market_cash_before = harness
@@ -366,17 +359,15 @@ fn sell_trade_moves_goods_and_money_atomically_and_records_real_execution() {
     harness.apply(execute_sell("trade.sell.001", 100)).unwrap();
 
     assert_eq!(
-        harness.state.inventory_balance(
-            &InventoryAccountId::new("inventory.market"),
-            &grain()
-        ),
+        harness
+            .state
+            .inventory_balance(&InventoryAccountId::new("inventory.market"), &grain()),
         Some(Quantity::new(1_100))
     );
     assert_eq!(
-        harness.state.inventory_balance(
-            &InventoryAccountId::new("inventory.actor"),
-            &grain()
-        ),
+        harness
+            .state
+            .inventory_balance(&InventoryAccountId::new("inventory.actor"), &grain()),
         Some(Quantity::new(100))
     );
 
@@ -418,17 +409,15 @@ fn buy_trade_moves_goods_and_money_atomically_and_records_real_execution() {
     harness.apply(execute_buy("trade.buy.001", 100)).unwrap();
 
     assert_eq!(
-        harness.state.inventory_balance(
-            &InventoryAccountId::new("inventory.market"),
-            &grain()
-        ),
+        harness
+            .state
+            .inventory_balance(&InventoryAccountId::new("inventory.market"), &grain()),
         Some(Quantity::new(900))
     );
     assert_eq!(
-        harness.state.inventory_balance(
-            &InventoryAccountId::new("inventory.actor"),
-            &grain()
-        ),
+        harness
+            .state
+            .inventory_balance(&InventoryAccountId::new("inventory.actor"), &grain()),
         Some(Quantity::new(100))
     );
 
@@ -460,7 +449,9 @@ fn insufficient_cash_or_inventory_rejects_without_partial_state() {
     cash_limited.register_listing(2_000, 1_000, 1_000, 10);
 
     let before_cash = state_hash(&cash_limited.state).unwrap();
-    let error = cash_limited.apply(execute_buy("trade.no.cash", 100)).unwrap_err();
+    let error = cash_limited
+        .apply(execute_buy("trade.no.cash", 100))
+        .unwrap_err();
     assert!(matches!(error, ApplyError::NegativeMoneyBalance { .. }));
     assert_eq!(before_cash, state_hash(&cash_limited.state).unwrap());
     assert!(cash_limited.state.market_trades().is_empty());
@@ -501,10 +492,7 @@ fn invalid_listing_configuration_is_rejected() {
             listing(2_000, 0, 100, 10),
             ApplyError::InvalidMarketTargetStock,
         ),
-        (
-            listing(2_000, 100, 0, 10),
-            ApplyError::InvalidMarketDepth,
-        ),
+        (listing(2_000, 100, 0, 10), ApplyError::InvalidMarketDepth),
         (
             MarketListing::new(
                 market_id(),
@@ -535,7 +523,10 @@ fn invalid_listing_configuration_is_rejected() {
 
         assert_eq!(error, expected);
         assert_eq!(before, state_hash(&harness.state).unwrap());
-        assert!(harness.state.market_listing(&market_id(), &grain()).is_none());
+        assert!(harness
+            .state
+            .market_listing(&market_id(), &grain())
+            .is_none());
     }
 }
 

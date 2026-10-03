@@ -51,7 +51,10 @@ fn trade_world(capacity_kg: i64, travel_ticks: u64) -> WorldState {
 #[test]
 fn dispatch_removes_origin_stock_and_arrival_changes_destination_later() {
     let mut world = trade_world(500_000, 2);
-    let origin_before = world.market("MKT-ATH", "CMD-GRAIN").unwrap().on_hand_milli();
+    let origin_before = world
+        .market("MKT-ATH", "CMD-GRAIN")
+        .unwrap()
+        .on_hand_milli();
     let destination_before = world.market("MKT-WD", "CMD-GRAIN").unwrap().on_hand_milli();
 
     let shipment = world
@@ -68,7 +71,10 @@ fn dispatch_removes_origin_stock_and_arrival_changes_destination_later() {
 
     assert_eq!(shipment.status, ShipmentStatus::InTransit);
     assert_eq!(
-        world.market("MKT-ATH", "CMD-GRAIN").unwrap().on_hand_milli(),
+        world
+            .market("MKT-ATH", "CMD-GRAIN")
+            .unwrap()
+            .on_hand_milli(),
         origin_before - 100_000_000
     );
     assert_eq!(
@@ -84,14 +90,23 @@ fn dispatch_removes_origin_stock_and_arrival_changes_destination_later() {
     );
 
     world.run_ticks(1);
-    assert_eq!(world.shipment(shipment.id).unwrap().progress_bps(world.tick()), 5_000);
+    assert_eq!(
+        world
+            .shipment(shipment.id)
+            .unwrap()
+            .progress_bps(world.tick()),
+        5_000
+    );
     assert_eq!(
         world.market("MKT-WD", "CMD-GRAIN").unwrap().on_hand_milli(),
         destination_before
     );
 
     world.run_ticks(1);
-    assert_eq!(world.shipment(shipment.id).unwrap().status, ShipmentStatus::Arrived);
+    assert_eq!(
+        world.shipment(shipment.id).unwrap().status,
+        ShipmentStatus::Arrived
+    );
     assert_eq!(
         world.market("MKT-WD", "CMD-GRAIN").unwrap().on_hand_milli(),
         destination_before + 100_000_000

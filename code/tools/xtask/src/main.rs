@@ -10,9 +10,7 @@ fn run(program: &str, args: &[&str]) -> bool {
 }
 
 fn usage() {
-    eprintln!(
-        "usage: cargo xtask <check|test-tiny|test-v2|pack-validate <scenario-pack.json>>"
-    );
+    eprintln!("usage: cargo xtask <check|test-tiny|test-v2|pack-validate <scenario-pack.json>>");
 }
 
 fn main() -> ExitCode {
@@ -29,6 +27,7 @@ fn main() -> ExitCode {
                     "cargo",
                     &[
                         "clippy",
+                        "--locked",
                         "--workspace",
                         "--all-targets",
                         "--",
@@ -36,12 +35,15 @@ fn main() -> ExitCode {
                         "warnings",
                     ],
                 )
-                && run("cargo", &["test", "--workspace", "--all-targets"])
+                && run(
+                    "cargo",
+                    &["test", "--locked", "--workspace", "--all-targets"],
+                )
         }
-        "test-v2" => run("cargo", &["test", "-p", "sim-kernel-v2"]),
+        "test-v2" => run("cargo", &["test", "--locked", "-p", "sim-kernel-v2"]),
         "test-tiny" => {
-            run("cargo", &["test", "-p", "sim-kernel-v2"])
-                && run("cargo", &["test", "-p", "scenario-pack-v2"])
+            run("cargo", &["test", "--locked", "-p", "sim-kernel-v2"])
+                && run("cargo", &["test", "--locked", "-p", "scenario-pack-v2"])
         }
         "pack-validate" => {
             let Some(path) = args.next() else {
@@ -52,6 +54,7 @@ fn main() -> ExitCode {
                 "cargo",
                 &[
                     "run",
+                    "--locked",
                     "-p",
                     "scenario-pack-v2",
                     "--bin",

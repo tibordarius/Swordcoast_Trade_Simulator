@@ -15,7 +15,16 @@ fn reserve_scarcity_is_monotonic() {
 #[test]
 fn incoming_supply_reduces_current_fundamental() {
     let none = compute_price(2_000, 350_000_000, 700_000_000, 0, 25_000_000, 0, 0, 4);
-    let incoming = compute_price(2_000, 350_000_000, 700_000_000, 0, 25_000_000, 350_000_000, 0, 4);
+    let incoming = compute_price(
+        2_000,
+        350_000_000,
+        700_000_000,
+        0,
+        25_000_000,
+        350_000_000,
+        0,
+        4,
+    );
     assert!(incoming.fundamental_mcp < none.fundamental_mcp);
 }
 

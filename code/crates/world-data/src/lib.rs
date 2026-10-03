@@ -180,9 +180,8 @@ impl SeedBundle {
             ));
         }
 
-        market_states.sort_by(|a, b| {
-            (&a.market_id, &a.commodity_id).cmp(&(&b.market_id, &b.commodity_id))
-        });
+        market_states
+            .sort_by(|a, b| (&a.market_id, &a.commodity_id).cmp(&(&b.market_id, &b.commodity_id)));
 
         Ok(Self {
             markets,
@@ -282,7 +281,10 @@ fn collect_markets(
     for definition in definitions {
         validate_provenance(&definition.provenance, &definition.id)?;
         if !(1..=5).contains(&definition.liquidity_tier) {
-            return Err(format!("invalid liquidity tier for market {}", definition.id));
+            return Err(format!(
+                "invalid liquidity tier for market {}",
+                definition.id
+            ));
         }
         let id = definition.id.clone();
         if out.insert(id.clone(), definition).is_some() {
@@ -362,7 +364,10 @@ fn validate_state(state: &MarketStateSeed) -> Result<(), String> {
         return Err(format!("invalid reserve for {}", state.commodity_id));
     }
     if state.reference_price_mcp <= 0 {
-        return Err(format!("invalid reference price for {}", state.commodity_id));
+        return Err(format!(
+            "invalid reference price for {}",
+            state.commodity_id
+        ));
     }
     if state.daily_supply_milli < 0 || state.daily_demand_milli <= 0 {
         return Err(format!("invalid daily flow for {}", state.commodity_id));
@@ -374,7 +379,10 @@ fn validate_state(state: &MarketStateSeed) -> Result<(), String> {
         return Err(format!("invalid depth for {}", state.commodity_id));
     }
     if state.incoming_committed_milli < 0 {
-        return Err(format!("negative incoming stock for {}", state.commodity_id));
+        return Err(format!(
+            "negative incoming stock for {}",
+            state.commodity_id
+        ));
     }
     if !(0..=10_000).contains(&state.risk_bps) {
         return Err(format!("invalid risk bps for {}", state.commodity_id));

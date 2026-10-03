@@ -88,7 +88,9 @@ pub fn validate(pack: &ScenarioPack) -> Result<(), ValidationError> {
     );
     duplicate_issues(
         "inventory_accounts",
-        pack.inventory_accounts.iter().map(|record| record.id.as_str()),
+        pack.inventory_accounts
+            .iter()
+            .map(|record| record.id.as_str()),
         &mut issues,
     );
     duplicate_issues(
@@ -103,7 +105,11 @@ pub fn validate(pack: &ScenarioPack) -> Result<(), ValidationError> {
         .iter()
         .map(|record| record.id.as_str())
         .collect();
-    let place_ids: BTreeSet<&str> = pack.places.iter().map(|record| record.id.as_str()).collect();
+    let place_ids: BTreeSet<&str> = pack
+        .places
+        .iter()
+        .map(|record| record.id.as_str())
+        .collect();
     let market_ids: BTreeSet<&str> = pack
         .markets
         .iter()

@@ -28,11 +28,12 @@ impl Harness {
             ("system.consumption", InventoryAccountKind::SourceOrSink),
             ("system.seed", InventoryAccountKind::SourceOrSink),
         ] {
-            harness.apply(Command::OpenInventoryAccount {
-                account_id: InventoryAccountId::new(id),
-                kind,
-            })
-            .unwrap();
+            harness
+                .apply(Command::OpenInventoryAccount {
+                    account_id: InventoryAccountId::new(id),
+                    kind,
+                })
+                .unwrap();
         }
 
         if raw_grain != 0 {
@@ -80,10 +81,8 @@ impl Harness {
         })
         .unwrap();
 
-        self.apply(Command::RegisterProductionSite {
-            site: flour_site(),
-        })
-        .unwrap();
+        self.apply(Command::RegisterProductionSite { site: flour_site() })
+            .unwrap();
     }
 }
 
@@ -172,8 +171,14 @@ fn production_reserves_input_then_completes_only_at_scheduled_tick() {
         })
         .unwrap();
 
-    assert_eq!(balance(&harness.state, "inventory.raw", &grain()), Quantity::new(90));
-    assert_eq!(balance(&harness.state, "inventory.wip", &grain()), Quantity::new(10));
+    assert_eq!(
+        balance(&harness.state, "inventory.raw", &grain()),
+        Quantity::new(90)
+    );
+    assert_eq!(
+        balance(&harness.state, "inventory.wip", &grain()),
+        Quantity::new(10)
+    );
     assert_eq!(
         balance(&harness.state, "inventory.output", &flour()),
         Quantity::ZERO
@@ -194,7 +199,10 @@ fn production_reserves_input_then_completes_only_at_scheduled_tick() {
         })
         .unwrap();
 
-    assert_eq!(balance(&harness.state, "inventory.wip", &grain()), Quantity::new(10));
+    assert_eq!(
+        balance(&harness.state, "inventory.wip", &grain()),
+        Quantity::new(10)
+    );
     assert_eq!(
         balance(&harness.state, "inventory.output", &flour()),
         Quantity::ZERO
@@ -206,7 +214,10 @@ fn production_reserves_input_then_completes_only_at_scheduled_tick() {
         })
         .unwrap();
 
-    assert_eq!(balance(&harness.state, "inventory.wip", &grain()), Quantity::ZERO);
+    assert_eq!(
+        balance(&harness.state, "inventory.wip", &grain()),
+        Quantity::ZERO
+    );
     assert_eq!(
         balance(&harness.state, "inventory.output", &flour()),
         Quantity::new(8)
@@ -244,17 +255,12 @@ fn insufficient_input_rejects_batch_without_partial_state() {
         })
         .unwrap_err();
 
-    assert!(matches!(
-        error,
-        ApplyError::NegativeInventoryBalance { .. }
-    ));
+    assert!(matches!(error, ApplyError::NegativeInventoryBalance { .. }));
     assert_eq!(before, state_hash(&harness.state).unwrap());
-    assert!(
-        harness
-            .state
-            .production_batch(&ProductionBatchId::new("batch.insufficient"))
-            .is_none()
-    );
+    assert!(harness
+        .state
+        .production_batch(&ProductionBatchId::new("batch.insufficient"))
+        .is_none());
     assert_eq!(harness.state.scheduler().active_event_count(), 0);
 }
 
@@ -284,7 +290,10 @@ fn recurring_consumption_records_served_and_unmet_per_cycle() {
         })
         .unwrap();
 
-    assert_eq!(balance(&harness.state, "inventory.food", &grain()), Quantity::ZERO);
+    assert_eq!(
+        balance(&harness.state, "inventory.food", &grain()),
+        Quantity::ZERO
+    );
     assert_eq!(
         balance(&harness.state, "system.consumption", &grain()),
         Quantity::new(100)
@@ -342,10 +351,7 @@ fn advance_is_atomic_when_due_event_fails() {
         })
         .unwrap_err();
 
-    assert!(matches!(
-        error,
-        ApplyError::NegativeInventoryBalance { .. }
-    ));
+    assert!(matches!(error, ApplyError::NegativeInventoryBalance { .. }));
     assert_eq!(before_hash, state_hash(&harness.state).unwrap());
     assert_eq!(before, harness.state);
     assert_eq!(harness.state.tick(), SimTick::ZERO);

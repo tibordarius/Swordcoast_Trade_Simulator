@@ -2,10 +2,7 @@ use postgres::{Client, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
-use sim_core::{
-    decode_world_snapshot, encode_world_snapshot, WorldState,
-    SNAPSHOT_STATE_FORMAT,
-};
+use sim_core::{decode_world_snapshot, encode_world_snapshot, WorldState, SNAPSHOT_STATE_FORMAT};
 use thiserror::Error;
 
 const EVENT_SCHEMA_VERSION: i32 = 1;
@@ -93,8 +90,9 @@ impl WorldCommand {
     }
 
     fn from_parts(command_type: &str, payload: Value) -> Result<Self, PersistenceError> {
-        let command: Self = serde_json::from_value(payload)
-            .map_err(|error| PersistenceError::Integrity(format!("stored command JSON: {error}")))?;
+        let command: Self = serde_json::from_value(payload).map_err(|error| {
+            PersistenceError::Integrity(format!("stored command JSON: {error}"))
+        })?;
         if command.command_type() != command_type {
             return Err(PersistenceError::Integrity(format!(
                 "command type mismatch: column={command_type}, payload={}",
@@ -407,10 +405,7 @@ impl PgPersistence {
         Ok(world)
     }
 
-    pub fn branch_head(
-        &mut self,
-        ids: WorldBranch,
-    ) -> Result<(i64, String), PersistenceError> {
+    pub fn branch_head(&mut self, ids: WorldBranch) -> Result<(i64, String), PersistenceError> {
         let context = read_branch(&mut self.client, ids)?;
         Ok((context.last_event_sequence, context.last_event_hash))
     }
@@ -471,10 +466,7 @@ fn lock_branch(
     })
 }
 
-fn read_branch(
-    client: &mut Client,
-    ids: WorldBranch,
-) -> Result<BranchContext, PersistenceError> {
+fn read_branch(client: &mut Client, ids: WorldBranch) -> Result<BranchContext, PersistenceError> {
     let row = client
         .query_opt(
             "SELECT b.last_event_sequence, b.last_event_hash, w.seed, w.current_tick, w.simulation_version
@@ -498,10 +490,7 @@ fn read_branch(
     })
 }
 
-fn load_events(
-    client: &mut Client,
-    branch_id: i64,
-) -> Result<Vec<EventRecord>, PersistenceError> {
+fn load_events(client: &mut Client, branch_id: i64) -> Result<Vec<EventRecord>, PersistenceError> {
     client
         .query(
             "SELECT sequence, tick_received, actor, command_type, payload, schema_version, event_hash

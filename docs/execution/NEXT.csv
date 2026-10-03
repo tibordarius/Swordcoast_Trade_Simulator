@@ -1,0 +1,12 @@
+job_id,owner,outcome,depends_on,status,acceptance,roadmap_mapping
+N01,Integrator,Normalize existing Rust formatting in a separate patch,none,REVIEW,formatting-only diff; strict xtask gate; source/behavior comparison,R0-02 strict baseline
+N02,Integrator,Retain dependency/toolchain/run manifest,N01,REVIEW,retained lock/artifact hashes; explicit build identity,R0-02; R0-04 reproducibility
+N03,Integrator + reviewer,Adopt reviewed execution contract through repository design workflow,N01;N02,REVIEW,accepted version/migration boundary; five task documents,R0-03;R0-04
+N04,Data worker,Define campaign continuity/date profile,N03,PLANNED,explicit config; do not default to generated1492 fixture,R1-01
+N05,Economic worker,Specify household budgets/income/payment next bounded slice,N03,PLANNED,versioned budget/need/affordability scenarios,R2-02; R2-03 after R2-02
+N06,Production worker,Specify multi-input labour and protected reservations,N03,PLANNED,atomic all-input capacity checks and complete snapshot fields,R2-04
+N07,Integrator,Assess/reuse incomplete PH4-009 branch before its next patch,N03,PLANNED,no duplicate task ID; resolve unhandled reducer matches; test/version plan,preimplementation spike; not R3 acceptance
+N08,Persistence worker,Draft minimal v2 durable adapter interface from contract,N03,PLANNED,request/receipt/cursors/atomic commit fixture design,design spike; R4-01 implementation waits R3-01
+N09,Integrator,Demonstrate funded synthetic economic loop,N05;N06;N11,BLOCKED,all R2-01..04 completion evidence; conservation/stress report,R2-05
+N10,Integrator + domain workers,Complete logistics then durable-history integration,N07;N09,BLOCKED,preserve R3/R4 exact dependencies: R3-01 after R2-05; R4-01 after R0-04 and R3-01; R4-02 after R4-01 and R3-04; final combined tests,R3-01 onward; R4-01 after R3-01
+N11,Information/policy worker,Validate completed delayed information and specify actor policy boundary,N03,PLANNED,dated actor knowledge and merchant API acceptance; mark only satisfied R2-01 evidence,R2-01

@@ -19,7 +19,11 @@ pub fn compile_initialization_commands(pack: &ValidatedScenarioPack) -> Vec<Comm
         .opening_inventory
         .iter()
         .any(|row| row.quantity != 0);
-    let has_opening_money = pack.pack().opening_money.iter().any(|row| row.amount_cp != 0);
+    let has_opening_money = pack
+        .pack()
+        .opening_money
+        .iter()
+        .any(|row| row.amount_cp != 0);
 
     if has_opening_inventory {
         sequence += 1;
@@ -124,12 +128,12 @@ pub fn compile_initialization_commands(pack: &ValidatedScenarioPack) -> Vec<Comm
     if !opening_money.is_empty() {
         let external_account = MoneyAccountId::new(OPENING_MONEY_ACCOUNT_ID);
         let mut postings = Vec::with_capacity(opening_money.len() + 1);
-        let total: i128 = opening_money.iter().map(|row| i128::from(row.amount_cp)).sum();
+        let total: i128 = opening_money
+            .iter()
+            .map(|row| i128::from(row.amount_cp))
+            .sum();
 
-        postings.push(MoneyPosting::new(
-            external_account,
-            MoneyCp::new(-total),
-        ));
+        postings.push(MoneyPosting::new(external_account, MoneyCp::new(-total)));
 
         for row in opening_money {
             postings.push(MoneyPosting::new(

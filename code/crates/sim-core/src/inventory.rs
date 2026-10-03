@@ -52,14 +52,23 @@ impl InventoryLedger {
         if amount <= 0 {
             return false;
         }
-        self.on_hand = self.on_hand.checked_add(amount).expect("inventory overflow");
+        self.on_hand = self
+            .on_hand
+            .checked_add(amount)
+            .expect("inventory overflow");
         true
     }
 
     pub fn add_production(&mut self, amount: i64) {
         assert!(amount >= 0);
-        self.on_hand = self.on_hand.checked_add(amount).expect("inventory overflow");
-        self.produced = self.produced.checked_add(amount).expect("production counter overflow");
+        self.on_hand = self
+            .on_hand
+            .checked_add(amount)
+            .expect("inventory overflow");
+        self.produced = self
+            .produced
+            .checked_add(amount)
+            .expect("production counter overflow");
     }
 
     pub fn consume(&mut self, requested: i64) -> i64 {

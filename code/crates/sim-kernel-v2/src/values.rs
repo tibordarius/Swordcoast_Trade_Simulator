@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 /// Integral copper-piece amount.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize,
+)]
 pub struct MoneyCp(pub i128);
 
 impl MoneyCp {
@@ -29,7 +31,9 @@ impl MoneyCp {
 }
 
 /// Integral base-unit commodity quantity.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize,
+)]
 pub struct Quantity(pub i64);
 
 impl Quantity {

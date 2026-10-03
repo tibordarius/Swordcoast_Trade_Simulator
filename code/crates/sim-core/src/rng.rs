@@ -9,8 +9,12 @@ pub struct SplitMix64 {
 impl SplitMix64 {
     const GAMMA: u64 = 0x9E3779B97F4A7C15;
 
-    pub fn new(seed: u64) -> Self { Self { state: seed } }
-    pub fn state(&self) -> u64 { self.state }
+    pub fn new(seed: u64) -> Self {
+        Self { state: seed }
+    }
+    pub fn state(&self) -> u64 {
+        self.state
+    }
 
     pub fn next_u64(&mut self) -> u64 {
         self.state = self.state.wrapping_add(Self::GAMMA);

@@ -52,3 +52,9 @@ Do not report a task complete unless:
 
 ## Scope discipline
 Keep changes small and reviewable. Do not use a task as permission to redesign unrelated modules.
+
+## Parallel work
+Use up to three subagents for independent bounded tasks when useful. Follow `docs/agents/WORKFLOW.md` and preserve the five existing task documents. The coordinator owns dependency/ownership assignment, shared contracts, serial integration and publication. Workers get pinned inputs and exclusive paths; reviewers examine concrete results independently. Do not recursively delegate unless the coordinator explicitly revises the allocation. Proposed execution decisions live in `docs/execution/CONTRACT.md`; existing accepted ADRs remain authoritative until a reviewed implementation adopts a versioned change.
+
+## Build input records
+Use the pinned Rust toolchain and committed `code/Cargo.lock`. `cargo xtask` locks dependency resolution. `code/reproducibility/README.md` explains verified build-input manifests and their limits. A recorded hash is not an archived executable or proof of a complete campaign runtime.

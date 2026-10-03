@@ -68,9 +68,7 @@ impl Harness {
             .unwrap();
 
         harness
-            .apply(Command::RegisterMarketListing {
-                listing: listing(),
-            })
+            .apply(Command::RegisterMarketListing { listing: listing() })
             .unwrap();
 
         harness
@@ -153,12 +151,7 @@ fn inventory_transfer(
     )
 }
 
-fn money_transfer(
-    transaction_id: &str,
-    from: &str,
-    to: &str,
-    amount: i128,
-) -> EconomicTransaction {
+fn money_transfer(transaction_id: &str, from: &str, to: &str, amount: i128) -> EconomicTransaction {
     EconomicTransaction::new(
         TransactionId::new(transaction_id),
         vec![],
@@ -211,7 +204,10 @@ fn observation_is_invisible_until_scheduled_delivery() {
         .latest_market_observation(&market_id(), &grain())
         .unwrap();
 
-    assert_eq!(observation.observation_id(), &MarketObservationId::new("obs.1"));
+    assert_eq!(
+        observation.observation_id(),
+        &MarketObservationId::new("obs.1")
+    );
     assert_eq!(observation.observed_at(), SimTick::ZERO);
     assert_eq!(observation.delivery_tick(), SimTick::new(10));
     assert_eq!(observation.transport_delay_ticks(), 10);
@@ -225,7 +221,10 @@ fn in_flight_observation_keeps_dispatch_time_quote_when_market_changes() {
 
     let truth_at_dispatch = derive_market_quote(
         &harness.state,
-        harness.state.market_listing(&market_id(), &grain()).unwrap(),
+        harness
+            .state
+            .market_listing(&market_id(), &grain())
+            .unwrap(),
     )
     .unwrap();
 
@@ -250,7 +249,10 @@ fn in_flight_observation_keeps_dispatch_time_quote_when_market_changes() {
 
     let current_truth = derive_market_quote(
         &harness.state,
-        harness.state.market_listing(&market_id(), &grain()).unwrap(),
+        harness
+            .state
+            .market_listing(&market_id(), &grain())
+            .unwrap(),
     )
     .unwrap();
     let view = harness
@@ -262,10 +264,7 @@ fn in_flight_observation_keeps_dispatch_time_quote_when_market_changes() {
         .unwrap();
 
     assert_eq!(observed.quote(), &truth_at_dispatch);
-    assert!(
-        current_truth.fundamental.scaled_value()
-            > observed.quote().fundamental.scaled_value()
-    );
+    assert!(current_truth.fundamental.scaled_value() > observed.quote().fundamental.scaled_value());
     assert!(harness.state.market_trades().is_empty());
 }
 
@@ -363,7 +362,9 @@ fn actor_views_are_isolated() {
         .knowledge_view(&ActorId::new("merchant.b"))
         .unwrap();
 
-    assert!(a.latest_market_observation(&market_id(), &grain()).is_some());
+    assert!(a
+        .latest_market_observation(&market_id(), &grain())
+        .is_some());
     assert!(b.market_observations().is_empty());
 }
 
@@ -372,7 +373,9 @@ fn unknown_actor_unknown_market_and_duplicate_observation_are_rejected_atomicall
     let mut harness = Harness::new(1_000);
 
     let before_unknown_actor = state_hash(&harness.state).unwrap();
-    let error = harness.dispatch("obs.unknown", "merchant.missing", 5).unwrap_err();
+    let error = harness
+        .dispatch("obs.unknown", "merchant.missing", 5)
+        .unwrap_err();
     assert_eq!(
         error,
         ApplyError::UnknownKnowledgeActor(ActorId::new("merchant.missing"))
@@ -520,10 +523,7 @@ fn replay_reproduces_delayed_information_state() {
                 ),
             },
         ),
-        CommandEnvelope::new(
-            5,
-            Command::RegisterMarketListing { listing: listing() },
-        ),
+        CommandEnvelope::new(5, Command::RegisterMarketListing { listing: listing() }),
         CommandEnvelope::new(
             6,
             Command::RegisterKnowledgeActor {

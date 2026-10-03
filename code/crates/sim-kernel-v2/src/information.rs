@@ -2,9 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    ActorId, CommodityId, MarketId, MarketObservationId, MarketQuote, SimTick,
-};
+use crate::{ActorId, CommodityId, MarketId, MarketObservationId, MarketQuote, SimTick};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct MarketObservation {
@@ -109,9 +107,7 @@ impl KnowledgeView {
     }
 
     #[must_use]
-    pub fn market_observations(
-        &self,
-    ) -> &BTreeMap<(MarketId, CommodityId), MarketObservation> {
+    pub fn market_observations(&self) -> &BTreeMap<(MarketId, CommodityId), MarketObservation> {
         &self.market_observations
     }
 
@@ -181,10 +177,7 @@ impl InformationState {
         self.actors.insert(actor_id);
     }
 
-    pub(crate) fn commit_observation_dispatched(
-        &mut self,
-        observation_id: MarketObservationId,
-    ) {
+    pub(crate) fn commit_observation_dispatched(&mut self, observation_id: MarketObservationId) {
         self.observation_ids.insert(observation_id);
     }
 
@@ -217,7 +210,12 @@ mod tests {
         Quantity, SimTick, UnitPrice,
     };
 
-    fn observation(id: &str, observed_at: u64, delivered_at: u64, sequence: u64) -> MarketObservation {
+    fn observation(
+        id: &str,
+        observed_at: u64,
+        delivered_at: u64,
+        sequence: u64,
+    ) -> MarketObservation {
         let price = UnitPrice::from_milli_cp(2_000);
         MarketObservation::new(
             MarketObservationId::new(id),

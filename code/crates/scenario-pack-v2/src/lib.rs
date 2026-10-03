@@ -9,8 +9,8 @@ pub use compile::compile_initialization_commands;
 pub use error::{InitializeError, PackLoadError, ValidationError, ValidationIssue};
 pub use model::{
     CommoditySpec, InventoryAccountSpec, MarketSpec, MoneyAccountSpec, OpeningInventorySpec,
-    OpeningMoneySpec, PackManifest, PlaceSpec, ProvenanceStatus, RouteSpec, ScenarioPack,
-    UnitSpec, SCENARIO_PACK_SCHEMA_VERSION,
+    OpeningMoneySpec, PackManifest, PlaceSpec, ProvenanceStatus, RouteSpec, ScenarioPack, UnitSpec,
+    SCENARIO_PACK_SCHEMA_VERSION,
 };
 pub use registry::compile_registry;
 pub use validate::validate;
