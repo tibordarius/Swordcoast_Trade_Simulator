@@ -2,10 +2,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     ActorId, EconomicTransaction, EventDomain, EventId, InventoryAccountId, InventoryAccountKind,
-    MarketId, MarketListing, MarketObservationId, MarketSide, MarketTradeId, MoneyAccountId,
+    CommodityTransportProfile, LogisticsRoute, MarketId, MarketListing, MarketObservationId,
+    MarketSide, MarketTradeId, MoneyAccountId,
     MoneyAccountKind,
     PopulationCohort, ProductionBatchId, ProductionRecipe, ProductionSite, ProductionSiteId,
-    Quantity, SimTick, CommodityId,
+    Quantity, RouteEdgeId, ShipmentId, SimTick, CommodityId,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -80,6 +81,25 @@ pub enum Command {
         market_id: MarketId,
         commodity_id: CommodityId,
         delay_ticks: u64,
+    },
+    RegisterCommodityTransportProfile {
+        profile: CommodityTransportProfile,
+    },
+    RegisterLogisticsRoute {
+        route: LogisticsRoute,
+    },
+    SetLogisticsRouteOpen {
+        route_id: RouteEdgeId,
+        open: bool,
+    },
+    DispatchShipment {
+        shipment_id: ShipmentId,
+        origin_market: MarketId,
+        destination_market: MarketId,
+        source_inventory_account: InventoryAccountId,
+        destination_inventory_account: InventoryAccountId,
+        commodity_id: CommodityId,
+        quantity: Quantity,
     },
     ExecuteMarketTrade {
         trade_id: MarketTradeId,
