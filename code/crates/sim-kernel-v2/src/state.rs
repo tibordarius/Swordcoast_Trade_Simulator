@@ -3,10 +3,11 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ConsumptionRecord, EconomicTransaction, EventId, EventSchedulerState, InventoryAccount,
-    InventoryAccountId, InventoryLedgerEntry, MoneyAccount, MoneyAccountId, MoneyLedgerEntry,
-    PopulationCohort, PopulationCohortId, ProductionBatch, ProductionBatchId, ProductionRecipe,
-    ProductionSite, ProductionSiteId, Quantity, RecipeId, ScheduledEvent, SimTick, TransactionId,
+    CommodityId, ConsumptionRecord, EconomicTransaction, EventId, EventSchedulerState,
+    InventoryAccount, InventoryAccountId, InventoryLedgerEntry, MarketId, MarketListing,
+    MarketTrade, MarketTradeId, MoneyAccount, MoneyAccountId, MoneyLedgerEntry, PopulationCohort,
+    PopulationCohortId, ProductionBatch, ProductionBatchId, ProductionRecipe, ProductionSite,
+    ProductionSiteId, Quantity, RecipeId, ScheduledEvent, SimTick, TransactionId,
 };
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -42,6 +43,9 @@ pub struct WorldState {
     production_batches: BTreeMap<ProductionBatchId, ProductionBatch>,
     population_cohorts: BTreeMap<PopulationCohortId, PopulationCohort>,
     consumption_records: Vec<ConsumptionRecord>,
+    market_listings: BTreeMap<(MarketId, CommodityId), MarketListing>,
+    market_trades: Vec<MarketTrade>,
+    market_trade_ids: BTreeSet<MarketTradeId>,
 }
 
 impl WorldState {
@@ -62,6 +66,9 @@ impl WorldState {
             production_batches: BTreeMap::new(),
             population_cohorts: BTreeMap::new(),
             consumption_records: Vec::new(),
+            market_listings: BTreeMap::new(),
+            market_trades: Vec::new(),
+            market_trade_ids: BTreeSet::new(),
         }
     }
 
@@ -148,6 +155,26 @@ impl WorldState {
     #[must_use]
     pub fn consumption_records(&self) -> &[ConsumptionRecord] {
         &self.consumption_records
+    }
+
+    #[must_use]
+    pub fn market_listing(
+        &self,
+        market_id: &MarketId,
+        commodity_id: &CommodityId,
+    ) -> Option<&MarketListing> {
+        self.market_listings
+            .get(&(market_id.clone(), commodity_id.clone()))
+    }
+
+    #[must_use]
+    pub fn market_trades(&self) -> &[MarketTrade] {
+        &self.market_trades
+    }
+
+    #[must_use]
+    pub fn has_market_trade(&self, trade_id: &MarketTradeId) -> bool {
+        self.market_trade_ids.contains(trade_id)
     }
 
     pub(crate) fn scheduler_mut(&mut self) -> &mut EventSchedulerState {
@@ -246,6 +273,29 @@ impl WorldState {
         revision: WorldRevision,
     ) {
         self.consumption_records.push(record);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_market_listing(
+        &mut self,
+        listing: MarketListing,
+        revision: WorldRevision,
+    ) {
+        let key = (
+            listing.market_id().clone(),
+            listing.commodity_id().clone(),
+        );
+        self.market_listings.insert(key, listing);
+        self.revision = revision;
+    }
+
+    pub(crate) fn commit_market_trade(
+        &mut self,
+        trade: MarketTrade,
+        revision: WorldRevision,
+    ) {
+        self.market_trade_ids.insert(trade.trade_id().clone());
+        self.market_trades.push(trade);
         self.revision = revision;
     }
 

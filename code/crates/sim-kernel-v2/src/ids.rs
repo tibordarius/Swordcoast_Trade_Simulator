@@ -30,6 +30,7 @@ string_id!(CommodityId);
 string_id!(EventId);
 string_id!(InventoryAccountId);
 string_id!(MarketId);
+string_id!(MarketTradeId);
 string_id!(MoneyAccountId);
 string_id!(PlaceId);
 string_id!(PopulationCohortId);
@@ -45,8 +46,8 @@ string_id!(UnitId);
 #[cfg(test)]
 mod tests {
     use super::{
-        ActorId, EventId, PopulationCohortId, ProductionBatchId, RecipeId, RouteEdgeId,
-        ScenarioPackId, TransactionId, UnitId,
+        ActorId, EventId, MarketTradeId, PopulationCohortId, ProductionBatchId, RecipeId,
+        RouteEdgeId, ScenarioPackId, TransactionId, UnitId,
     };
 
     #[test]
@@ -80,6 +81,7 @@ mod tests {
 
     #[test]
     fn economy_domain_ids_remain_distinct() {
+        assert_eq!(MarketTradeId::new("trade.001").as_str(), "trade.001");
         assert_eq!(RecipeId::new("recipe.flour").as_str(), "recipe.flour");
         assert_eq!(ProductionBatchId::new("batch.001").as_str(), "batch.001");
         assert_eq!(
