@@ -39,7 +39,7 @@ pub enum EventPayload {
         cycle: u64,
     },
     MarketObservationDelivery {
-        observation: MarketObservation,
+        observation: Box<MarketObservation>,
     },
 }
 
