@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{EventId, PopulationCohortId, ProductionBatchId, SimTick};
+use crate::{EventId, MarketObservation, PopulationCohortId, ProductionBatchId, SimTick};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum EventDomain {
@@ -37,6 +37,9 @@ pub enum EventPayload {
     PopulationConsumptionDue {
         cohort_id: PopulationCohortId,
         cycle: u64,
+    },
+    MarketObservationDelivery {
+        observation: MarketObservation,
     },
 }
 
