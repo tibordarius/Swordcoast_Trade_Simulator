@@ -7,6 +7,7 @@ pub mod hash;
 pub mod ids;
 pub mod information;
 pub mod ledger;
+pub mod logistics;
 pub mod market;
 pub mod population;
 pub mod production;
@@ -33,6 +34,10 @@ pub use information::{InformationState, KnowledgeView, MarketObservation};
 pub use ledger::{
     InventoryAccount, InventoryAccountKind, InventoryLedgerEntry, MoneyAccount, MoneyAccountKind,
     MoneyLedgerEntry,
+};
+pub use logistics::{
+    CommodityTransportProfile, Itinerary, ItineraryLeg, LogisticsRoute, LogisticsState,
+    RouteCapacityUse, Shipment, ShipmentStatus,
 };
 pub use market::{
     derive_market_quote, execution_price, MarketListing, MarketMathError, MarketQuote, MarketSide,
