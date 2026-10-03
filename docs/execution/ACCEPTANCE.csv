@@ -1,0 +1,31 @@
+case_id,status,subject,trigger,expected,evidence_or_contract
+C01,implemented,same input replay,Repeat one pinned stream,Identical complete WorldState and hash,baseline v2 replay tests
+C02,implemented,snapshot pending knowledge,Restore pending observation after market changes,Deliver original dispatch quote and identical knowledge,baseline information tests
+C03,implemented,advance rollback,Due production fails after earlier due effects,Entire advance unchanged,baseline production tests
+C04,implemented,domain duplication,Repeat TransactionId,Duplicate error; no second posting,baseline ledger tests
+C05,proposed,retry after lost acknowledgement,Commit Q at head10; advance12; retry Q with head10,Original receipt and no new effects,contract 2
+C06,proposed,payload conflict precedence,Same request ID changed quantity and stale head,IdempotencyConflict before HeadConflict,contract 2
+C07,proposed,rejected receipt,Reject Q; restart; retry exact Q,Same rejection; kernel cursor unchanged,contract 2
+C08,proposed,watermark,Restore100 then replay99/100 or missing101,Reject corrupt/non-contiguous committed suffix,contract 2
+C09,proposed,registry mismatch,Same opening balances but altered pack route time,Reject checkpoint context mismatch,contract 1
+C10,proposed,lost executable,Inspect archived outcomes without engine artifact,Inspection permitted; recomputation unavailable explicitly,contract 1
+C11,proposed,immediate closure,Close now then advance with next departure due,No new departure; stock remains accounted,contract 4
+C12,proposed,scheduled same tick closure,Logistics30 and closure Shock50 at T,Logistics executes first; no implied control barrier,contract 4
+C13,proposed,overlay composition,Two closures; expire one,Other closure still blocks access,contract 4
+C14,proposed,dynamic due insertion,Handler schedules earlier-priority same-tick event,Next minimum-queue pop per documented dynamic drain,contract 4
+C15,proposed,protected WIP,Start batch then generic debit WIP,Debit rejected atomically,contract 5
+C16,proposed,economic cancellation,Generic cancel production or arrival event,Reject; active commitment remains valid,contract 5
+C17,proposed,moving closure,Close next leg while first leg moving,First arrives; cargo strands at transfer once,contract 5
+C18,proposed,obsolete arrival,Reroute then restore and reach old/new arrival times,Old event suppressed; one valid custody transition,contract 5
+C19,proposed,capacity contention,Two consignments request same finite capacity,Stable winner; no excess allocation,contract 5
+C20,proposed,crash transaction,Crash before/during/after durable commit,All-or-none result; old receipt after lost acknowledgement,contract 3
+C21,proposed,mixed checkpoint,Pending WIP observation cargo queue obligations,Restored full trace equals direct execution,contract 6
+C22,proposed,compacted retries,Archive old history; retry old request/domain ID,Receipt retained; domain duplicate still rejected,contract 6
+C23,proposed,rolling scarcity,Compact records across inclusive demand-window boundary,Same quote arithmetic and outcomes,contract 6
+C24,proposed,past correction,Fork before long advance; inject child shock,Parent unchanged; child recomputes suffix,contract 7
+C25,proposed,world-event conflict,Child removes prerequisite for authored event,Suspended outcome; other due effects continue,contract 7
+C26,proposed,weather alignment,Add unrelated carrier or cancel shipment in one child,Same region/time weather in both children,contract 8
+C27,proposed,RNG stream retention,Checkpoint used mutable stream cursor,Continuation draws equal direct run,contract 8
+C28,proposed,journal integrity,Corrupt or remove committed outcome segment,Restore fails visibly; no silent repair,contract 1/6
+C29,proposed,economic event replacement,Schedule Noop using pending production/arrival/consumption EventId,Reject generic replacement; commitment and valid generation remain intact,contract 5
+C30,proposed,inherited domain ID,Fork after committed trade; reuse inherited trade ID on child,Duplicate rejected; independent sibling suffix IDs retain branch context,contract 2
