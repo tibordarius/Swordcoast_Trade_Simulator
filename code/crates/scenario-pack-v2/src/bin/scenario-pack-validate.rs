@@ -2,9 +2,7 @@ use std::env;
 use std::fs;
 use std::process::ExitCode;
 
-use scenario_pack_v2::{
-    compile_initialization_commands, compile_registry, load_json,
-};
+use scenario_pack_v2::{compile_initialization_commands, compile_registry, load_json};
 use sim_kernel_v2::{replay, state_hash, WorldState};
 
 fn main() -> ExitCode {

@@ -22,7 +22,10 @@ fn tiny_pack_loads_with_expected_shape() {
     let pack = load_json(TINY).unwrap();
     let registry = compile_registry(&pack).unwrap();
 
-    assert_eq!(pack.pack().manifest.schema_version, SCENARIO_PACK_SCHEMA_VERSION);
+    assert_eq!(
+        pack.pack().manifest.schema_version,
+        SCENARIO_PACK_SCHEMA_VERSION
+    );
     assert_eq!(pack.pack().markets.len(), 3);
     assert_eq!(pack.pack().commodities.len(), 5);
     assert_eq!(pack.pack().routes.len(), 2);
@@ -31,12 +34,12 @@ fn tiny_pack_loads_with_expected_shape() {
     assert_eq!(registry.markets().len(), 3);
     assert_eq!(registry.commodities().len(), 5);
     assert_eq!(registry.routes().len(), 2);
-    assert!(registry.markets().contains_key(&MarketId::new("market.waterdeep")));
-    assert!(
-        registry
-            .routes()
-            .contains_key(&RouteEdgeId::new("route.neverwinter-luskan"))
-    );
+    assert!(registry
+        .markets()
+        .contains_key(&MarketId::new("market.waterdeep")));
+    assert!(registry
+        .routes()
+        .contains_key(&RouteEdgeId::new("route.neverwinter-luskan")));
 }
 
 #[test]
@@ -169,7 +172,6 @@ fn reserved_system_account_ids_are_rejected() {
     assert!(issue_codes(error).contains(&"reserved_id".to_owned()));
 }
 
-
 #[test]
 fn dangling_market_place_is_rejected() {
     let mut pack = raw_pack();
@@ -182,8 +184,7 @@ fn dangling_market_place_is_rejected() {
 #[test]
 fn dangling_opening_balance_commodity_is_rejected() {
     let mut pack = raw_pack();
-    pack.opening_inventory[0].commodity_id =
-        CommodityId::new("commodity.missing");
+    pack.opening_inventory[0].commodity_id = CommodityId::new("commodity.missing");
 
     let error = validate_pack(pack).unwrap_err();
     assert!(issue_codes(error).contains(&"unknown_commodity".to_owned()));
@@ -215,7 +216,6 @@ fn negative_opening_balances_are_rejected() {
         2
     );
 }
-
 
 #[test]
 fn json_roundtrip_preserves_pack() {
@@ -298,7 +298,6 @@ fn opening_balances_are_explicitly_balanced_against_system_accounts() {
     );
 }
 
-
 #[test]
 fn initialize_is_the_safe_one_step_runtime_entry_point() {
     let validated = load_json(TINY).unwrap();
@@ -307,7 +306,9 @@ fn initialize_is_the_safe_one_step_runtime_entry_point() {
     assert_eq!(initialized.registry().markets().len(), 3);
     assert_eq!(initialized.world_state().world_seed(), 424242);
     assert_eq!(
-        initialized.world_state().money_balance(&MoneyAccountId::new("cash.waterdeep")),
+        initialized
+            .world_state()
+            .money_balance(&MoneyAccountId::new("cash.waterdeep")),
         Some(MoneyCp::new(50000))
     );
 }

@@ -43,8 +43,18 @@ mod tests {
 
     fn commands() -> Vec<CommandEnvelope> {
         vec![
-            CommandEnvelope::new(1, Command::AdvanceTo { tick: SimTick::new(5) }),
-            CommandEnvelope::new(2, Command::AdvanceTo { tick: SimTick::new(10) }),
+            CommandEnvelope::new(
+                1,
+                Command::AdvanceTo {
+                    tick: SimTick::new(5),
+                },
+            ),
+            CommandEnvelope::new(
+                2,
+                Command::AdvanceTo {
+                    tick: SimTick::new(10),
+                },
+            ),
         ]
     }
 
@@ -62,8 +72,18 @@ mod tests {
     fn non_monotonic_sequence_is_rejected() {
         let initial = WorldState::new(99);
         let commands = vec![
-            CommandEnvelope::new(2, Command::AdvanceTo { tick: SimTick::new(5) }),
-            CommandEnvelope::new(2, Command::AdvanceTo { tick: SimTick::new(10) }),
+            CommandEnvelope::new(
+                2,
+                Command::AdvanceTo {
+                    tick: SimTick::new(5),
+                },
+            ),
+            CommandEnvelope::new(
+                2,
+                Command::AdvanceTo {
+                    tick: SimTick::new(10),
+                },
+            ),
         ];
 
         assert_eq!(

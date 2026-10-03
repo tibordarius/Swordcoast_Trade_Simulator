@@ -32,12 +32,22 @@ fn route() -> TradeRouteEconomics {
 #[test]
 fn forward_arbitrage_is_selected_and_reverse_is_rejected() {
     let forward = evaluate_opportunity(
-        athkatla(950_000_000), waterdeep(640_000_000), route(),
-        100_000_000, 500_000_000, 500, 2_000,
+        athkatla(950_000_000),
+        waterdeep(640_000_000),
+        route(),
+        100_000_000,
+        500_000_000,
+        500,
+        2_000,
     );
     let reverse = evaluate_opportunity(
-        waterdeep(640_000_000), athkatla(950_000_000), route(),
-        100_000_000, 500_000_000, 500, 2_000,
+        waterdeep(640_000_000),
+        athkatla(950_000_000),
+        route(),
+        100_000_000,
+        500_000_000,
+        500,
+        2_000,
     );
     assert!(forward.accepted);
     assert_eq!(forward.expected_profit_mcp, 139_145_000);
@@ -58,10 +68,17 @@ fn repeated_completed_arbitrage_converges() {
 
     loop {
         let opp = evaluate_opportunity(
-            athkatla(origin), waterdeep(destination), route(),
-            quantity, capital, 500, 2_000,
+            athkatla(origin),
+            waterdeep(destination),
+            route(),
+            quantity,
+            capital,
+            500,
+            2_000,
         );
-        if first_roi.is_none() { first_roi = Some(opp.roi_bps); }
+        if first_roi.is_none() {
+            first_roi = Some(opp.roi_bps);
+        }
         if !opp.accepted {
             final_roi = opp.roi_bps;
             break;

@@ -46,9 +46,7 @@ pub fn state_hash(state: &WorldState) -> Result<u64, SnapshotError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        decode_snapshot, encode_snapshot, state_hash, SnapshotEnvelope, SnapshotError,
-    };
+    use super::{decode_snapshot, encode_snapshot, state_hash, SnapshotEnvelope, SnapshotError};
     use crate::{Command, CommandEnvelope, SimTick, WorldReducer, WorldState};
 
     #[test]
@@ -56,7 +54,12 @@ mod tests {
         let mut state = WorldState::new(1234);
         WorldReducer::apply(
             &mut state,
-            &CommandEnvelope::new(1, Command::AdvanceTo { tick: SimTick::new(88) }),
+            &CommandEnvelope::new(
+                1,
+                Command::AdvanceTo {
+                    tick: SimTick::new(88),
+                },
+            ),
         )
         .unwrap();
 

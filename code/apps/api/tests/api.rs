@@ -17,7 +17,12 @@ async fn json_body(response: axum::response::Response) -> Value {
 async fn health_is_ok() {
     let app = build_router(AppState::new(WORLD, 12_345));
     let response = app
-        .oneshot(Request::builder().uri("/health").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::builder()
+                .uri("/health")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     assert_eq!(response.status(), StatusCode::OK);
@@ -26,7 +31,9 @@ async fn health_is_ok() {
 #[tokio::test]
 async fn every_mvp_exchange_is_seeded_with_all_commodities() {
     let app = build_router(AppState::new(WORLD, 12_345));
-    for market in ["MKT-WD", "MKT-BG", "MKT-ATH", "MKT-CAL", "MKT-NW", "MKT-LUS"] {
+    for market in [
+        "MKT-WD", "MKT-BG", "MKT-ATH", "MKT-CAL", "MKT-NW", "MKT-LUS",
+    ] {
         let response = app
             .clone()
             .oneshot(
@@ -39,7 +46,11 @@ async fn every_mvp_exchange_is_seeded_with_all_commodities() {
             .unwrap();
         assert_eq!(response.status(), StatusCode::OK, "{market}");
         let value = json_body(response).await;
-        assert_eq!(value["commodities"].as_array().unwrap().len(), 24, "{market}");
+        assert_eq!(
+            value["commodities"].as_array().unwrap().len(),
+            24,
+            "{market}"
+        );
         assert!(!value["exchange_code"].as_str().unwrap().is_empty());
     }
 }
@@ -65,7 +76,11 @@ async fn market_state_advances_from_seeded_supply_and_demand() {
         .iter()
         .find(|item| item["commodity_id"] == "CMD-GRAIN")
         .unwrap();
-    let initial_stock = grain["on_hand_milli"].as_str().unwrap().parse::<i64>().unwrap();
+    let initial_stock = grain["on_hand_milli"]
+        .as_str()
+        .unwrap()
+        .parse::<i64>()
+        .unwrap();
 
     let advance = app
         .clone()
@@ -97,7 +112,11 @@ async fn market_state_advances_from_seeded_supply_and_demand() {
         .iter()
         .find(|item| item["commodity_id"] == "CMD-GRAIN")
         .unwrap();
-    let later_stock = grain["on_hand_milli"].as_str().unwrap().parse::<i64>().unwrap();
+    let later_stock = grain["on_hand_milli"]
+        .as_str()
+        .unwrap()
+        .parse::<i64>()
+        .unwrap();
     assert!(later_stock < initial_stock);
     assert_eq!(later["tick"], "288");
 }

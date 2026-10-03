@@ -1,7 +1,6 @@
 use sim_core::{
     decode_world_snapshot, encode_world_snapshot, CalibratedRoute, CargoProfile,
-    MarketCommodityKey, MarketCommodityState, StableStateHash, WorldState,
-    SNAPSHOT_STATE_FORMAT,
+    MarketCommodityKey, MarketCommodityState, StableStateHash, WorldState, SNAPSHOT_STATE_FORMAT,
 };
 
 fn world_with_active_voyage() -> WorldState {

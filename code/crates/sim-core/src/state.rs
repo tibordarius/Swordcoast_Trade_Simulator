@@ -128,11 +128,7 @@ impl WorldState {
         self.cargo_profiles.insert(commodity_id.into(), profile)
     }
 
-    pub fn market(
-        &self,
-        market_id: &str,
-        commodity_id: &str,
-    ) -> Option<&MarketCommodityState> {
+    pub fn market(&self, market_id: &str, commodity_id: &str) -> Option<&MarketCommodityState> {
         self.markets
             .get(&MarketCommodityKey::new(market_id, commodity_id))
     }
@@ -183,20 +179,18 @@ impl WorldState {
         let origin_key = MarketCommodityKey::new(origin_market, commodity_id);
         let destination_key = MarketCommodityKey::new(destination_market, commodity_id);
 
-        let origin = self
-            .markets
-            .get(&origin_key)
-            .ok_or_else(|| TradeDispatchError::UnknownMarketState {
+        let origin = self.markets.get(&origin_key).ok_or_else(|| {
+            TradeDispatchError::UnknownMarketState {
                 market_id: origin_market.to_string(),
                 commodity_id: commodity_id.to_string(),
-            })?;
-        let destination = self
-            .markets
-            .get(&destination_key)
-            .ok_or_else(|| TradeDispatchError::UnknownMarketState {
+            }
+        })?;
+        let destination = self.markets.get(&destination_key).ok_or_else(|| {
+            TradeDispatchError::UnknownMarketState {
                 market_id: destination_market.to_string(),
                 commodity_id: commodity_id.to_string(),
-            })?;
+            }
+        })?;
 
         if quantity_milli <= 0 || origin.available_milli() < quantity_milli {
             return Err(TradeDispatchError::InsufficientOriginStock {
@@ -341,8 +335,7 @@ impl WorldState {
             .shipments
             .iter()
             .filter_map(|(id, shipment)| {
-                (shipment.status == ShipmentStatus::InTransit
-                    && shipment.eta_tick <= current_tick)
+                (shipment.status == ShipmentStatus::InTransit && shipment.eta_tick <= current_tick)
                     .then_some((
                         *id,
                         shipment.destination_market.clone(),
@@ -353,8 +346,7 @@ impl WorldState {
             .collect();
 
         for (shipment_id, destination_market, commodity_id, quantity_milli) in due {
-            let destination_key =
-                MarketCommodityKey::new(&destination_market, &commodity_id);
+            let destination_key = MarketCommodityKey::new(&destination_market, &commodity_id);
             let destination = self
                 .markets
                 .get_mut(&destination_key)

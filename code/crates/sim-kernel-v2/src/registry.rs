@@ -123,9 +123,7 @@ impl ScenarioRegistry {
         let mut unit_map = BTreeMap::new();
         for unit in units {
             if unit.numerator == 0 || unit.denominator == 0 {
-                return Err(RegistryError::InvalidUnitConversion {
-                    unit_id: unit.id,
-                });
+                return Err(RegistryError::InvalidUnitConversion { unit_id: unit.id });
             }
             let id = unit.id.clone();
             if unit_map.insert(id.clone(), unit).is_some() {
@@ -191,9 +189,7 @@ impl ScenarioRegistry {
                 || route.distance_meters == 0
                 || route.base_travel_ticks == SimTick::ZERO
             {
-                return Err(RegistryError::InvalidRoute {
-                    route_id: route.id,
-                });
+                return Err(RegistryError::InvalidRoute { route_id: route.id });
             }
 
             for market_id in [&route.from_market, &route.to_market] {

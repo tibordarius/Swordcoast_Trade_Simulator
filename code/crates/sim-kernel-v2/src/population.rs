@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    CommodityId, InventoryAccountId, PopulationCohortId, Quantity, SimTick,
-};
+use crate::{CommodityId, InventoryAccountId, PopulationCohortId, Quantity, SimTick};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PopulationCohort {

@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    CommodityId, InventoryAccountId, MoneyAccountId, MoneyCp, Quantity, TransactionId,
-};
+use crate::{CommodityId, InventoryAccountId, MoneyAccountId, MoneyCp, Quantity, TransactionId};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct InventoryPosting {
@@ -13,11 +11,7 @@ pub struct InventoryPosting {
 
 impl InventoryPosting {
     #[must_use]
-    pub fn new(
-        account_id: InventoryAccountId,
-        commodity_id: CommodityId,
-        delta: Quantity,
-    ) -> Self {
+    pub fn new(account_id: InventoryAccountId, commodity_id: CommodityId, delta: Quantity) -> Self {
         Self {
             account_id,
             commodity_id,

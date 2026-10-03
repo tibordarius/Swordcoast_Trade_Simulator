@@ -8,7 +8,11 @@ pub struct ExactDailyRate {
 impl ExactDailyRate {
     pub fn new(amount_per_day: i64) -> Self {
         assert!(amount_per_day >= 0);
-        Self { amount_per_day, hours_elapsed: 0, emitted: 0 }
+        Self {
+            amount_per_day,
+            hours_elapsed: 0,
+            emitted: 0,
+        }
     }
 
     pub fn next_hour(&mut self) -> i64 {

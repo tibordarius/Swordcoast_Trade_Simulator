@@ -10,9 +10,7 @@ fn run(program: &str, args: &[&str]) -> bool {
 }
 
 fn usage() {
-    eprintln!(
-        "usage: cargo xtask <check|test-tiny|test-v2|pack-validate <scenario-pack.json>>"
-    );
+    eprintln!("usage: cargo xtask <check|test-tiny|test-v2|pack-validate <scenario-pack.json>>");
 }
 
 fn main() -> ExitCode {

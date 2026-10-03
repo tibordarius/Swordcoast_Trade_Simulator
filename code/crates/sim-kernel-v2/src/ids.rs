@@ -47,8 +47,8 @@ string_id!(UnitId);
 #[cfg(test)]
 mod tests {
     use super::{
-        ActorId, EventId, MarketObservationId, MarketTradeId, PopulationCohortId, ProductionBatchId, RecipeId,
-        RouteEdgeId, ScenarioPackId, TransactionId, UnitId,
+        ActorId, EventId, MarketObservationId, MarketTradeId, PopulationCohortId,
+        ProductionBatchId, RecipeId, RouteEdgeId, ScenarioPackId, TransactionId, UnitId,
     };
 
     #[test]
@@ -73,7 +73,10 @@ mod tests {
     #[test]
     fn scenario_registry_ids_remain_exact() {
         assert_eq!(UnitId::new("unit.kg").as_str(), "unit.kg");
-        assert_eq!(ScenarioPackId::new("pack.tiny.001").as_str(), "pack.tiny.001");
+        assert_eq!(
+            ScenarioPackId::new("pack.tiny.001").as_str(),
+            "pack.tiny.001"
+        );
         assert_eq!(
             RouteEdgeId::new("route.waterdeep-neverwinter").as_str(),
             "route.waterdeep-neverwinter"

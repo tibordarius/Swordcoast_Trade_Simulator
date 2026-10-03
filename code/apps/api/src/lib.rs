@@ -26,8 +26,7 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(world_id: impl Into<Arc<str>>, seed: u64) -> Self {
-        let seed_data =
-            SeedBundle::embedded_mvp().expect("embedded MVP seed must be valid");
+        let seed_data = SeedBundle::embedded_mvp().expect("embedded MVP seed must be valid");
         let world = seed_data.instantiate_world(seed);
 
         let (updates, _) = broadcast::channel(64);
@@ -245,10 +244,7 @@ async fn live_socket(mut socket: WebSocket, state: AppState) {
     }
 }
 
-async fn send_status(
-    socket: &mut WebSocket,
-    status: &WorldStatus,
-) -> Result<(), axum::Error> {
+async fn send_status(socket: &mut WebSocket, status: &WorldStatus) -> Result<(), axum::Error> {
     let payload = serde_json::to_string(status).expect("world status serializes");
     socket.send(Message::Text(payload.into())).await
 }

@@ -98,7 +98,6 @@ impl Shipment {
     }
 }
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CargoProfile {
     pub mass_grams_per_base_unit: i64,
@@ -199,9 +198,7 @@ impl CalibratedRoute {
 
     pub fn supports_direction(&self, origin: &str, destination: &str) -> bool {
         (origin == self.from_market && destination == self.to_market)
-            || (self.bidirectional
-                && origin == self.to_market
-                && destination == self.from_market)
+            || (self.bidirectional && origin == self.to_market && destination == self.from_market)
     }
 
     pub fn freight_cost_mcp(&self, quantity_milli: i64, cargo: CargoProfile) -> i64 {
@@ -215,10 +212,8 @@ impl CalibratedRoute {
     pub fn accepts_usage(&self, usage: CargoUsage) -> bool {
         usage.mass_grams > 0
             && usage.volume_cm3 > 0
-            && i128::from(usage.mass_grams)
-                <= i128::from(self.capacity_kg_per_day) * 1_000
-            && i128::from(usage.volume_cm3)
-                <= i128::from(self.capacity_m3_per_day) * 1_000_000
+            && i128::from(usage.mass_grams) <= i128::from(self.capacity_kg_per_day) * 1_000
+            && i128::from(usage.volume_cm3) <= i128::from(self.capacity_m3_per_day) * 1_000_000
     }
 
     pub fn accepts_quantity(&self, quantity_milli: i64, cargo: CargoProfile) -> bool {
@@ -294,10 +289,7 @@ impl TradeShipment {
     }
 
     pub fn expected_profit_mcp(&self) -> i64 {
-        self.expected_revenue_mcp
-            - self.purchase_mcp
-            - self.freight_mcp
-            - self.expected_loss_mcp
+        self.expected_revenue_mcp - self.purchase_mcp - self.freight_mcp - self.expected_loss_mcp
     }
 
     pub(crate) fn append_stable_bytes(&self, bytes: &mut Vec<u8>) {

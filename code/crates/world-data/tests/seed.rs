@@ -8,7 +8,9 @@ fn embedded_seed_loads_complete_six_market_matrix() {
     assert_eq!(bundle.market_states().len(), 144);
     assert_eq!(bundle.routes_len(), 8);
 
-    for market in ["MKT-WD", "MKT-BG", "MKT-ATH", "MKT-CAL", "MKT-NW", "MKT-LUS"] {
+    for market in [
+        "MKT-WD", "MKT-BG", "MKT-ATH", "MKT-CAL", "MKT-NW", "MKT-LUS",
+    ] {
         assert_eq!(bundle.states_for_market(market).count(), 24);
     }
 

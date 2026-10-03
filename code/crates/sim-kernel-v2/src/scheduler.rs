@@ -258,8 +258,6 @@ impl EventSchedulerState {
     pub(crate) fn record_fired(&mut self, event: ScheduledEvent) {
         self.fired_events.push(event.into());
     }
-
-
 }
 
 #[cfg(test)]

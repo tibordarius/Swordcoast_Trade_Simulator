@@ -11,15 +11,22 @@ impl SimulationClock {
 
     pub fn new(tick_minutes: u16) -> Self {
         assert!(tick_minutes > 0, "tick_minutes must be positive");
-        Self { tick: 0, tick_minutes }
+        Self {
+            tick: 0,
+            tick_minutes,
+        }
     }
 
     pub fn five_minute() -> Self {
         Self::new(Self::DEFAULT_TICK_MINUTES)
     }
 
-    pub fn tick(&self) -> u64 { self.tick }
-    pub fn tick_minutes(&self) -> u16 { self.tick_minutes }
+    pub fn tick(&self) -> u64 {
+        self.tick
+    }
+    pub fn tick_minutes(&self) -> u16 {
+        self.tick_minutes
+    }
 
     pub fn advance_one(&mut self) {
         self.tick = self.tick.checked_add(1).expect("simulation tick overflow");
@@ -32,5 +39,7 @@ impl SimulationClock {
 }
 
 impl Default for SimulationClock {
-    fn default() -> Self { Self::five_minute() }
+    fn default() -> Self {
+        Self::five_minute()
+    }
 }

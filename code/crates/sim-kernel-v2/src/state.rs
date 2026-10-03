@@ -4,14 +4,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     ActorId, CommodityId, ConsumptionRecord, EconomicTransaction, EventId, EventSchedulerState,
-    InformationState, KnowledgeView, MarketObservation, MarketObservationId,
-    InventoryAccount, InventoryAccountId, InventoryLedgerEntry, MarketId, MarketListing,
-    MarketTrade, MarketTradeId, MoneyAccount, MoneyAccountId, MoneyLedgerEntry, PopulationCohort,
-    PopulationCohortId, ProductionBatch, ProductionBatchId, ProductionRecipe, ProductionSite,
-    ProductionSiteId, Quantity, RecipeId, ScheduledEvent, SimTick, TransactionId,
+    InformationState, InventoryAccount, InventoryAccountId, InventoryLedgerEntry, KnowledgeView,
+    MarketId, MarketListing, MarketObservation, MarketObservationId, MarketTrade, MarketTradeId,
+    MoneyAccount, MoneyAccountId, MoneyLedgerEntry, PopulationCohort, PopulationCohortId,
+    ProductionBatch, ProductionBatchId, ProductionRecipe, ProductionSite, ProductionSiteId,
+    Quantity, RecipeId, ScheduledEvent, SimTick, TransactionId,
 };
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize,
+)]
 pub struct WorldRevision(u64);
 
 impl WorldRevision {
@@ -218,7 +220,8 @@ impl WorldState {
         account: InventoryAccount,
         revision: WorldRevision,
     ) {
-        self.inventory_accounts.insert(account.id().clone(), account);
+        self.inventory_accounts
+            .insert(account.id().clone(), account);
         self.revision = revision;
     }
 
@@ -227,11 +230,7 @@ impl WorldState {
         self.revision = revision;
     }
 
-    pub(crate) fn commit_schedule_event(
-        &mut self,
-        event: ScheduledEvent,
-        revision: WorldRevision,
-    ) {
+    pub(crate) fn commit_schedule_event(&mut self, event: ScheduledEvent, revision: WorldRevision) {
         self.scheduler.commit_scheduled(event);
         self.revision = revision;
     }
@@ -246,11 +245,7 @@ impl WorldState {
         self.revision = revision;
     }
 
-    pub(crate) fn commit_recipe(
-        &mut self,
-        recipe: ProductionRecipe,
-        revision: WorldRevision,
-    ) {
+    pub(crate) fn commit_recipe(&mut self, recipe: ProductionRecipe, revision: WorldRevision) {
         self.production_recipes.insert(recipe.id().clone(), recipe);
         self.revision = revision;
     }
@@ -260,11 +255,7 @@ impl WorldState {
         self.revision = revision;
     }
 
-    pub(crate) fn commit_batch_started(
-        &mut self,
-        batch: ProductionBatch,
-        revision: WorldRevision,
-    ) {
+    pub(crate) fn commit_batch_started(&mut self, batch: ProductionBatch, revision: WorldRevision) {
         self.production_batches.insert(batch.id().clone(), batch);
         self.revision = revision;
     }
@@ -281,11 +272,7 @@ impl WorldState {
         self.revision = revision;
     }
 
-    pub(crate) fn commit_cohort(
-        &mut self,
-        cohort: PopulationCohort,
-        revision: WorldRevision,
-    ) {
+    pub(crate) fn commit_cohort(&mut self, cohort: PopulationCohort, revision: WorldRevision) {
         self.population_cohorts.insert(cohort.id().clone(), cohort);
         self.revision = revision;
     }
@@ -304,29 +291,18 @@ impl WorldState {
         listing: MarketListing,
         revision: WorldRevision,
     ) {
-        let key = (
-            listing.market_id().clone(),
-            listing.commodity_id().clone(),
-        );
+        let key = (listing.market_id().clone(), listing.commodity_id().clone());
         self.market_listings.insert(key, listing);
         self.revision = revision;
     }
 
-    pub(crate) fn commit_market_trade(
-        &mut self,
-        trade: MarketTrade,
-        revision: WorldRevision,
-    ) {
+    pub(crate) fn commit_market_trade(&mut self, trade: MarketTrade, revision: WorldRevision) {
         self.market_trade_ids.insert(trade.trade_id().clone());
         self.market_trades.push(trade);
         self.revision = revision;
     }
 
-    pub(crate) fn commit_knowledge_actor(
-        &mut self,
-        actor_id: ActorId,
-        revision: WorldRevision,
-    ) {
+    pub(crate) fn commit_knowledge_actor(&mut self, actor_id: ActorId, revision: WorldRevision) {
         self.information.commit_actor(actor_id);
         self.revision = revision;
     }

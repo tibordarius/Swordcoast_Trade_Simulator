@@ -28,7 +28,11 @@ pub struct ValidationError {
 
 impl fmt::Display for ValidationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "scenario pack validation failed with {} issue(s)", self.issues.len())?;
+        writeln!(
+            f,
+            "scenario pack validation failed with {} issue(s)",
+            self.issues.len()
+        )?;
         for issue in &self.issues {
             writeln!(f, "{} [{}]: {}", issue.path, issue.code, issue.message)?;
         }
@@ -54,7 +58,6 @@ impl fmt::Display for PackLoadError {
 }
 
 impl std::error::Error for PackLoadError {}
-
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum InitializeError {

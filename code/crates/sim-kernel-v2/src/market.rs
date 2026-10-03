@@ -228,7 +228,9 @@ pub fn derive_market_quote(
 
     let stock = state
         .inventory_balance(listing.inventory_account(), listing.commodity_id())
-        .ok_or_else(|| MarketMathError::MissingInventoryAccount(listing.inventory_account().clone()))?;
+        .ok_or_else(|| {
+            MarketMathError::MissingInventoryAccount(listing.inventory_account().clone())
+        })?;
     let stock_nonnegative = i128::from(stock.get().max(0));
     let target = i128::from(listing.target_stock().get());
 
@@ -386,8 +388,7 @@ pub fn execution_price(
             .ok_or(MarketMathError::ArithmeticOverflow)?,
     };
 
-    let factor_ppm =
-        i64::try_from(factor_ppm).map_err(|_| MarketMathError::ArithmeticOverflow)?;
+    let factor_ppm = i64::try_from(factor_ppm).map_err(|_| MarketMathError::ArithmeticOverflow)?;
     let base = match side {
         MarketSide::Buy => quote.ask,
         MarketSide::Sell => quote.bid,

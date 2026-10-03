@@ -4,11 +4,11 @@ use crate::{
     derive_market_quote, execution_price, ActorId, Command, CommandEnvelope, CommodityId,
     ConsumptionRecord, EconomicTransaction, EventDomain, EventId, EventPayload, InventoryAccount,
     InventoryAccountId, InventoryAccountKind, InventoryPosting, MarketId, MarketListing,
-    MarketMathError, MarketObservation, MarketObservationId, MarketSide, MarketTrade, MarketTradeId,
-    MoneyAccount, MoneyAccountId,
-    MoneyAccountKind, MoneyCp, MoneyPosting, PopulationCohort, PopulationCohortId, ProductionBatch,
-    ProductionBatchId, ProductionBatchStatus, ProductionRecipe, ProductionSite, ProductionSiteId,
-    Quantity, RecipeId, ScheduledEvent, SimTick, TransactionId, WorldRevision, WorldState,
+    MarketMathError, MarketObservation, MarketObservationId, MarketSide, MarketTrade,
+    MarketTradeId, MoneyAccount, MoneyAccountId, MoneyAccountKind, MoneyCp, MoneyPosting,
+    PopulationCohort, PopulationCohortId, ProductionBatch, ProductionBatchId,
+    ProductionBatchStatus, ProductionRecipe, ProductionSite, ProductionSiteId, Quantity, RecipeId,
+    ScheduledEvent, SimTick, TransactionId, WorldRevision, WorldState,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -111,13 +111,7 @@ impl WorldReducer {
                 event_id,
                 at_tick,
                 domain,
-            } => Self::schedule_event(
-                state,
-                event_id,
-                *at_tick,
-                *domain,
-                EventPayload::Noop,
-            ),
+            } => Self::schedule_event(state, event_id, *at_tick, *domain, EventPayload::Noop),
             Command::CancelEvent { event_id } => Self::cancel_event(state, event_id),
             Command::OpenInventoryAccount { account_id, kind } => {
                 Self::open_inventory_account(state, account_id, *kind)
@@ -128,16 +122,12 @@ impl WorldReducer {
             Command::ApplyTransaction { transaction } => {
                 Self::apply_transaction(state, envelope.sequence(), transaction)
             }
-            Command::RegisterProductionRecipe { recipe } => {
-                Self::register_recipe(state, recipe)
-            }
+            Command::RegisterProductionRecipe { recipe } => Self::register_recipe(state, recipe),
             Command::RegisterProductionSite { site } => Self::register_site(state, site),
             Command::StartProductionBatch { batch_id, site_id } => {
                 Self::start_batch(state, envelope.sequence(), batch_id, site_id)
             }
-            Command::RegisterPopulationCohort { cohort } => {
-                Self::register_cohort(state, cohort)
-            }
+            Command::RegisterPopulationCohort { cohort } => Self::register_cohort(state, cohort),
             Command::RegisterMarketListing { listing } => {
                 Self::register_market_listing(state, listing)
             }
@@ -226,13 +216,7 @@ impl WorldReducer {
                 Self::complete_batch(state, command_sequence, revision, batch_id)
             }
             EventPayload::PopulationConsumptionDue { cohort_id, cycle } => {
-                Self::consume_cohort(
-                    state,
-                    command_sequence,
-                    revision,
-                    cohort_id,
-                    *cycle,
-                )
+                Self::consume_cohort(state, command_sequence, revision, cohort_id, *cycle)
             }
             EventPayload::MarketObservationDelivery { observation } => {
                 state.commit_market_observation_delivered(observation.as_ref().clone(), revision);
@@ -389,7 +373,9 @@ impl WorldReducer {
             .iter()
             .all(|account_id| distinct.insert((*account_id).clone()))
         {
-            return Err(ApplyError::ProductionAccountsMustBeDistinct(site.id().clone()));
+            return Err(ApplyError::ProductionAccountsMustBeDistinct(
+                site.id().clone(),
+            ));
         }
 
         Self::require_inventory_account_kind(
@@ -512,7 +498,9 @@ impl WorldReducer {
             .ok_or_else(|| ApplyError::UnknownProductionBatch(batch_id.clone()))?;
 
         if batch.status() == ProductionBatchStatus::Completed {
-            return Err(ApplyError::ProductionBatchAlreadyCompleted(batch_id.clone()));
+            return Err(ApplyError::ProductionBatchAlreadyCompleted(
+                batch_id.clone(),
+            ));
         }
 
         if state.tick() < batch.completes_at() {
@@ -645,7 +633,9 @@ impl WorldReducer {
         let requested = cohort.quantity_per_cycle();
         let available = state
             .inventory_balance(cohort.inventory_account(), cohort.commodity_id())
-            .ok_or_else(|| ApplyError::UnknownInventoryAccount(cohort.inventory_account().clone()))?;
+            .ok_or_else(|| {
+                ApplyError::UnknownInventoryAccount(cohort.inventory_account().clone())
+            })?;
 
         let served_value = available.get().max(0).min(requested.get());
         let served = Quantity::new(served_value);
@@ -881,15 +871,11 @@ impl WorldReducer {
             actor_inventory_account,
             InventoryAccountKind::Holding,
         )?;
-        Self::require_money_account_kind(
-            state,
-            actor_money_account,
-            MoneyAccountKind::Holding,
-        )?;
+        Self::require_money_account_kind(state, actor_money_account, MoneyAccountKind::Holding)?;
 
         let quote = derive_market_quote(state, &listing).map_err(ApplyError::MarketMath)?;
-        let average_unit_price =
-            execution_price(&quote, side, quantity, listing.depth()).map_err(ApplyError::MarketMath)?;
+        let average_unit_price = execution_price(&quote, side, quantity, listing.depth())
+            .map_err(ApplyError::MarketMath)?;
         let total_value = average_unit_price
             .total_for(quantity)
             .map_err(|_| ApplyError::ArithmeticOverflow)?;
@@ -940,7 +926,10 @@ impl WorldReducer {
                     ),
                 ],
                 vec![
-                    MoneyPosting::new(listing.money_account().clone(), MoneyCp::new(negative_value)),
+                    MoneyPosting::new(
+                        listing.money_account().clone(),
+                        MoneyCp::new(negative_value),
+                    ),
                     MoneyPosting::new(actor_money_account.clone(), total_value),
                 ],
             ),
@@ -1140,8 +1129,12 @@ mod tests {
     #[test]
     fn successful_command_advances_time_and_revision_once() {
         let mut state = WorldState::new(7);
-        let command =
-            CommandEnvelope::new(1, Command::AdvanceTo { tick: SimTick::new(12) });
+        let command = CommandEnvelope::new(
+            1,
+            Command::AdvanceTo {
+                tick: SimTick::new(12),
+            },
+        );
 
         WorldReducer::apply(&mut state, &command).unwrap();
 
@@ -1154,13 +1147,23 @@ mod tests {
         let mut state = WorldState::new(7);
         WorldReducer::apply(
             &mut state,
-            &CommandEnvelope::new(1, Command::AdvanceTo { tick: SimTick::new(12) }),
+            &CommandEnvelope::new(
+                1,
+                Command::AdvanceTo {
+                    tick: SimTick::new(12),
+                },
+            ),
         )
         .unwrap();
 
         let error = WorldReducer::apply(
             &mut state,
-            &CommandEnvelope::new(2, Command::AdvanceTo { tick: SimTick::new(11) }),
+            &CommandEnvelope::new(
+                2,
+                Command::AdvanceTo {
+                    tick: SimTick::new(11),
+                },
+            ),
         )
         .unwrap_err();
 
@@ -1180,7 +1183,12 @@ mod tests {
         let mut state = WorldState::new(7);
         WorldReducer::apply(
             &mut state,
-            &CommandEnvelope::new(1, Command::AdvanceTo { tick: SimTick::new(12) }),
+            &CommandEnvelope::new(
+                1,
+                Command::AdvanceTo {
+                    tick: SimTick::new(12),
+                },
+            ),
         )
         .unwrap();
 
