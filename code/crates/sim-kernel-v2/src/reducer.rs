@@ -235,7 +235,7 @@ impl WorldReducer {
                 )
             }
             EventPayload::MarketObservationDelivery { observation } => {
-                state.commit_market_observation_delivered(observation.clone(), revision);
+                state.commit_market_observation_delivered(observation.as_ref().clone(), revision);
                 Ok(())
             }
         }
@@ -832,7 +832,9 @@ impl WorldReducer {
                 EventDomain::Information,
                 event_sequence,
                 event_generation,
-                EventPayload::MarketObservationDelivery { observation },
+                EventPayload::MarketObservationDelivery {
+                    observation: Box::new(observation),
+                },
             ),
             revision,
         );
